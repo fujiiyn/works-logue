@@ -1,5 +1,21 @@
 # AI-DLC Audit Log
 
+## U1 Foundation — Code Generation Plan 承認
+**Timestamp**: 2026-04-12T00:10:00Z
+**User Input**: "y"
+**AI Response**: Code Generation Plan 承認を受領。Part 2 (Generation) を開始。Step 1 から順に実行。
+**Context**: CONSTRUCTION - U1 Foundation - Code Generation Part 2 開始
+
+---
+
+## U1 Foundation — Code Generation Plan (Part 1) 提示
+**Timestamp**: 2026-04-12T00:00:00Z
+**User Input**: "y"（Code Generation 開始の承認）
+**AI Response**: U1 Foundation の Code Generation Plan を作成。19ステップ構成（Backend 9, Frontend 7, Infra 2, Docs 1）。TDD 戦略（pytest + JWT モック）と Figma 参照計画を含む。ユーザー承認待ち。
+**Context**: CONSTRUCTION - U1 Foundation - Code Generation Part 1 (Planning)
+
+---
+
 ## U1 Foundation — Functional Design 承認
 **Timestamp**: 2026-04-08T00:00:00Z
 **User Input**: "U1 Foundation の Functional Designを承認します"

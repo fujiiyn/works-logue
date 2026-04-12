@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-04-05T00:00:00Z
-- **Current Stage**: CONSTRUCTION - U1 Foundation - Functional Design
+- **Current Stage**: CONSTRUCTION - U1 Foundation - Code Generation (Part 2: Generation)
 
 ## Workspace State
 - **Existing Code**: No
@@ -40,7 +40,7 @@
 - [ ] Per-Unit Loop (feature slice x N)
   - [ ] U1 Foundation
     - [x] Functional Design — Completed 2026-04-08
-    - [ ] Code Generation — 計画中
+    - [x] Code Generation — Completed 2026-04-12
   - [ ] U2 Seed
   - [ ] U3 Log & Score
   - [ ] U4 Louge

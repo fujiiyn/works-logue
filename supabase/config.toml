@@ -1,0 +1,8 @@
+[project]
+id = "works-logue"
+
+[db]
+port = 54322
+
+[api]
+port = 54321

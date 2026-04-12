@@ -210,14 +210,47 @@ U1 の認証基盤として最低限のログインページを含む。
 
 ## デザイントークン（Tailwind カスタム設定）
 
+Figma design-system ページ (nodeId: 95:34) から実測。
+
 ```
 colors:
-  primary:       '#29736b'  (ミドルグリーン — ボタン・バッジ・アクティブ状態。Figma実装値)
-  primary-dark:  '#1A5C42'  (ダークフォレストグリーン — ロゴ・見出しテキスト)
-  primary-light: '#00B4CC'  (ティールシアン — ロゴアクセント)
-  cream:         '#FFF8F0'  (背景)
-  cream-dark:    '#F5EDE0'  (カード背景・ボーダー)
+  # Primary
+  primary:         '#29736B'  (ボタン・アクティブ状態・CTA)
+  primary-dark:    '#1F3833'  (テキスト — 見出し・本文)
+  primary-light-bg:'#E0F0ED'  (アクティブナビ背景・バッジ背景)
+  accent:          '#00B4CC'  (ロゴ蓮の花・ブランドアクセント)
+
+  # Background & Surface
+  bg:              '#F7F5ED'  (ページ背景)
+  bg-card:         '#FBF9F5'  (ヘッダー・サイドバー・カード背景)
+  border:          '#E5E3DB'  (ボーダー・区切り線)
+
+  # Text
+  text-secondary:  '#596B66'  (サブテキスト・タグテキスト)
+  text-muted:      '#99998F'  (タイムスタンプ・メタ情報)
+  text-sage:       '#A6B89E'  (セパレーター・プレースホルダー)
+  white:           '#FFFFFF'  (Lougeバッジテキスト・CTAテキスト)
 
 fontFamily:
   sans: ['Inter', 'Noto Sans JP', 'sans-serif']
+
+borderRadius:
+  xs: '2px'   (プログレスバー)
+  sm: '4px'   (タグ・バッジ)
+  md: '6px'   (ボタン・ナビ項目)
+  lg: '10px'  (カード・About Card)
+
+fontSize:
+  display:    '28px / Semi Bold'  (Louge記事タイトル・大見出し)
+  heading-xl: '24px / Semi Bold'  (ページ見出し・セクションタイトル)
+  heading-l:  '18px / Medium'     (カードタイトル・投稿タイトル)
+  heading-m:  '15px / Semi Bold'  (About Cardタイトル・セクション見出し)
+  body-m:     '13px / Medium'     (ナビゲーション・ボタンラベル・本文)
+  body-s:     '12px / Medium'     (メタ情報・ユーザー名・統計テキスト)
+  caption:    '11px / Medium'     (バッジ・タグ・ラベル)
+
+icons:
+  library: lucide-react
+  size: 20px
+  strokeWidth: 1.5
 ```

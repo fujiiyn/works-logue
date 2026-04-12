@@ -1,0 +1,112 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
+
+interface AppUser {
+  id: string;
+  display_name: string;
+  bio: string | null;
+  avatar_url: string | null;
+  insight_score: number;
+  role: string;
+  created_at: string;
+}
+
+interface AuthContextValue {
+  user: AppUser | null;
+  session: Session | null;
+  isLoading: boolean;
+  signIn: (
+    provider: "google" | "email",
+    credentials?: { email: string; password: string },
+  ) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  async function fetchAppUser() {
+    try {
+      const appUser = await apiFetch<AppUser>("/api/v1/users/me");
+      setUser(appUser);
+    } catch {
+      setUser(null);
+    }
+  }
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      if (s) {
+        fetchAppUser().finally(() => setIsLoading(false));
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      if (s) {
+        fetchAppUser();
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function signIn(
+    provider: "google" | "email",
+    credentials?: { email: string; password: string },
+  ) {
+    if (provider === "google") {
+      await supabase.auth.signInWithOAuth({ provider: "google" });
+    } else if (credentials) {
+      const { error } = await supabase.auth.signInWithPassword(credentials);
+      if (error) throw error;
+    }
+  }
+
+  async function signUp(email: string, password: string) {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) throw error;
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{ user, session, isLoading, signIn, signUp, signOut }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+}

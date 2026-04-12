@@ -126,6 +126,7 @@
 | category | VARCHAR(20) | NOT NULL | カテゴリ（industry/occupation/role/situation/skill/knowledge） |
 | parent_tag_id | UUID | FK → tags.id, NULL | 親タグ（階層構造） |
 | sort_order | INT | NOT NULL, DEFAULT 0 | 表示順 |
+| is_leaf | BOOLEAN | NOT NULL, DEFAULT TRUE | リーフタグフラグ。TRUE = Planter/User に紐付け可能。FALSE = UI グルーピング用の親タグ |
 | is_active | BOOLEAN | NOT NULL, DEFAULT TRUE | 無効化フラグ（管理画面から制御） |
 
 **インデックス**:
