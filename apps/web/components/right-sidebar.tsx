@@ -1,13 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { Sprout } from "lucide-react";
+import { useRightSidebar } from "@/contexts/right-sidebar-context";
 
 export function RightSidebar() {
+  const { content } = useRightSidebar();
   return (
     <aside
-      className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-[300px] shrink-0 p-5 xl:block"
+      className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-[300px] shrink-0 py-6 pr-6 xl:block"
       data-testid="right-sidebar"
     >
-      <AboutCard />
+      {content ?? <AboutCard />}
     </aside>
   );
 }

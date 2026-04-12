@@ -11,6 +11,7 @@ class UserResponse(BaseModel):
     avatar_url: str | None
     insight_score: float
     role: str
+    onboarded_at: datetime | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -19,6 +20,8 @@ class UserResponse(BaseModel):
 class UserUpdate(BaseModel):
     display_name: str | None = None
     bio: str | None = None
+    tag_ids: list[uuid.UUID] | None = None
+    complete_onboarding: bool | None = None
 
 
 class UserPublicResponse(BaseModel):

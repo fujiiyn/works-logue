@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import JSON, event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.models.base import Base
@@ -12,9 +13,27 @@ from app.models.base import Base
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 
+def _adapt_schema_for_sqlite(base: type) -> None:
+    """Replace PostgreSQL-specific types with SQLite-compatible ones."""
+    from sqlalchemy.dialects.postgresql import JSONB
+
+    for table in base.metadata.tables.values():
+        for column in table.columns:
+            if isinstance(column.type, JSONB):
+                column.type = JSON()
+            if column.server_default is not None:
+                try:
+                    text = str(column.server_default.arg) if hasattr(column.server_default, "arg") else ""
+                except Exception:
+                    text = ""
+                if "gen_random_uuid" in text:
+                    column.server_default = None
+
+
 @pytest.fixture
 async def db_engine():
     engine = create_async_engine(TEST_DATABASE_URL)
+    _adapt_schema_for_sqlite(Base)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine

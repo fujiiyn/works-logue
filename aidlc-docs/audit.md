@@ -1,5 +1,61 @@
 # AI-DLC Audit Log
 
+## U2 Seed — Code Generation Plan 承認 & Part 2 開始
+**Timestamp**: 2026-04-12T03:20:00Z
+**User Input**: "Subabaseと並行してセットアップを進める。"
+**AI Response**: Plan 承認を受領。Part 2 (Generation) を Step 1 から開始。Supabase セットアップ手順を並行で提示。
+**Context**: CONSTRUCTION - U2 Seed - Code Generation Part 2 開始
+
+---
+
+## U2 Seed — Code Generation Plan (Part 1) 提示
+**Timestamp**: 2026-04-12T03:10:00Z
+**User Input**: (Functional Design 承認に続き自動遷移)
+**AI Response**: U2 Seed の Code Generation Plan を作成。17ステップ構成（Backend 8, Frontend 8, Docs 1）。TDD戦略: PlanterRepository, TagRepository, FollowRepository, 全Routerをテスト先行。Figma参照計画: Home(12:3), Seed Detail(57:29), Seed New(78:6), Profile Setup(271:161)。ユーザー承認待ち。
+**Context**: CONSTRUCTION - U2 Seed - Code Generation Part 1 (Planning)
+
+---
+
+## U2 Seed — Functional Design 承認
+**Timestamp**: 2026-04-12T03:00:00Z
+**User Input**: "U2 Seed — Functional Designを承認します。"
+**AI Response**: Functional Design 承認を受領。Code Generation (Part 1: Planning) へ進行。
+**Context**: CONSTRUCTION - U2 Seed - Functional Design 承認完了 → Code Generation へ
+
+---
+
+## U2 Seed — Functional Design オンボーディング追加
+**Timestamp**: 2026-04-12T02:00:00Z
+**User Input**: "Aだね"（オンボーディングを U2 に含める）→ 必須項目: 表示名のみ。オンボーディング強制（onboarded_at IS NULL → リダイレクト）。閲覧は自由。リダイレクトチェーン方式 A（redirect パラメータ持ち回し）。
+**AI Response**: Functional Design 4ファイルにオンボーディングフロー追加。domain-entities（User拡張・UserTag）、business-logic-model（フロー6）、business-rules（BR-U2-11〜14）、frontend-components（OnboardingPage・Auth Context拡張・TagSelector categories prop）。
+**Context**: CONSTRUCTION - U2 Seed - Functional Design オンボーディング追加
+
+---
+
+## U2 Seed — Functional Design 回答受領・アーティファクト生成
+**Timestamp**: 2026-04-12T01:30:00Z
+**User Input**: "回答しました。" (Q1:D, Q2:B, Q3:A, Q4:A, Q5:A)
+**AI Response**: 全5問の回答を確認。曖昧な点なし。Functional Design アーティファクト4ファイルを生成完了。
+**Context**: CONSTRUCTION - U2 Seed - Functional Design Step 6 完了
+
+---
+
+## U2 Seed — Functional Design Q5 Figma 参照
+**Timestamp**: 2026-04-12T01:15:00Z
+**User Input**: "Q5についてさ、Figmaを参照するとなにになりそうかな？"
+**AI Response**: Figma nodeId 78:6 を get_design_context で取得。TagSelector は右サイドバーに配置され、カテゴリタブ切り替え + 階層ツリー + チェックボックスの構成 → 選択肢 A と一致。
+**Context**: CONSTRUCTION - U2 Seed - Functional Design 質問フェーズ
+
+---
+
+## U2 Seed — Functional Design 開始
+**Timestamp**: 2026-04-12T01:00:00Z
+**User Input**: "u1を承認します。"
+**AI Response**: U1 Foundation 承認を受領。U2 Seed の Functional Design (Step 2: Plan作成) を開始。
+**Context**: CONSTRUCTION - U2 Seed - Functional Design 開始
+
+---
+
 ## U1 Foundation — Code Generation Plan 承認
 **Timestamp**: 2026-04-12T00:10:00Z
 **User Input**: "y"

@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { apiFetch } from "@/lib/api-client";
@@ -18,6 +19,7 @@ interface AppUser {
   avatar_url: string | null;
   insight_score: number;
   role: string;
+  onboarded_at: string | null;
   created_at: string;
 }
 
@@ -25,6 +27,7 @@ interface AuthContextValue {
   user: AppUser | null;
   session: Session | null;
   isLoading: boolean;
+  refreshUser: () => Promise<void>;
   signIn: (
     provider: "google" | "email",
     credentials?: { email: string; password: string },
@@ -39,6 +42,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
   async function fetchAppUser() {
     try {
@@ -73,6 +78,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Onboarding redirect: if logged in but not onboarded, redirect to /onboarding
+  useEffect(() => {
+    if (user && !user.onboarded_at) {
+      const allowedPaths = ["/", "/login", "/onboarding"];
+      const isViewPage = pathname.startsWith("/p/");
+      if (!allowedPaths.includes(pathname) && !isViewPage) {
+        router.push(`/onboarding?redirect=${encodeURIComponent(pathname)}`);
+      }
+    }
+  }, [user, pathname, router]);
+
   async function signIn(
     provider: "google" | "email",
     credentials?: { email: string; password: string },
@@ -98,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, isLoading, signIn, signUp, signOut }}
+      value={{ user, session, isLoading, refreshUser: fetchAppUser, signIn, signUp, signOut }}
     >
       {children}
     </AuthContext.Provider>
