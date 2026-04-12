@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
 import { RightSidebarProvider } from "@/contexts/right-sidebar-context";
@@ -38,7 +39,9 @@ export default function RootLayout({
             className="flex min-h-[calc(100vh-3.5rem)]"
             data-testid="layout-container"
           >
-            <Sidebar />
+            <Suspense>
+              <Sidebar />
+            </Suspense>
             <main className="min-w-0 flex-1 px-10 py-6 xl:ml-[92px]" data-testid="main-content">
               {children}
             </main>

@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { apiFetch } from "@/lib/api-client";
 import { TagAccordionSelector } from "@/components/common/TagAccordionSelector";
 
 export default function OnboardingPage() {
+  return (
+    <Suspense>
+      <OnboardingForm />
+    </Suspense>
+  );
+}
+
+function OnboardingForm() {
   const { user, isLoading, refreshUser } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
