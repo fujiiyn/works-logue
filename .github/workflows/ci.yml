@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api-lint:
+    name: API Lint (ruff)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' ||
+      contains(join(github.event.commits.*.modified, ','), 'apps/api/') ||
+      contains(join(github.event.commits.*.added, ','), 'apps/api/')
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check .
+      - run: ruff format --check .
+
+  api-test:
+    name: API Test (pytest)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' ||
+      contains(join(github.event.commits.*.modified, ','), 'apps/api/') ||
+      contains(join(github.event.commits.*.added, ','), 'apps/api/')
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: pytest --tb=short -q
+
+  web-lint:
+    name: Web Lint (ESLint)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' ||
+      contains(join(github.event.commits.*.modified, ','), 'apps/web/') ||
+      contains(join(github.event.commits.*.added, ','), 'apps/web/')
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+
+  web-build:
+    name: Web Build (Next.js)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' ||
+      contains(join(github.event.commits.*.modified, ','), 'apps/web/') ||
+      contains(join(github.event.commits.*.added, ','), 'apps/web/')
+    defaults:
+      run:
+        working-directory: apps/web
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
+      NEXT_PUBLIC_API_URL: https://placeholder.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run build
