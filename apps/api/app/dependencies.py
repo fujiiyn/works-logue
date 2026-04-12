@@ -15,7 +15,7 @@ def _get_auth_client() -> SupabaseAuthClient:
 
     return SupabaseAuthClient(
         supabase_url=settings.supabase_url,
-        anon_key=settings.supabase_anon_key,
+        anon_key=settings.supabase_publishable_key,
         service_role_key=settings.supabase_service_role_key,
     )
 
@@ -31,6 +31,8 @@ async def _find_or_create_user(
     db: AsyncSession,
     auth_id: uuid.UUID,
     auth_client: SupabaseAuthClient,
+    email: str | None = None,
+    user_metadata: dict | None = None,
 ) -> User:
     result = await db.execute(select(User).where(User.auth_id == auth_id))
     user = result.scalar_one_or_none()
@@ -41,12 +43,20 @@ async def _find_or_create_user(
         return user
 
     # Auto-create user on first login (BR-02)
-    meta = await auth_client.get_user_metadata(auth_id)
-    display_name = meta.get("display_name") or meta.get("email", "").split("@")[0] or "User"
+    # Use JWT claims first, fall back to Admin API
+    jwt_meta = user_metadata or {}
+    display_name = (
+        jwt_meta.get("full_name")
+        or jwt_meta.get("name")
+        or (email or "").split("@")[0]
+        or "User"
+    )
+    avatar_url = jwt_meta.get("avatar_url")
+
     user = User(
         auth_id=auth_id,
         display_name=display_name,
-        avatar_url=meta.get("avatar_url"),
+        avatar_url=avatar_url,
     )
     db.add(user)
     await db.commit()
@@ -68,7 +78,11 @@ async def get_current_user(
     except SupabaseAuthError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    user = await _find_or_create_user(db, auth_user.sub, auth_client)
+    user = await _find_or_create_user(
+        db, auth_user.sub, auth_client,
+        email=auth_user.email,
+        user_metadata=auth_user.user_metadata,
+    )
 
     if user.is_banned:
         if request.method not in ("GET", "HEAD", "OPTIONS"):
@@ -92,6 +106,10 @@ async def get_optional_user(
         return None
 
     try:
-        return await _find_or_create_user(db, auth_user.sub, auth_client)
+        return await _find_or_create_user(
+            db, auth_user.sub, auth_client,
+            email=auth_user.email,
+            user_metadata=auth_user.user_metadata,
+        )
     except HTTPException:
         return None

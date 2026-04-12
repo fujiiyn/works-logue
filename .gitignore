@@ -38,3 +38,12 @@ coverage/
 
 # ruff
 .ruff_cache/
+
+# Egg info
+*.egg-info/
+
+# TypeScript
+tsconfig.tsbuildinfo
+
+# Playwright MCP
+.playwright-mcp/

@@ -4,7 +4,9 @@
       "mcp__figma__get_design_context",
       "mcp__figma__get_metadata",
       "mcp__figma__get_screenshot",
-      "mcp__figma__use_figma"
+      "mcp__figma__use_figma",
+      "Bash(python -m pytest app/tests/test_planters.py -v)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

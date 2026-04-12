@@ -22,9 +22,9 @@ class Tag(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     category: Mapped[str] = mapped_column(String(20), nullable=False)
     parent_tag_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("tags.id"), nullable=True)
-    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
-    is_leaf: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    is_leaf: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
 
 
 class PlanterTag(Base):

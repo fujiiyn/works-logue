@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
+import { RightSidebarProvider } from "@/contexts/right-sidebar-context";
 import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
 import { RightSidebar } from "@/components/right-sidebar";
@@ -31,17 +32,19 @@ export default function RootLayout({
     <html lang="ja" className={`${inter.variable} ${notoSansJP.variable}`}>
       <body>
         <AuthProvider>
+          <RightSidebarProvider>
           <Header />
           <div
-            className="flex"
+            className="flex min-h-[calc(100vh-3.5rem)]"
             data-testid="layout-container"
           >
             <Sidebar />
-            <main className="mx-auto min-w-0 max-w-[960px] flex-1 px-10 py-6" data-testid="main-content">
+            <main className="min-w-0 flex-1 px-10 py-6 xl:ml-[92px]" data-testid="main-content">
               {children}
             </main>
             <RightSidebar />
           </div>
+          </RightSidebarProvider>
         </AuthProvider>
       </body>
     </html>

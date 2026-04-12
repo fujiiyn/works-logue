@@ -45,7 +45,7 @@ class SupabaseAuthClient:
             payload = jwt.decode(
                 token,
                 jwks,
-                algorithms=["RS256"],
+                algorithms=["RS256", "ES256"],
                 audience="authenticated",
             )
         except JWTError as e:
@@ -62,7 +62,7 @@ class SupabaseAuthClient:
             resp = await client.get(
                 f"{self._supabase_url}/auth/v1/admin/users/{auth_id}",
                 headers={
-                    "apikey": self._service_role_key,
+                    "apikey": self._anon_key,
                     "Authorization": f"Bearer {self._service_role_key}",
                 },
             )

@@ -14,8 +14,15 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
     bio: Mapped[str | None] = mapped_column(nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(nullable=True)
-    insight_score: Mapped[float] = mapped_column(Float, nullable=False, server_default="0.0")
-    role: Mapped[str] = mapped_column(String(10), nullable=False, server_default="'user'")
-    is_banned: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    insight_score: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0, server_default="0.0"
+    )
+    role: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="user", server_default="'user'"
+    )
+    is_banned: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
     banned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     ban_reason: Mapped[str | None] = mapped_column(nullable=True)
+    onboarded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
