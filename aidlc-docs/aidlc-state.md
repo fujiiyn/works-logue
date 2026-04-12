@@ -39,8 +39,8 @@
 ### CONSTRUCTION PHASE
 - [ ] Per-Unit Loop (feature slice x N)
   - [ ] U1 Foundation
-    - [ ] Functional Design — 承認待ち
-    - [ ] Code Generation
+    - [x] Functional Design — Completed 2026-04-08
+    - [ ] Code Generation — 計画中
   - [ ] U2 Seed
   - [ ] U3 Log & Score
   - [ ] U4 Louge

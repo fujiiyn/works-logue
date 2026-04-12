@@ -52,12 +52,22 @@ works-logue/               ← monorepo
 ### TypeScript (apps/web)
 - `strict: true` を必須とする
 - ESLint + Prettier（デフォルト設定）
-- テスト対象: Vertex AI呼び出し周り・主要APIルート・核心フロー（Seed→Log→Louge）のE2E（Playwright）
+- UIはFigmaデザイン参照で実装後、Playwright E2Eで検証
 
 ### Python (apps/api)
 - Ruff（lint + format）
 - mypy strict
-- pytest でAPIエンドポイント + AIパイプラインをカバー
+- **TDD必須**: pytest でテストを先に書いてからAPIエンドポイント・ビジネスロジックを実装する（Red→Green→Refactor）
+
+### テスト戦略（実用TDD）
+
+| 対象 | アプローチ | ツール |
+|---|---|---|
+| FastAPI エンドポイント | TDD（テスト先行） | pytest + httpx（AsyncClient） |
+| FastAPI ビジネスロジック | TDD（テスト先行） | pytest |
+| FastAPI 認証ミドルウェア | TDD（テスト先行） | pytest + JWT モック |
+| Next.js UIコンポーネント | Figma参照で実装後にE2E | Playwright |
+| 核心フロー（Seed→Log→Louge） | E2E | Playwright |
 
 ### 共通
 - Cloud Run向けに**構造化JSONログ**を標準とする
@@ -72,6 +82,29 @@ works-logue/               ← monorepo
 - カラー: ティールグリーン（#00B4CC）+ クリーム背景 + ダークフォレストグリーン（#1A5C42）
 - アイコン: Lucide（絵文字は使わない）
 - 雰囲気: ボタニカル・オーガニック
+
+### Figma MCP 必須ルール
+
+**UIコンポーネント・ページを実装する際は、必ず Figma MCP で既存のFigmaデザインを参照してからコードを生成すること。新たにデザインを作成する必要はない。**
+
+- Figmaファイル: `fileKey: RKsHkKG2GfOlaVxRzY81TG`
+- デザイン参照ツール: `get_design_context`（nodeIdを指定）
+- 1画面ずつ参照 → スクリーンショット確認 → コード実装 の順で進める
+
+既存画面一覧（mainページ）:
+
+| nodeId | 画面 |
+|---|---|
+| 12:3 | Home `/` |
+| 57:29 | Seed Detail `/p/{id}` (seed/sprout状態) |
+| 78:6 | Seed投稿 `/seed/new` |
+| 212:8 | Login `/login` |
+| 213:10 | Louge Detail `/p/{id}` (louge状態) |
+| 217:12 | Explore `/explore` |
+| 220:14 | User Profile `/user/{id}` |
+| 223:16 | Admin `/admin` |
+
+デザインシステム（design-systemページ、nodeId: 95:34）にカラー・タイポグラフィ・スペーシング等が定義されている。
 
 ---
 

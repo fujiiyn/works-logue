@@ -1,5 +1,13 @@
 # AI-DLC Audit Log
 
+## U1 Foundation — Functional Design 承認
+**Timestamp**: 2026-04-08T00:00:00Z
+**User Input**: "U1 Foundation の Functional Designを承認します"
+**AI Response**: Functional Design 承認を受領。Code Generation (Part 1: Plan) を開始。
+**Context**: CONSTRUCTION - U1 Foundation - Code Generation へ進む
+
+---
+
 ## Workspace Detection
 **Timestamp**: 2026-04-05T00:00:00Z
 **User Input**: "Works Logueの開発を始めたい。"
