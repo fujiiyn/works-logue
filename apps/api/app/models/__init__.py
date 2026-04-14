@@ -1,4 +1,5 @@
 from app.models.ai_config import AiConfig
+from app.models.app_setting import AppSetting
 from app.models.base import Base
 from app.models.follow import PlanterFollow, UserFollow
 from app.models.log import Log
@@ -12,6 +13,7 @@ from app.models.user import User
 
 __all__ = [
     "AiConfig",
+    "AppSetting",
     "Base",
     "InsightScoreEvent",
     "Log",

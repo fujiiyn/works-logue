@@ -1,5 +1,37 @@
 # AI-DLC Audit Log
 
+## U3 Log & Score - Code Generation Plan 作成
+**Timestamp**: 2026-04-13T13:30:00Z
+**User Input**: "y" + "あとVertexとかのAI関連が入るからVertexAIのデプロイとかもここのフェースでやりたいよ。ちゃんと動くかも検証するよ。バックエンドが動くのを確認してからフロントを実装するよ。"
+**AI Response**: Code Generation Plan (Part 1) を作成。20ステップ、6フェーズ構成。Backend first + Vertex AI セットアップ & 疎通確認を含む。Step 14 で Backend 動作確認後に Frontend に着手する構成。
+**Context**: CONSTRUCTION - U3 Log & Score - Code Generation (Part 1: Planning)
+
+---
+
+## U3 Log & Score - Functional Design 修正（バックグラウンドスコア計算）
+**Timestamp**: 2026-04-13T13:00:00Z
+**User Input**: "1. 現設計。2. やっぱスコアはバックグラウンドにするかぁ。これだとＵＩ上どうなるかな？3. ok"
+**AI Response**: バックグラウンドスコア計算のUI案を提示（FastAPI BackgroundTasks + polling）。ユーザー承認後、business-logic-model.md, domain-entities.md, frontend-components.md を更新。スコアpollingエンドポイント追加、score_pendingフラグ追加、ScoreCard計算中インジケーター追加。
+**Context**: CONSTRUCTION - U3 Log & Score - Functional Design (修正)
+
+---
+
+## U3 Log & Score - Functional Design 回答受領 & アーティファクト生成
+**Timestamp**: 2026-04-13T12:30:00Z
+**User Input**: "y" (ファイル編集で全8問に回答: Q1:C, Q2:A, Q3:C+管理者ページ, Q4:A, Q5:A, Q6:A, Q7:A, Q8:B)
+**AI Response**: 回答に曖昧な点なし。business-logic-model.md, domain-entities.md, business-rules.md, frontend-components.md の4アーティファクトを生成。
+**Context**: CONSTRUCTION - U3 Log & Score - Functional Design (Step 5-7)
+
+---
+
+## U3 Log & Score - Functional Design 開始
+**Timestamp**: 2026-04-13T12:00:00Z
+**User Input**: "y"
+**AI Response**: U3 Log & Score の Functional Design を開始。コンテキスト（unit-of-work.md, requirements.md, 既存コード）を読み込み、Functional Design Plan を作成。8つの質問を提示。
+**Context**: CONSTRUCTION - U3 Log & Score - Functional Design (Step 1-4)
+
+---
+
 ## U2 Seed — Code Generation Plan 承認 & Part 2 開始
 **Timestamp**: 2026-04-12T03:20:00Z
 **User Input**: "Subabaseと並行してセットアップを進める。"

@@ -1,9 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
-import { MessageSquare, Users, Sparkles } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { MessageSquare, Users } from "lucide-react";
 import { formatRelativeTime } from "@/lib/format-time";
+import { apiFetch } from "@/lib/api-client";
 import { useRightSidebar } from "@/contexts/right-sidebar-context";
+import { LogThread } from "@/components/log/LogThread";
+import { LogComposer } from "@/components/log/LogComposer";
+import { ScoreCard } from "@/components/planter/ScoreCard";
+
+interface StructureParts {
+  context: boolean;
+  problem: boolean;
+  solution: boolean;
+  name: boolean;
+}
 
 interface PlanterDetail {
   id: string;
@@ -16,10 +27,26 @@ interface PlanterDetail {
   log_count: number;
   contributor_count: number;
   progress: number;
-  diversity_score: number;
-  structure_score: number;
+  structure_fulfillment: number;
+  maturity_score: number | null;
+  structure_parts: StructureParts | null;
   bloom_threshold: number;
   created_at: string;
+}
+
+interface ScoreResponse {
+  score: {
+    id: string;
+    status: string;
+    log_count: number;
+    contributor_count: number;
+    progress: number;
+    structure_fulfillment: number;
+    maturity_score: number | null;
+    structure_parts: StructureParts | null;
+  };
+  score_pending: boolean;
+  last_scored_at: string | null;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -28,23 +55,143 @@ const STATUS_LABELS: Record<string, string> = {
   louge: "Louge",
 };
 
+const POLL_INTERVALS = [3000, 5000, 10000];
+
 export function PlanterDetailClient({
-  planter,
+  planter: initialPlanter,
+  bloomThreshold,
 }: {
   planter: PlanterDetail;
+  bloomThreshold: number;
 }) {
-  const isLouge = planter.status === "louge";
+  const [planter, setPlanter] = useState(initialPlanter);
+  const [scorePending, setScorePending] = useState(false);
+  const [replyTo, setReplyTo] = useState<{
+    id: string;
+    displayName: string;
+  } | null>(null);
+  const logThreadKeyRef = useRef(0);
   const { setContent } = useRightSidebar();
+  const isLouge = planter.status === "louge";
 
+  // Score polling
+  const pollScore = useCallback(
+    async (attempt: number = 0) => {
+      if (attempt >= POLL_INTERVALS.length) {
+        setScorePending(false);
+        return;
+      }
+
+      await new Promise((r) => setTimeout(r, POLL_INTERVALS[attempt]));
+
+      try {
+        const data = await apiFetch<ScoreResponse>(
+          `/api/v1/planters/${planter.id}/score`,
+        );
+        const s = data.score;
+        setPlanter((prev) => ({
+          ...prev,
+          status: s.status,
+          log_count: s.log_count,
+          contributor_count: s.contributor_count,
+          progress: s.progress,
+          structure_fulfillment: s.structure_fulfillment,
+          maturity_score: s.maturity_score,
+          structure_parts: s.structure_parts,
+        }));
+
+        if (data.score_pending) {
+          pollScore(attempt + 1);
+        } else {
+          setScorePending(false);
+        }
+      } catch {
+        setScorePending(false);
+      }
+    },
+    [planter.id],
+  );
+
+  // Update right sidebar with ScoreCard
   useEffect(() => {
     setContent(
-      <ScoreCard planter={planter} isLouge={isLouge} />,
+      <ScoreCard
+        status={planter.status}
+        structureFulfillment={planter.structure_fulfillment}
+        maturityScore={planter.maturity_score}
+        logCount={planter.log_count}
+        contributorCount={planter.contributor_count}
+        progress={planter.progress}
+        bloomThreshold={bloomThreshold}
+        structureParts={planter.structure_parts}
+        scorePending={scorePending}
+      />,
     );
     return () => setContent(null);
-  }, [planter, isLouge, setContent]);
+  }, [
+    planter.status,
+    planter.structure_fulfillment,
+    planter.maturity_score,
+    planter.log_count,
+    planter.contributor_count,
+    planter.progress,
+    planter.structure_parts,
+    bloomThreshold,
+    scorePending,
+    setContent,
+  ]);
+
+  const handleLogCreated = useCallback(
+    (response: {
+      log: { id: string; planter_id: string };
+      planter: {
+        status: string;
+        log_count: number;
+        contributor_count: number;
+        progress: number;
+        structure_fulfillment: number;
+        maturity_score: number | null;
+        structure_parts: StructureParts | null;
+      };
+      score_pending: boolean;
+    }) => {
+      // Update planter with immediate response data
+      setPlanter((prev) => ({
+        ...prev,
+        status: response.planter.status,
+        log_count: response.planter.log_count,
+        contributor_count: response.planter.contributor_count,
+        progress: response.planter.progress,
+        structure_fulfillment: response.planter.structure_fulfillment,
+        maturity_score: response.planter.maturity_score,
+        structure_parts: response.planter.structure_parts,
+      }));
+
+      // Force LogThread to refetch
+      logThreadKeyRef.current += 1;
+
+      // Start score polling if pending
+      if (response.score_pending) {
+        setScorePending(true);
+        pollScore(0);
+      }
+    },
+    [pollScore],
+  );
+
+  const handleReply = useCallback(
+    (logId: string) => {
+      // We don't have the display name here, but we can set a generic one
+      setReplyTo({ id: logId, displayName: "Log" });
+    },
+    [],
+  );
 
   return (
-    <div className="-mb-6 flex min-h-[calc(100vh-3.5rem)] flex-col" data-testid="planter-detail">
+    <div
+      className="-mb-6 flex min-h-[calc(100vh-3.5rem)] flex-col"
+      data-testid="planter-detail"
+    >
       <div className="flex-1">
         {/* Meta row */}
         <div className="mb-3 flex items-center gap-1.5 text-caption text-text-muted">
@@ -119,97 +266,24 @@ export function PlanterDetailClient({
         {/* Divider */}
         <div className="mb-5 h-px bg-border" />
 
-        {/* Logs section header */}
+        {/* Logs section */}
         <h2 className="mb-4 text-heading-m text-primary-dark">Logs</h2>
 
-        <p className="py-8 text-center text-body-s text-text-muted">
-          まだLogがありません
-        </p>
-
+        <LogThread
+          key={logThreadKeyRef.current}
+          planterId={planter.id}
+          onReply={handleReply}
+        />
       </div>
 
       {/* Bottom sticky input bar */}
-      <div className="sticky bottom-0 z-30 -mx-10 border-t border-border bg-bg-page px-10 py-3">
-        <div className="flex items-center gap-3">
-          <div className="flex min-h-[40px] flex-1 items-center rounded-lg border border-border bg-white px-3.5 py-2.5 text-[13px] text-text-muted">
-            あなたの経験や知恵を共有...
-          </div>
-          <button
-            disabled
-            className="rounded-md bg-primary/40 px-5 py-2.5 text-[13px] font-medium text-white"
-            data-testid="planter-detail-log-submit"
-          >
-            Logを投稿
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ScoreCard({
-  planter,
-  isLouge,
-}: {
-  planter: PlanterDetail;
-  isLouge: boolean;
-}) {
-  return (
-    <div className="rounded-lg border border-border bg-bg-card p-5">
-      <h3 className="mb-4 flex items-center gap-1.5 text-heading-m text-primary-dark">
-        <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
-        開花スコア
-      </h3>
-
-      <div className="mb-4">
-        <div className="mb-1 flex items-center justify-between">
-          <span className="text-body-s text-text-secondary">
-            構造充足度（条件A）
-          </span>
-          <span className="text-body-s font-medium text-primary">
-            {Math.round((planter.structure_score ?? 0) * 100)}%
-          </span>
-        </div>
-        <div className="h-[6px] w-full rounded-xs bg-primary-light-bg">
-          <div
-            className={`h-[6px] rounded-xs ${
-              isLouge ? "bg-primary" : "bg-primary/50"
-            }`}
-            style={{
-              width: `${Math.min(planter.structure_score ?? 0, 1) * 100}%`,
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2.5">
-        <ScoreStat label="Log数" value={String(planter.log_count)} />
-        <ScoreStat
-          label="貢献者数"
-          value={String(planter.contributor_count)}
-        />
-        <ScoreStat
-          label="多様性"
-          value={`${Math.round((planter.diversity_score ?? 0) * 100)}%`}
-        />
-        <ScoreStat
-          label="開花まで"
-          value={
-            isLouge
-              ? "開花済み"
-              : `${Math.round((planter.progress ?? 0) * 100)}%`
-          }
-        />
-      </div>
-    </div>
-  );
-}
-
-function ScoreStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-body-s text-text-secondary">{label}</span>
-      <span className="text-body-s font-medium text-primary">{value}</span>
+      <LogComposer
+        planterId={planter.id}
+        planterStatus={planter.status}
+        replyTo={replyTo}
+        onCancelReply={() => setReplyTo(null)}
+        onLogCreated={handleLogCreated}
+      />
     </div>
   );
 }

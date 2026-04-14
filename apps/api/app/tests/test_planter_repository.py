@@ -193,3 +193,56 @@ class TestListRecent:
         results = await repo.list_recent(limit=10)
         assert len(results) == 1
         assert results[0].title == "Active"
+
+
+class TestUpdateScores:
+    async def test_update_scores(self, repo, test_user, seed_type, db_session):
+        """update_scores() should update score-related fields and status."""
+        planter = Planter(
+            user_id=test_user.id, title="Score", body="Body", seed_type_id=seed_type.id
+        )
+        created = await repo.create(planter)
+
+        await repo.update_scores(
+            created.id,
+            structure_fulfillment=0.75,
+            maturity_score=0.6,
+            progress=0.5,
+            status="sprout",
+        )
+        await db_session.refresh(created)
+        assert created.structure_fulfillment == 0.75
+        assert created.maturity_score == 0.6
+        assert created.progress == 0.5
+        assert created.status == "sprout"
+
+
+class TestIncrementLogCount:
+    async def test_increment_log_count(self, repo, test_user, seed_type, db_session):
+        """increment_log_count() should increment log_count by 1."""
+        planter = Planter(
+            user_id=test_user.id, title="Count", body="Body", seed_type_id=seed_type.id
+        )
+        created = await repo.create(planter)
+        assert created.log_count == 0
+
+        await repo.increment_log_count(created.id)
+        await db_session.refresh(created)
+        assert created.log_count == 1
+
+        await repo.increment_log_count(created.id)
+        await db_session.refresh(created)
+        assert created.log_count == 2
+
+
+class TestUpdateContributorCount:
+    async def test_update_contributor_count(self, repo, test_user, seed_type, db_session):
+        """update_contributor_count() should set contributor_count to given value."""
+        planter = Planter(
+            user_id=test_user.id, title="Contributors", body="Body", seed_type_id=seed_type.id
+        )
+        created = await repo.create(planter)
+
+        await repo.update_contributor_count(created.id, 5)
+        await db_session.refresh(created)
+        assert created.contributor_count == 5

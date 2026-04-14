@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.planter import Planter
@@ -57,3 +57,40 @@ class PlanterRepository:
 
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
+
+    async def update_scores(
+        self,
+        planter_id: uuid.UUID,
+        *,
+        structure_fulfillment: float,
+        maturity_score: float | None,
+        progress: float,
+        status: str,
+    ) -> None:
+        await self.db.execute(
+            update(Planter)
+            .where(Planter.id == planter_id)
+            .values(
+                structure_fulfillment=structure_fulfillment,
+                maturity_score=maturity_score,
+                progress=progress,
+                status=status,
+            )
+        )
+        await self.db.flush()
+
+    async def increment_log_count(self, planter_id: uuid.UUID) -> None:
+        await self.db.execute(
+            update(Planter)
+            .where(Planter.id == planter_id)
+            .values(log_count=Planter.log_count + 1)
+        )
+        await self.db.flush()
+
+    async def update_contributor_count(self, planter_id: uuid.UUID, count: int) -> None:
+        await self.db.execute(
+            update(Planter)
+            .where(Planter.id == planter_id)
+            .values(contributor_count=count)
+        )
+        await self.db.flush()

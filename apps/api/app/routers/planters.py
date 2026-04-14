@@ -20,9 +20,12 @@ from app.schemas.planter import (
     PlanterCreateRequest,
     PlanterResponse,
 )
+from app.schemas.score import StructurePartsResponse
 from app.schemas.seed_type import SeedTypeResponse
 from app.schemas.tag import TagResponse
 from app.schemas.user import UserPublicResponse
+
+DEFAULT_BLOOM_THRESHOLD = 0.7
 
 router = APIRouter(tags=["planters"])
 
@@ -34,10 +37,15 @@ def _build_planter_response(
     tags: list[Tag],
     *,
     include_body: bool = True,
+    bloom_threshold: float = DEFAULT_BLOOM_THRESHOLD,
 ) -> PlanterResponse | PlanterCardResponse:
     user_resp = UserPublicResponse.model_validate(user)
     seed_type_resp = SeedTypeResponse.model_validate(seed_type)
     tag_resps = [TagResponse.model_validate(t) for t in tags]
+
+    # Build structure_parts from planter's stored data (if any)
+    structure_parts = None
+    # structure_parts will be populated from LougeScoreSnapshot in score endpoints
 
     if include_body:
         return PlanterResponse(
@@ -51,6 +59,10 @@ def _build_planter_response(
             log_count=planter.log_count,
             contributor_count=planter.contributor_count,
             progress=planter.progress,
+            structure_fulfillment=planter.structure_fulfillment,
+            maturity_score=planter.maturity_score,
+            structure_parts=structure_parts,
+            bloom_threshold=bloom_threshold,
             created_at=planter.created_at,
         )
     return PlanterCardResponse(

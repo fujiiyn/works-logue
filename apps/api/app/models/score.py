@@ -23,6 +23,7 @@ class LougeScoreSnapshot(Base):
     maturity_total: Mapped[float | None] = mapped_column(Float, nullable=True)
     passed_structure: Mapped[bool] = mapped_column(Boolean, nullable=False)
     passed_maturity: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    structure_parts: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

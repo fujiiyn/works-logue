@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import engine
-from app.routers import health, planters, seed_types, tags, users
+from app.routers import health, logs, planters, scores, seed_types, tags, users
 
 structlog.configure(
     processors=[
@@ -45,3 +45,5 @@ app.include_router(users.router, prefix="/api/v1")
 app.include_router(planters.router, prefix="/api/v1")
 app.include_router(seed_types.router, prefix="/api/v1")
 app.include_router(tags.router, prefix="/api/v1")
+app.include_router(logs.router, prefix="/api/v1")
+app.include_router(scores.router, prefix="/api/v1")

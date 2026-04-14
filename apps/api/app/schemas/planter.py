@@ -4,6 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from app.schemas.score import StructurePartsResponse
 from app.schemas.seed_type import SeedTypeResponse
 from app.schemas.tag import TagResponse
 from app.schemas.user import UserPublicResponse
@@ -27,6 +28,10 @@ class PlanterResponse(BaseModel):
     log_count: int
     contributor_count: int
     progress: float
+    structure_fulfillment: float
+    maturity_score: float | None
+    structure_parts: StructurePartsResponse | None
+    bloom_threshold: float
     created_at: datetime
 
     model_config = {"from_attributes": True}
