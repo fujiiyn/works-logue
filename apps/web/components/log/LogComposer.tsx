@@ -54,9 +54,6 @@ export function LogComposer({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Hide for louge status
-  if (planterStatus === "louge") return null;
-
   const handleInput = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -64,6 +61,9 @@ export function LogComposer({
     const maxHeight = 5 * 24; // 5 lines approx
     el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
   }, []);
+
+  // Hide for louge status (after all hooks)
+  if (planterStatus === "louge") return null;
 
   const handleSubmit = async () => {
     const trimmed = body.trim();
