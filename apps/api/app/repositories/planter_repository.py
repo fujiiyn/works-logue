@@ -94,3 +94,13 @@ class PlanterRepository:
             .values(contributor_count=count)
         )
         await self.db.flush()
+
+    async def update_louge_content(
+        self, planter_id: uuid.UUID, content: str, generated_at: datetime
+    ) -> None:
+        await self.db.execute(
+            update(Planter)
+            .where(Planter.id == planter_id)
+            .values(louge_content=content, louge_generated_at=generated_at)
+        )
+        await self.db.flush()

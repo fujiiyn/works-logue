@@ -246,3 +246,21 @@ class TestUpdateContributorCount:
         await repo.update_contributor_count(created.id, 5)
         await db_session.refresh(created)
         assert created.contributor_count == 5
+
+
+class TestUpdateLougeContent:
+    async def test_update_louge_content(self, repo, test_user, seed_type, db_session):
+        """update_louge_content() should set louge_content and louge_generated_at."""
+        planter = Planter(
+            user_id=test_user.id, title="Louge", body="Body", seed_type_id=seed_type.id,
+            status="louge",
+        )
+        created = await repo.create(planter)
+        assert created.louge_content is None
+        assert created.louge_generated_at is None
+
+        now = datetime.now(timezone.utc)
+        await repo.update_louge_content(created.id, "# Article", now)
+        await db_session.refresh(created)
+        assert created.louge_content == "# Article"
+        assert created.louge_generated_at is not None

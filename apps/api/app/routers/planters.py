@@ -48,6 +48,7 @@ def _build_planter_response(
     # structure_parts will be populated from LougeScoreSnapshot in score endpoints
 
     if include_body:
+        bloom_pending = planter.status == "louge" and planter.louge_content is None
         return PlanterResponse(
             id=planter.id,
             title=planter.title,
@@ -63,6 +64,9 @@ def _build_planter_response(
             maturity_score=planter.maturity_score,
             structure_parts=structure_parts,
             bloom_threshold=bloom_threshold,
+            louge_content=planter.louge_content,
+            louge_generated_at=planter.louge_generated_at,
+            bloom_pending=bloom_pending,
             created_at=planter.created_at,
         )
     return PlanterCardResponse(

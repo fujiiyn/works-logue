@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { apiFetch } from "@/lib/api-client";
+import { Skeleton } from "@/components/common/Skeleton";
 import { TagAccordionSelector } from "@/components/common/TagAccordionSelector";
 
 export default function OnboardingPage() {
@@ -77,8 +78,25 @@ function OnboardingForm() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <p className="text-sm text-text-secondary">読み込み中...</p>
+      <div className="flex gap-6">
+        <div className="min-w-0 flex-1 space-y-4">
+          <Skeleton className="h-7 w-64" />
+          <Skeleton className="h-4 w-96" />
+          {/* Display name */}
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-[42px] rounded-md" />
+          {/* Tags */}
+          <Skeleton className="h-4 w-36" />
+          <Skeleton className="h-4 w-72" />
+          <Skeleton className="h-[200px] rounded-md" />
+          {/* Bio */}
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-[80px] rounded-md" />
+          {/* Button */}
+          <div className="flex justify-end">
+            <Skeleton className="h-[42px] w-40 rounded-lg" />
+          </div>
+        </div>
       </div>
     );
   }

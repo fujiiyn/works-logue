@@ -23,6 +23,14 @@ def mock_ai_facilitator():
 
 
 @pytest.fixture
+def mock_louge_generator():
+    with patch("app.pipelines.score_pipeline.LougeGenerator") as mock_cls:
+        mock_instance = AsyncMock()
+        mock_cls.return_value = mock_instance
+        yield mock_instance
+
+
+@pytest.fixture
 def mock_db_session():
     session = AsyncMock()
     session.commit = AsyncMock()
@@ -225,3 +233,74 @@ class TestScorePipelineExecute:
 
         # Should not raise
         await pipeline.execute(uuid.uuid4(), uuid.uuid4(), mock_db_session)
+
+    async def test_bloom_triggered_when_maturity_passed(
+        self, mock_score_engine, mock_ai_facilitator, mock_louge_generator, mock_session_factory, mock_db_session
+    ):
+        """execute() should trigger LougeGenerator.bloom() when passed_maturity=True."""
+        from app.pipelines.score_pipeline import ScorePipeline
+
+        planter = _make_planter_mock(log_count=5, contributor_count=3)
+        logs = [MagicMock(body=f"Log {i}", user_id=uuid.uuid4(), is_ai_generated=False) for i in range(5)]
+
+        mock_score_engine.evaluate_structure.return_value = StructureResult(
+            parts={"context": True, "problem": True, "solution": True, "name": True},
+            fulfillment=1.0,
+        )
+        mock_score_engine.evaluate_maturity.return_value = MaturityResult(
+            scores={"comprehensiveness": 0.8, "diversity": 0.8, "counterarguments": 0.7, "specificity": 0.9},
+            total=0.8,
+        )
+
+        pipeline = ScorePipeline(mock_session_factory)
+        pipeline._get_planter = AsyncMock(return_value=planter)
+        pipeline._get_logs_with_users = AsyncMock(return_value=(logs, {}))
+        pipeline._get_settings = AsyncMock(
+            return_value={"min_contributors": 3, "min_logs": 5, "bloom_threshold": 0.7, "bud_threshold": 0.8}
+        )
+        pipeline._save_snapshot = AsyncMock()
+        pipeline._update_planter = AsyncMock()
+
+        await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
+
+        mock_louge_generator.bloom.assert_called_once_with(planter.id, mock_db_session)
+
+        # Verify planter was updated with status="louge" and progress=1.0
+        update_call = pipeline._update_planter.call_args
+        assert update_call[1]["status"] == "louge"
+        assert update_call[1]["progress"] == 1.0
+
+    async def test_bloom_error_does_not_propagate(
+        self, mock_score_engine, mock_ai_facilitator, mock_louge_generator, mock_session_factory, mock_db_session
+    ):
+        """execute() should catch bloom errors without propagating."""
+        from app.pipelines.score_pipeline import ScorePipeline
+
+        planter = _make_planter_mock(log_count=5, contributor_count=3)
+        logs = [MagicMock(body=f"Log {i}", user_id=uuid.uuid4(), is_ai_generated=False) for i in range(5)]
+
+        mock_score_engine.evaluate_structure.return_value = StructureResult(
+            parts={"context": True, "problem": True, "solution": True, "name": True},
+            fulfillment=1.0,
+        )
+        mock_score_engine.evaluate_maturity.return_value = MaturityResult(
+            scores={"comprehensiveness": 0.9, "diversity": 0.9, "counterarguments": 0.9, "specificity": 0.9},
+            total=0.9,
+        )
+        mock_louge_generator.bloom.side_effect = Exception("Vertex AI down during bloom")
+
+        pipeline = ScorePipeline(mock_session_factory)
+        pipeline._get_planter = AsyncMock(return_value=planter)
+        pipeline._get_logs_with_users = AsyncMock(return_value=(logs, {}))
+        pipeline._get_settings = AsyncMock(
+            return_value={"min_contributors": 3, "min_logs": 5, "bloom_threshold": 0.7, "bud_threshold": 0.8}
+        )
+        pipeline._save_snapshot = AsyncMock()
+        pipeline._update_planter = AsyncMock()
+
+        # Should not raise
+        await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
+
+        # Status should still be set to louge (committed before bloom attempt)
+        update_call = pipeline._update_planter.call_args
+        assert update_call[1]["status"] == "louge"

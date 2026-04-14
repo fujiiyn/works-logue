@@ -269,6 +269,62 @@
 
 ---
 
+## U4 Louge - Code Generation 完了
+**Timestamp**: 2026-04-15T12:00:00Z
+**User Input**: N/A（プラン承認後に連続実行）
+**AI Response**: U4 Louge の Code Generation を完了。Backend: LougeGenerator, InsightScoreCalculator, ScorePipeline拡張, ContributorsRouter 実装。テスト143/143 passed。Frontend: LougeArticle, ContributorsSidebar, LougeCopyButton, PlanterDetail Louge状態拡張。TypeScript コンパイル成功。
+**Context**: CONSTRUCTION - U4 Louge - Code Generation Complete
+
+---
+
+## U4 Louge - Code Generation Plan 承認
+**Timestamp**: 2026-04-15T11:15:00Z
+**User Input**: "ｏｋ大丈夫そう"
+**AI Response**: Code Generation Plan 承認。Part 2 (Generation) を開始する。
+**Context**: CONSTRUCTION - U4 Louge - Code Generation Plan Approved
+
+---
+
+## U4 Louge - Code Generation Plan 作成
+**Timestamp**: 2026-04-15T11:00:00Z
+**User Input**: "ok"（Functional Design 承認 → Code Generation に進行）
+**AI Response**: U4 Louge の Code Generation Plan を作成。14ステップ、5フェーズ構成。DB マイグレーション不要。LougeGenerator, InsightScoreCalculator, ScorePipeline拡張, ContributorsRouter, フロントエンド Louge 状態対応を含む。
+**Context**: CONSTRUCTION - U4 Louge - Code Generation Plan (Part 1)
+
+---
+
+## U4 Louge - Functional Design 承認
+**Timestamp**: 2026-04-15T10:45:00Z
+**User Input**: "ok"
+**AI Response**: Functional Design を承認。Code Generation フェーズに進む。
+**Context**: CONSTRUCTION - U4 Louge - Functional Design Approved
+
+---
+
+## U4 Louge - Functional Design アーティファクト生成
+**Timestamp**: 2026-04-15T10:30:00Z
+**User Input**: Q1:A, Q2:A, Q3:A, Q4:B, Q5:B, Q6:C, Q7:A
+**AI Response**: 全7問の回答を反映し、4つの Functional Design アーティファクトを生成: business-logic-model.md, business-rules.md, domain-entities.md, frontend-components.md。新規テーブル・マイグレーション不要。既存スキーマのカラム（louge_content, louge_generated_at, insight_score_events）を活用。
+**Context**: CONSTRUCTION - U4 Louge - Functional Design Artifacts Generation
+
+---
+
+## U4 Louge - Functional Design 質問回答
+**Timestamp**: 2026-04-15T10:15:00Z
+**User Input**: "q5はどれがおすすめ？" → B推奨を選択。"ｑ６のそれぞれの実装イメージは？" → C（脚注方式）を選択。"done"（全回答完了: Q1:A, Q2:A, Q3:A, Q4:B, Q5:B, Q6:C, Q7:A）
+**AI Response**: Q5はB（ポーリング型）を推奨（U3の既存仕組み流用・開花の瞬間を見逃さない）。Q6は3方式の実装イメージを説明し、B（引用ブロック）を推奨したがユーザーはC（脚注方式）を選択。
+**Context**: CONSTRUCTION - U4 Louge - Functional Design 質問回答
+
+---
+
+## U4 Louge - Functional Design 開始
+**Timestamp**: 2026-04-15T10:00:00Z
+**User Input**: "y"
+**AI Response**: U4 Louge の Functional Design を開始。設計判断の質問を7問作成し、u4-louge-functional-design-plan.md に保存。ユニット仕様・要件・U3実装状況を分析した上でプランを策定。
+**Context**: CONSTRUCTION - U4 Louge - Functional Design Plan 作成
+
+---
+
 ## U1 Foundation — Progress Bar / Sprout設計修正
 **Timestamp**: 2026-04-06T15:00:00Z
 **User Input**: "そうかんがえると、つぼみになるの早いか。60からだとね。" / "条件Bの惜しいところ、あと少しみたいなのをつぼみにしたいね。" / "OK"

@@ -154,7 +154,7 @@ export function LogComposer({
           onKeyDown={handleKeyDown}
           placeholder="あなたの経験や知恵を共有..."
           rows={1}
-          className="min-h-[40px] flex-1 resize-none rounded-lg border border-border bg-white px-3.5 py-2.5 text-[13px] text-primary-dark placeholder:text-text-muted focus:border-primary focus:outline-none"
+          className="min-h-[40px] max-h-[120px] flex-1 resize-none overflow-y-auto rounded-lg border border-border bg-white px-3.5 py-2.5 text-[13px] text-primary-dark placeholder:text-text-muted focus:border-primary focus:outline-none [&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-text-muted/40 hover:[&::-webkit-scrollbar-thumb]:bg-text-muted [scrollbar-width:thin] [scrollbar-color:rgba(153,153,143,0.4)_transparent]"
           data-testid="log-composer-input"
         />
         <button

@@ -13,6 +13,7 @@ from app.repositories.planter_repository import PlanterRepository
 from app.repositories.score_repository import ScoreRepository
 from app.repositories.settings_repository import SettingsRepository
 from app.services.ai_facilitator import AIFacilitator
+from app.services.louge_generator import LougeGenerator
 from app.services.score_engine import ScoreEngine
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ class ScorePipeline:
         self.session_factory = session_factory
         self.score_engine = ScoreEngine()
         self.facilitator = AIFacilitator()
+        self.louge_generator = LougeGenerator()
 
     async def execute(
         self,
@@ -105,7 +107,13 @@ class ScorePipeline:
 
         # Calculate progress
         maturity_total = maturity_result.total if maturity_result else None
-        progress = calculate_progress(structure.fulfillment, maturity_total)
+        new_status = planter.status
+
+        if passed_maturity:
+            new_status = "louge"
+            progress = 1.0
+        else:
+            progress = calculate_progress(structure.fulfillment, maturity_total)
 
         # Save snapshot
         snapshot = LougeScoreSnapshot(
@@ -127,10 +135,19 @@ class ScorePipeline:
             structure_fulfillment=structure.fulfillment,
             maturity_score=maturity_total,
             progress=progress,
-            status=planter.status,
+            status=new_status,
         )
 
         await db.commit()
+
+        # Trigger bloom (after commit so planter status is persisted)
+        if passed_maturity:
+            try:
+                await self.louge_generator.bloom(planter_id, db)
+            except Exception:
+                logger.error(
+                    "LougeGenerator.bloom failed for planter=%s", planter_id, exc_info=True
+                )
 
     async def _get_planter(
         self, planter_id: uuid.UUID, db: AsyncSession

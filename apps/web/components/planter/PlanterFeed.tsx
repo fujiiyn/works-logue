@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sprout } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { PlanterCard } from "./PlanterCard";
+import { PlanterCardSkeleton } from "./PlanterCardSkeleton";
 
 interface PlanterItem {
   id: string;
@@ -127,7 +128,13 @@ export function PlanterFeed() {
       </div>
 
       {/* Feed */}
-      {initialLoaded && planters.length === 0 ? (
+      {!initialLoaded ? (
+        <div>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <PlanterCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : planters.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
           <Sprout
             size={48}
@@ -152,8 +159,9 @@ export function PlanterFeed() {
           ))}
 
           {loading && (
-            <div className="py-6 text-center text-body-s text-text-muted">
-              読み込み中...
+            <div>
+              <PlanterCardSkeleton />
+              <PlanterCardSkeleton />
             </div>
           )}
 

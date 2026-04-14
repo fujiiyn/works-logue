@@ -23,6 +23,9 @@ interface PlanterDetail {
     name: boolean;
   } | null;
   bloom_threshold: number;
+  louge_content: string | null;
+  louge_generated_at: string | null;
+  bloom_pending: boolean;
   created_at: string;
 }
 
