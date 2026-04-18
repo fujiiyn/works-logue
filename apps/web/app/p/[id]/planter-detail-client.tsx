@@ -95,6 +95,13 @@ export function PlanterDetailClient({
   const { setContent } = useRightSidebar();
   const isLouge = planter.status === "louge";
 
+  // Record view (fire-and-forget)
+  useEffect(() => {
+    apiFetch(`/api/v1/planters/${initialPlanter.id}/view`, { method: "POST" }).catch(
+      () => {},
+    );
+  }, [initialPlanter.id]);
+
   // Score polling
   const pollScore = useCallback(
     async (attempt: number = 0) => {

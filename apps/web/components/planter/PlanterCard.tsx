@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import { ProgressBar } from "./ProgressBar";
 import { formatRelativeTime } from "@/lib/format-time";
 
@@ -13,6 +14,7 @@ interface PlanterCardProps {
     log_count: number;
     contributor_count: number;
     progress: number;
+    view_count?: number;
     created_at: string;
   };
 }
@@ -93,6 +95,12 @@ export function PlanterCard({ planter }: PlanterCardProps) {
         <div className="flex gap-3 text-body-s text-text-muted">
           <span>{planter.log_count} logs</span>
           <span>{planter.contributor_count} contributors</span>
+          {planter.view_count != null && planter.view_count > 0 && (
+            <span className="flex items-center gap-0.5">
+              <Eye size={13} strokeWidth={1.5} />
+              {planter.view_count}
+            </span>
+          )}
         </div>
         <ProgressBar progress={planter.progress} status={planter.status} />
       </div>

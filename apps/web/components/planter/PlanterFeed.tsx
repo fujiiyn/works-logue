@@ -25,6 +25,12 @@ interface PlanterListResponse {
   next_cursor: string | null;
 }
 
+const TAB_API_MAP: Record<string, string> = {
+  latest: "recent",
+  popular: "trending",
+  bloomed: "bloomed",
+};
+
 const TABS = [
   { key: "latest", label: "新着" },
   { key: "popular", label: "人気" },
@@ -40,13 +46,18 @@ export function PlanterFeed() {
   const [hasMore, setHasMore] = useState(true);
   const [initialLoaded, setInitialLoaded] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef(false);
 
   const fetchPlanters = useCallback(
-    async (currentCursor: string | null, append: boolean) => {
-      if (loading) return;
+    async (currentCursor: string | null, append: boolean, tab: string) => {
+      if (loadingRef.current) return;
+      loadingRef.current = true;
       setLoading(true);
       try {
-        const params = new URLSearchParams({ limit: "20" });
+        const params = new URLSearchParams({
+          limit: "20",
+          tab: TAB_API_MAP[tab] || "recent",
+        });
         if (currentCursor) params.set("cursor", currentCursor);
 
         const data = await apiFetch<PlanterListResponse>(
@@ -57,21 +68,24 @@ export function PlanterFeed() {
         setCursor(data.next_cursor);
         setHasMore(data.next_cursor !== null);
       } catch {
-        // API not available yet - show empty state
         setHasMore(false);
       } finally {
         setLoading(false);
+        loadingRef.current = false;
         setInitialLoaded(true);
       }
     },
-    [loading],
+    [],
   );
 
-  // Initial load
+  // Load on tab change
   useEffect(() => {
-    fetchPlanters(null, false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setPlanters([]);
+    setCursor(null);
+    setHasMore(true);
+    setInitialLoaded(false);
+    fetchPlanters(null, false, activeTab);
+  }, [activeTab, fetchPlanters]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -80,8 +94,8 @@ export function PlanterFeed() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
-          fetchPlanters(cursor, true);
+        if (entries[0].isIntersecting && hasMore && !loadingRef.current) {
+          fetchPlanters(cursor, true, activeTab);
         }
       },
       { rootMargin: "200px" },
@@ -89,7 +103,7 @@ export function PlanterFeed() {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [cursor, hasMore, loading, fetchPlanters]);
+  }, [cursor, hasMore, activeTab, fetchPlanters]);
 
   return (
     <div data-testid="planter-feed">
@@ -97,28 +111,19 @@ export function PlanterFeed() {
       <div className="mb-4 flex gap-4 border-b border-border pb-2">
         {TABS.map((tab) => {
           const isActive = tab.key === activeTab;
-          const isComingSoon = tab.key !== "latest";
 
           return (
             <button
               key={tab.key}
-              onClick={() => {
-                if (!isComingSoon) setActiveTab(tab.key);
-              }}
-              className={`relative pb-1 text-body-m transition-colors ${
+              onClick={() => setActiveTab(tab.key)}
+              className={`relative cursor-pointer pb-1 text-body-m transition-colors ${
                 isActive
                   ? "font-semibold text-primary"
                   : "font-normal text-text-sage"
-              } ${isComingSoon ? "cursor-default" : "cursor-pointer"}`}
+              }`}
               data-testid={`planter-feed-tab-${tab.key}`}
-              disabled={isComingSoon}
             >
               {tab.label}
-              {isComingSoon && (
-                <span className="ml-1 text-[10px] text-text-muted">
-                  (coming soon)
-                </span>
-              )}
               {isActive && (
                 <span className="absolute bottom-0 left-0 h-[2px] w-full rounded-full bg-primary" />
               )}
@@ -142,15 +147,21 @@ export function PlanterFeed() {
             className="mb-4 text-text-sage"
           />
           <p className="mb-4 text-body-m text-text-secondary">
-            まだSeedが投稿されていません。最初のSeedを蒔いてみましょう。
+            {activeTab === "bloomed"
+              ? "まだ開花した記事がありません。"
+              : activeTab === "popular"
+                ? "まだ注目のSeedがありません。"
+                : "まだSeedが投稿されていません。最初のSeedを蒔いてみましょう。"}
           </p>
-          <button
-            onClick={() => router.push("/seed/new")}
-            className="rounded-md bg-primary px-4 py-2 text-body-m text-white transition-colors hover:bg-primary-dark"
-            data-testid="planter-feed-empty-cta"
-          >
-            Seedを蒔く
-          </button>
+          {activeTab === "latest" && (
+            <button
+              onClick={() => router.push("/seed/new")}
+              className="rounded-md bg-primary px-4 py-2 text-body-m text-white transition-colors hover:bg-primary-dark"
+              data-testid="planter-feed-empty-cta"
+            >
+              Seedを蒔く
+            </button>
+          )}
         </div>
       ) : (
         <>

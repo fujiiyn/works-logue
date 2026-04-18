@@ -1,7 +1,8 @@
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +13,7 @@ from app.models.seed_type import SeedType
 from app.models.tag import Tag
 from app.models.user import User
 from app.repositories.follow_repository import FollowRepository
+from app.repositories.log_repository import LogRepository
 from app.repositories.planter_repository import PlanterRepository
 from app.repositories.tag_repository import TagRepository
 from app.schemas.planter import (
@@ -24,6 +26,7 @@ from app.schemas.score import StructurePartsResponse
 from app.schemas.seed_type import SeedTypeResponse
 from app.schemas.tag import TagResponse
 from app.schemas.user import UserPublicResponse
+from app.services.feed_ranker import FeedRanker
 
 DEFAULT_BLOOM_THRESHOLD = 0.7
 
@@ -140,6 +143,7 @@ async def create_planter(
 async def list_planters(
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User | None, Depends(get_optional_user)],
+    tab: str = Query("recent", pattern="^(recent|trending|bloomed)$"),
     limit: int = Query(20, ge=1, le=50),
     cursor: str | None = Query(None),
 ) -> CursorPaginatedResponse:
@@ -150,17 +154,58 @@ async def list_planters(
     if cursor:
         cursor_created_at, cursor_id = CursorPaginatedResponse.decode_cursor(cursor)
 
-    planters = await planter_repo.list_recent(
-        limit=limit + 1,
-        cursor_created_at=cursor_created_at,
-        cursor_id=cursor_id,
-    )
+    if tab == "trending":
+        planters = await _fetch_trending(planter_repo, db, limit)
+        # Trending does not support cursor pagination (returns top N)
+        return await _build_feed_response(planters, False, db)
+
+    if tab == "bloomed":
+        planters = await planter_repo.list_bloomed(
+            limit=limit + 1,
+            cursor_louge_generated_at=cursor_created_at,
+            cursor_id=cursor_id,
+        )
+    else:
+        planters = await planter_repo.list_recent(
+            limit=limit + 1,
+            cursor_created_at=cursor_created_at,
+            cursor_id=cursor_id,
+        )
 
     has_next = len(planters) > limit
     if has_next:
         planters = planters[:limit]
 
-    # Batch load related data
+    return await _build_feed_response(planters, has_next, db)
+
+
+async def _fetch_trending(
+    planter_repo: PlanterRepository,
+    db: AsyncSession,
+    limit: int,
+) -> list[Planter]:
+    candidates = await planter_repo.list_trending_candidates(window_days=7, limit=100)
+    if not candidates:
+        return []
+
+    planter_ids = [p.id for p in candidates]
+    since = datetime.now(timezone.utc) - timedelta(days=7)
+    view_counts = await planter_repo.get_view_counts(planter_ids, since=since)
+
+    log_repo = LogRepository(db)
+    log_velocities = await log_repo.get_log_velocities(planter_ids, window_hours=72)
+
+    ranker = FeedRanker()
+    ranked = ranker.rank_trending(candidates, view_counts, log_velocities)
+
+    return [r.planter for r in ranked[:limit]]
+
+
+async def _build_feed_response(
+    planters: list[Planter],
+    has_next: bool,
+    db: AsyncSession,
+) -> CursorPaginatedResponse:
     if not planters:
         return CursorPaginatedResponse(items=[], has_next=False)
 
@@ -191,16 +236,23 @@ async def list_planters(
         if pt.tag_id in tags_map:
             planter_tags_map[pt.planter_id].append(tags_map[pt.tag_id])
 
-    items = [
-        _build_planter_response(
+    # Batch load view counts
+    planter_repo = PlanterRepository(db)
+    view_counts = await planter_repo.get_view_counts(
+        planter_ids, since=datetime(2020, 1, 1, tzinfo=timezone.utc)
+    )
+
+    items = []
+    for p in planters:
+        card = _build_planter_response(
             p,
             st_map[p.seed_type_id],
             users_map[p.user_id],
             planter_tags_map.get(p.id, []),
             include_body=False,
         )
-        for p in planters
-    ]
+        card.view_count = view_counts.get(p.id, 0)
+        items.append(card)
 
     next_cursor = None
     if has_next:
@@ -238,3 +290,21 @@ async def get_planter(
         tags = list(tags_result.scalars().all())
 
     return _build_planter_response(planter, seed_type, user, tags)
+
+
+@router.post("/planters/{planter_id}/view", status_code=204)
+async def record_view(
+    planter_id: uuid.UUID,
+    request: Request,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[User | None, Depends(get_optional_user)],
+) -> Response:
+    ip_address = request.client.host if request.client else None
+    planter_repo = PlanterRepository(db)
+    await planter_repo.record_view(
+        planter_id,
+        user_id=user.id if user else None,
+        ip_address=ip_address,
+    )
+    await db.commit()
+    return Response(status_code=204)

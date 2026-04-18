@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -119,3 +119,24 @@ class LogRepository:
             .order_by(Log.created_at.asc())
         )
         return list(result.scalars().all())
+
+    async def get_log_velocities(
+        self, planter_ids: list[uuid.UUID], window_hours: int = 72
+    ) -> dict[uuid.UUID, float]:
+        if not planter_ids:
+            return {}
+
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=window_hours)
+
+        stmt = (
+            select(Log.planter_id, func.count().label("cnt"))
+            .where(
+                Log.planter_id.in_(planter_ids),
+                Log.deleted_at.is_(None),
+                Log.created_at >= cutoff,
+            )
+            .group_by(Log.planter_id)
+        )
+
+        result = await self.db.execute(stmt)
+        return {row.planter_id: row.cnt / window_hours for row in result.all()}
