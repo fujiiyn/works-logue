@@ -1,5 +1,13 @@
 # AI-DLC Audit Log
 
+## U6 User & Follow - Code Generation Stage Approval (Continue to Next Stage)
+**Timestamp**: 2026-04-30T00:00:00Z
+**User Input**: "u6を承認します。"
+**AI Response**: U6 User & Follow の Code Generation ステージ完了を承認として処理。aidlc-state.md の U6 親チェックボックスを [x] に更新し、Current Stage を U7 Admin に進める。次の AI-DLC ステージは U7 Admin の Functional Design (CONDITIONAL)。
+**Context**: CONSTRUCTION - U6 User & Follow - Stage Completion → 次は U7 Admin
+
+---
+
 ## U6 User & Follow - Code Generation Part 2 Complete
 **Timestamp**: 2026-04-19T14:30:00Z
 **User Input**: "承認して、実装に進みます。" → "y" (フロントエンド実装続行)
