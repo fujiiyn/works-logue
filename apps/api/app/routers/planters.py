@@ -143,11 +143,19 @@ async def create_planter(
 async def list_planters(
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User | None, Depends(get_optional_user)],
-    tab: str = Query("recent", pattern="^(recent|trending|bloomed)$"),
+    tab: str = Query("recent", pattern="^(recent|trending|bloomed|following)$"),
     limit: int = Query(20, ge=1, le=50),
     cursor: str | None = Query(None),
 ) -> CursorPaginatedResponse:
     planter_repo = PlanterRepository(db)
+
+    # Following tab requires authentication (BR-FF01)
+    if tab == "following":
+        if _user is None:
+            from fastapi import HTTPException as _HTTPException
+
+            raise _HTTPException(status_code=401, detail="Authentication required")
+        return await _fetch_following(planter_repo, db, _user, limit, cursor)
 
     cursor_created_at = None
     cursor_id = None
@@ -199,6 +207,42 @@ async def _fetch_trending(
     ranked = ranker.rank_trending(candidates, view_counts, log_velocities)
 
     return [r.planter for r in ranked[:limit]]
+
+
+async def _fetch_following(
+    planter_repo: PlanterRepository,
+    db: AsyncSession,
+    user: User,
+    limit: int,
+    cursor: str | None,
+) -> CursorPaginatedResponse:
+    """Fetch planters from followed planters + followed users' planters (BR-FF01)."""
+    follow_repo = FollowRepository(db)
+
+    # Get followed planter IDs
+    followed_planter_ids = await follow_repo.get_following_planter_ids(user.id)
+
+    # Get followed user IDs → their planters
+    followed_user_ids = await follow_repo.get_following_user_ids(user.id)
+
+    cursor_created_at = None
+    cursor_id = None
+    if cursor:
+        cursor_created_at, cursor_id = CursorPaginatedResponse.decode_cursor(cursor)
+
+    planters = await planter_repo.list_following(
+        followed_planter_ids=followed_planter_ids,
+        followed_user_ids=followed_user_ids,
+        limit=limit + 1,
+        cursor_updated_at=cursor_created_at,
+        cursor_id=cursor_id,
+    )
+
+    has_next = len(planters) > limit
+    if has_next:
+        planters = planters[:limit]
+
+    return await _build_feed_response(planters, has_next, db)
 
 
 async def _build_feed_response(
@@ -289,7 +333,42 @@ async def get_planter(
         tags_result = await db.execute(select(Tag).where(Tag.id.in_(tag_ids)))
         tags = list(tags_result.scalars().all())
 
-    return _build_planter_response(planter, seed_type, user, tags)
+    response = _build_planter_response(planter, seed_type, user, tags)
+    if _user is not None:
+        follow_repo = FollowRepository(db)
+        response.is_following = await follow_repo.is_following_planter(_user.id, planter.id)
+    return response
+
+
+@router.post("/planters/{planter_id}/follow", status_code=204)
+async def follow_planter(
+    planter_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Response:
+    """Manually follow a planter."""
+    planter_repo = PlanterRepository(db)
+    planter = await planter_repo.get_by_id(planter_id)
+    if planter is None:
+        raise HTTPException(status_code=404, detail="planter_not_found")
+
+    follow_repo = FollowRepository(db)
+    await follow_repo.follow_planter(current_user.id, planter_id)
+    await db.commit()
+    return Response(status_code=204)
+
+
+@router.delete("/planters/{planter_id}/follow", status_code=204)
+async def unfollow_planter(
+    planter_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Response:
+    """Manually unfollow a planter (D5: sets is_manually_unfollowed)."""
+    follow_repo = FollowRepository(db)
+    await follow_repo.unfollow_planter(current_user.id, planter_id)
+    await db.commit()
+    return Response(status_code=204)
 
 
 @router.post("/planters/{planter_id}/view", status_code=204)

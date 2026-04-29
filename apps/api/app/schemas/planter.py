@@ -35,6 +35,7 @@ class PlanterResponse(BaseModel):
     louge_content: str | None = None
     louge_generated_at: datetime | None = None
     bloom_pending: bool = False
+    is_following: bool = False
     created_at: datetime
 
     model_config = {"from_attributes": True}

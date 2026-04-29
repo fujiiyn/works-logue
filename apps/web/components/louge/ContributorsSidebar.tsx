@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Sprout } from "lucide-react";
 import { Skeleton } from "@/components/common/Skeleton";
+import { PlanterFollowButton } from "@/components/planter/PlanterFollowButton";
 import { LougeCopyButton } from "./LougeCopyButton";
 
 interface Contributor {
@@ -18,6 +20,8 @@ interface ContributorsSidebarProps {
   logCount: number;
   contributorCount: number;
   lougeContent: string;
+  planterId: string;
+  isFollowing: boolean;
   loading?: boolean;
 }
 
@@ -39,6 +43,8 @@ export function ContributorsSidebar({
   logCount,
   contributorCount,
   lougeContent,
+  planterId,
+  isFollowing,
   loading = false,
 }: ContributorsSidebarProps) {
   const showSkeleton = loading && contributors.length === 0;
@@ -75,9 +81,12 @@ export function ContributorsSidebar({
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-medium text-primary-dark truncate">
+                <Link
+                  href={`/user/${contributor.user_id}`}
+                  className="block truncate text-[11px] font-medium text-primary-dark hover:text-primary hover:underline"
+                >
                   {contributor.display_name}
-                </p>
+                </Link>
                 <p className="text-[10px] text-text-muted">
                   {contributor.is_seed_author ? (
                     <span className="inline-flex items-center gap-0.5">
@@ -100,10 +109,14 @@ export function ContributorsSidebar({
       </div>
 
       {/* Stats */}
-      <div className="mt-3 rounded-md bg-bg-page px-3 py-2.5">
+      <div className="mt-3 flex items-center gap-3 rounded-md bg-bg-page px-3 py-2.5">
         <p className="text-[11px] font-bold text-primary-dark">
           {logCount} logs · {contributorCount} contributors
         </p>
+        <PlanterFollowButton
+          planterId={planterId}
+          initialIsFollowing={isFollowing}
+        />
       </div>
 
       {/* Progress bar (100%) */}

@@ -281,6 +281,71 @@ class TestListPlanters:
         assert resp.status_code == 200
 
 
+class TestPlanterFollow:
+    async def test_follow_planter(self, client, seed_type, db_session):
+        """POST /planters/{id}/follow should succeed."""
+        create_resp = await client.post(
+            "/api/v1/planters", headers=AUTH_HEADERS,
+            json={"title": "Follow Me", "body": "Body", "seed_type_id": str(seed_type.id)},
+        )
+        planter_id = create_resp.json()["id"]
+
+        resp = await client.post(
+            f"/api/v1/planters/{planter_id}/follow", headers=AUTH_HEADERS,
+        )
+        assert resp.status_code == 204
+
+    async def test_unfollow_planter(self, client, seed_type, db_session):
+        """DELETE /planters/{id}/follow should set is_manually_unfollowed."""
+        create_resp = await client.post(
+            "/api/v1/planters", headers=AUTH_HEADERS,
+            json={"title": "Unfollow Me", "body": "Body", "seed_type_id": str(seed_type.id)},
+        )
+        planter_id = create_resp.json()["id"]
+
+        resp = await client.delete(
+            f"/api/v1/planters/{planter_id}/follow", headers=AUTH_HEADERS,
+        )
+        assert resp.status_code == 204
+
+        result = await db_session.execute(
+            select(PlanterFollow).where(
+                PlanterFollow.planter_id == uuid.UUID(planter_id)
+            )
+        )
+        follow = result.scalar_one_or_none()
+        assert follow is not None
+        assert follow.is_manually_unfollowed is True
+
+    async def test_follow_nonexistent_planter_returns_404(self, client):
+        """POST /planters/{bad_id}/follow should return 404."""
+        resp = await client.post(
+            f"/api/v1/planters/{uuid.uuid4()}/follow", headers=AUTH_HEADERS,
+        )
+        assert resp.status_code == 404
+
+
+class TestFollowingTab:
+    async def test_following_tab_requires_auth(self, client):
+        """GET /planters?tab=following without auth should return 401."""
+        resp = await client.get("/api/v1/planters?tab=following")
+        assert resp.status_code == 401
+
+    async def test_following_tab_returns_followed_planters(self, client, seed_type):
+        """GET /planters?tab=following should return followed planters."""
+        create_resp = await client.post(
+            "/api/v1/planters", headers=AUTH_HEADERS,
+            json={"title": "My Seed", "body": "Body", "seed_type_id": str(seed_type.id)},
+        )
+        # The planter is auto-followed on creation
+        resp = await client.get(
+            "/api/v1/planters?tab=following", headers=AUTH_HEADERS,
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["items"]) >= 1
+
+
 class TestGetPlanter:
     async def test_get_existing(self, client, seed_type):
         """GET /api/v1/planters/{id} should return the planter."""

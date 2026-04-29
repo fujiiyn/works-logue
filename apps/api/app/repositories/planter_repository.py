@@ -169,6 +169,49 @@ class PlanterRepository:
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
 
+    async def list_following(
+        self,
+        followed_planter_ids: list[uuid.UUID],
+        followed_user_ids: list[uuid.UUID],
+        limit: int = 20,
+        cursor_updated_at: datetime | None = None,
+        cursor_id: uuid.UUID | None = None,
+    ) -> list[Planter]:
+        """List planters from followed planters + followed users (BR-FF01)."""
+        conditions = []
+        if followed_planter_ids:
+            conditions.append(Planter.id.in_(followed_planter_ids))
+        if followed_user_ids:
+            conditions.append(Planter.user_id.in_(followed_user_ids))
+
+        if not conditions:
+            return []
+
+        stmt = (
+            select(Planter)
+            .where(
+                Planter.deleted_at.is_(None),
+                Planter.status != "archived",
+                or_(*conditions),
+            )
+            .order_by(Planter.updated_at.desc(), Planter.id.desc())
+            .limit(limit)
+        )
+
+        if cursor_updated_at is not None and cursor_id is not None:
+            stmt = stmt.where(
+                or_(
+                    Planter.updated_at < cursor_updated_at,
+                    and_(
+                        Planter.updated_at == cursor_updated_at,
+                        Planter.id < cursor_id,
+                    ),
+                )
+            )
+
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
+
     async def search(
         self,
         keyword: str | None = None,

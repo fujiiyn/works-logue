@@ -15,8 +15,15 @@ import { apiFetch } from "@/lib/api-client";
 interface AppUser {
   id: string;
   display_name: string;
+  headline: string | null;
   bio: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
+  location: string | null;
+  x_url: string | null;
+  linkedin_url: string | null;
+  wantedly_url: string | null;
+  website_url: string | null;
   insight_score: number;
   role: string;
   onboarded_at: string | null;

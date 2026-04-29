@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-04-05T00:00:00Z
-- **Current Stage**: CONSTRUCTION - U5 Feed & Search - Code Generation Complete
+- **Current Stage**: CONSTRUCTION - U6 User & Follow - Code Generation Complete → U7 Admin 待ち
 
 ## Workspace State
 - **Existing Code**: No
@@ -54,5 +54,7 @@
     - [x] Functional Design — Completed 2026-04-18
     - [x] Code Generation — Completed 2026-04-18
   - [ ] U6 User & Follow
+    - [x] Functional Design — Completed 2026-04-18
+    - [x] Code Generation — Completed 2026-04-19
   - [ ] U7 Admin
 - [ ] Build and Test

@@ -64,9 +64,17 @@ export function Header() {
                 className="flex items-center gap-1"
                 data-testid="header-user-menu"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-light-bg text-body-s text-primary">
-                  {user.display_name.charAt(0)}
-                </div>
+                {user.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user.display_name}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-light-bg text-body-s text-primary">
+                    {user.display_name.charAt(0)}
+                  </div>
+                )}
               </button>
 
               {dropdownOpen && (

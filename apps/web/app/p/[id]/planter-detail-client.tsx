@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { MessageSquare, Users, ChevronDown, ChevronRight, Flower2 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/format-time";
@@ -8,6 +9,7 @@ import { useRightSidebar } from "@/contexts/right-sidebar-context";
 import { LogThread } from "@/components/log/LogThread";
 import { LogComposer } from "@/components/log/LogComposer";
 import { ScoreCard } from "@/components/planter/ScoreCard";
+import { PlanterFollowButton } from "@/components/planter/PlanterFollowButton";
 import { LougeArticle } from "@/components/louge/LougeArticle";
 import { ContributorsSidebar } from "@/components/louge/ContributorsSidebar";
 
@@ -36,6 +38,7 @@ interface PlanterDetail {
   louge_content: string | null;
   louge_generated_at: string | null;
   bloom_pending: boolean;
+  is_following: boolean;
   created_at: string;
 }
 
@@ -229,6 +232,8 @@ export function PlanterDetailClient({
           logCount={planter.log_count}
           contributorCount={planter.contributor_count}
           lougeContent={planter.louge_content}
+          planterId={planter.id}
+          isFollowing={planter.is_following}
           loading={contributorsLoading}
         />,
       );
@@ -338,7 +343,12 @@ export function PlanterDetailClient({
               {planter.user.display_name.charAt(0)}
             </span>
           )}
-          <span>{planter.user.display_name}</span>
+          <Link
+            href={`/user/${planter.user.id}`}
+            className="hover:text-primary hover:underline"
+          >
+            {planter.user.display_name}
+          </Link>
           <span>·</span>
           <span>{formatRelativeTime(planter.created_at)}</span>
         </div>
@@ -465,7 +475,7 @@ export function PlanterDetailClient({
             )}
 
             {/* Stats */}
-            <div className="mb-5 flex gap-3 text-body-s text-text-muted">
+            <div className="mb-5 flex items-center gap-3 text-body-s text-text-muted">
               <span className="flex items-center gap-1">
                 <MessageSquare size={14} strokeWidth={1.5} />
                 {planter.log_count} logs
@@ -474,6 +484,10 @@ export function PlanterDetailClient({
                 <Users size={14} strokeWidth={1.5} />
                 {planter.contributor_count} contributors
               </span>
+              <PlanterFollowButton
+                planterId={planter.id}
+                initialIsFollowing={planter.is_following}
+              />
             </div>
 
             {/* Divider */}

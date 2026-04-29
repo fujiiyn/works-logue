@@ -1,5 +1,123 @@
 # AI-DLC Audit Log
 
+## U6 User & Follow - Code Generation Part 2 Complete
+**Timestamp**: 2026-04-19T14:30:00Z
+**User Input**: "承認して、実装に進みます。" → "y" (フロントエンド実装続行)
+**AI Response**: Code Generation Part 2 全20ステップ完了。Backend 245テスト通過、Frontend TypeScriptエラーなし、E2Eテスト作成済み。
+**Context**: CONSTRUCTION - U6 User & Follow - Code Generation Part 2 (Generation) Complete
+
+**成果物:**
+- DB migration: 00008_u6_user_follow.sql
+- Backend: UserRepository, FollowRepository拡張, StorageClient, Users/Plantersルーター拡張
+- Frontend: UserProfilePage, ProfileEditPage, 8コンポーネント, PlanterFeed followingタブ
+- E2E: user-profile.spec.ts (8テスト)
+- Documentation: code-summary.md
+
+---
+
+## U6 User & Follow - Code Generation Plan v4 Approval
+**Timestamp**: 2026-04-19T13:00:00Z
+**User Input**: "承認して、実装に進みます。"
+**AI Response**: Code Generation Plan v4 承認を記録。Part 2 (Generation) に進む。
+**Context**: CONSTRUCTION - U6 User & Follow - Code Generation Part 1 → Part 2 移行
+
+---
+
+## U6 User & Follow - Code Generation Plan v4 (Part 1)
+**Timestamp**: 2026-04-19T12:00:00Z
+**User Input**: 7項目の追加レビュー指摘（Critical 2, Moderate 3, Minor 2）
+**AI Response**: 全項目を反映しプラン v4 に更新。
+**Context**: CONSTRUCTION - U6 User & Follow - Code Generation Part 1 (Planning) v4
+
+**v4 変更点:**
+1. 画像削除順序: 新アップロード→PATCH成功→旧削除 に逆転 (D15修正)
+2. pending 実装: users に pending_avatar_path, pending_cover_path 追加、Step 1 マイグレーションに含める
+3. pending セッションまたぎ: 未採用 pending は放置、次回 POST 時に上書き
+4. UserPublicResponse の公開範囲を具体列挙 (auth_id, role, pending_* 等は除外)
+5. SNS allowlist テスト: Step 10 に「allowlist逸脱で422」「正規ドメインで成功」を明示
+6. Step 17 Header 変更の影響範囲確認注記
+7. similar users 未ログイン時: 全ユーザー対象で共通タグ計算（暗黙挙動をそのまま採用）
+
+**Approval Prompt**: Code Generation Plan v4 のレビューと承認を依頼
+
+---
+
+## U6 User & Follow - Code Generation Plan v3 (Part 1)
+**Timestamp**: 2026-04-19T11:00:00Z
+**User Input**: 14項目のレビュー指摘（Critical 3, Moderate 4, Minor 4）
+**AI Response**: 全14項目を反映しプラン v3 に更新。20ステップ、9フェーズ構成。TDD順序をテスト→実装ペアに修正。
+**Context**: CONSTRUCTION - U6 User & Follow - Code Generation Part 1 (Planning) v3
+
+**Critical 修正:**
+1. TDD順序: テスト→実装ペアに並び替え (CLAUDE.md 準拠)
+2. avatar_url/cover_url: クライアントからURL受取廃止、サーバー側pending記録→PATCH時自動適用
+3. MIME検証: Pillow Image.open() + verify() でマジックバイト判定
+
+**Moderate 修正:**
+4. 古い画像削除フロー明記 (旧delete→新upload、失敗時ログのみ)
+5. フォロー一覧で BAN/deleted 除外
+6. E2E テスト Step 19 追加 (Playwright)
+7. マイグレーション: 全カラム NULL 許可明記
+8. AuthContext 追加フィールド具体列挙
+9. similar users 認証任意 (未ログイン時フォロー済み除外なし)
+10. tz: Intl API + SSR フォールバック Asia/Tokyo
+
+**Minor 修正:**
+11. カラム名 x_url/linkedin_url/wantedly_url/website_url
+12. apiFetchUpload に AbortController 対応
+13. FollowListModal 楽観更新
+14. 画像アップロード済みも beforeunload 対象
+
+**Approval Prompt**: Code Generation Plan v3 のレビューと承認を依頼
+
+---
+
+## U6 User & Follow - Functional Design 仕様変更
+**Timestamp**: 2026-04-19T00:00:00Z
+**User Input**: Code Generation開始前の仕様ディスカッションにて複数の変更を決定
+**AI Response**: Functional Design ドキュメント・Figma を更新
+**Context**: CONSTRUCTION Phase - U6 仕様変更反映
+
+**仕様変更内容:**
+1. 得意テーマ (`specialty_themes`) → 削除
+2. 居住地 (`location`, 自由テキスト100文字) → 追加
+3. SNSリンク (`social_links`, jsonb: x/linkedin/wantedly/website) → 追加
+4. マイページ (`/mypage`) → 不要と判断、削除
+5. 貢献グラフ（GitHub草風） → 公開プロフィールに表示（Seed+Log投稿の日別ヒートマップ）
+6. 公開プロフィールに自分のときだけ「編集」ボタン表示（元に戻す）
+7. オンボーディング → アバター画像アップロード追加
+8. オンボーディングとプロフィール編集は別画面のまま維持
+
+**Figma更新:**
+- 編集画面 (356:159): 得意テーマ削除、居住地・SNSリンク追加、左サイドバー追加、プレビュー+ボタンを右サイドバーに移動
+- 公開プロフィール (351:159): 得意テーマ→居住地・SNSリンク、統計カードアイコン削除、貢献グラフ追加
+- マイページ (377:159): 作成後削除
+
+---
+
+## U6 User & Follow - Functional Design Complete
+**Timestamp**: 2026-04-18T15:30:00Z
+**User Input**: "ok" (Functional Design artifacts承認)
+**AI Response**: 全4 artifactsを生成完了（domain-entities, business-logic-model, business-rules, frontend-components）
+**Context**: CONSTRUCTION Phase - U6 Functional Design completion
+
+**設計判断:**
+- 編集UI: 専用ページ（Figmaで3パターン比較して決定）
+- プロフィールは転職ポートフォリオとして設計（カバー画像、ヘッドライン、得意テーマ追加）
+- User テーブルに headline, cover_url, specialty_themes を追加
+- SupabaseStorageClient を新規実装（BC-17）
+- フォロー中フィード: Planter + ユーザーの混合表示
+
+**Figma v2デザイン作成:** 公開プロフィール (351:159), 編集ページ (356:159)
+
+---
+
+## U6 User & Follow - Functional Design Start
+**Timestamp**: 2026-04-18T14:00:00Z
+**User Input**: "次に進む"
+**AI Response**: U5 Code Generation完了確認。U6 User & Follow の Functional Design を開始。
+**Context**: CONSTRUCTION Phase - U6 Functional Design stage entry
+
 ## U5 Feed & Search - Code Generation Complete
 **Timestamp**: 2026-04-18T12:30:00Z
 **User Input**: "y" (実装開始承認)

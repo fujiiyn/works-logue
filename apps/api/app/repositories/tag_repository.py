@@ -30,6 +30,15 @@ class TagRepository:
             self.db.add(PlanterTag(planter_id=planter_id, tag_id=tag_id))
         await self.db.flush()
 
+    async def get_user_tags(self, user_id: uuid.UUID) -> list[Tag]:
+        result = await self.db.execute(
+            select(Tag)
+            .join(UserTag, Tag.id == UserTag.tag_id)
+            .where(UserTag.user_id == user_id)
+            .order_by(Tag.category, Tag.sort_order)
+        )
+        return list(result.scalars().all())
+
     async def replace_user_tags(
         self, user_id: uuid.UUID, tag_ids: list[uuid.UUID]
     ) -> None:

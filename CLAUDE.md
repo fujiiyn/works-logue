@@ -108,6 +108,15 @@ works-logue/               ← monorepo
 
 デザインシステム（design-systemページ、nodeId: 95:34）にカラー・タイポグラフィ・スペーシング等が定義されている。
 
+### 右カラム（RightSidebar）の実装ルール
+
+**グローバルの `RightSidebar`（`components/right-sidebar.tsx`）はレイアウト共通であり、各ページが `useRightSidebar().setContent()` で内容を差し替える仕組み。**
+
+- ページ独自の右カラムを `<div className="hidden w-[276px]">` 等で直接追加してはならない。必ず `useRightSidebar` の `setContent` を使う
+- Figma デザインの右カラムに独自コンテンツがある場合（例: プロフィールページのバッジ+似たユーザー、編集ページのプレビュー+保存ボタン）、そのコンテンツを `setContent` で注入する
+- `useEffect` の cleanup で `setContent(null)` を呼び、ページ離脱時にデフォルト（About Works Logue）に戻す
+- Figma デザインの右カラムが About Works Logue のままの場合は `setContent` を呼ばない（デフォルトが表示される）
+
 ---
 
 ## Domain Vocabulary

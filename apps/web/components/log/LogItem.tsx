@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { MessageSquare } from "lucide-react";
 import { formatRelativeTime } from "@/lib/format-time";
 
@@ -56,15 +57,16 @@ export function LogItem({ log, isReply = false, onReply }: LogItemProps) {
       <div className="shrink-0">{avatarContent}</div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 text-body-s">
-          <span
-            className={`font-medium ${
-              log.is_ai_generated
-                ? "text-accent"
-                : "text-text-secondary"
-            }`}
-          >
-            {displayName}
-          </span>
+          {log.is_ai_generated || !log.user ? (
+            <span className="font-medium text-accent">{displayName}</span>
+          ) : (
+            <Link
+              href={`/user/${log.user.id}`}
+              className="font-medium text-text-secondary hover:text-primary hover:underline"
+            >
+              {displayName}
+            </Link>
+          )}
           <span className="text-text-sage">·</span>
           <span className="text-text-muted">
             {formatRelativeTime(log.created_at)}

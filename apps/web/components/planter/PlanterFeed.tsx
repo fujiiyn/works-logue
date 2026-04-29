@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Sprout } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { LogIn, Sprout } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 import { apiFetch } from "@/lib/api-client";
 import { PlanterCard } from "./PlanterCard";
 import { PlanterCardSkeleton } from "./PlanterCardSkeleton";
@@ -29,17 +31,26 @@ const TAB_API_MAP: Record<string, string> = {
   latest: "recent",
   popular: "trending",
   bloomed: "bloomed",
+  following: "following",
 };
 
 const TABS = [
   { key: "latest", label: "新着" },
   { key: "popular", label: "人気" },
   { key: "bloomed", label: "開花済み" },
+  { key: "following", label: "フォロー中" },
 ] as const;
+
+const VALID_TAB_KEYS: string[] = TABS.map((t) => t.key);
 
 export function PlanterFeed() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<string>("latest");
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+
+  const tabFromUrl = searchParams.get("tab") ?? "";
+  const initialTab = VALID_TAB_KEYS.includes(tabFromUrl) ? tabFromUrl : "latest";
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [planters, setPlanters] = useState<PlanterItem[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -132,8 +143,21 @@ export function PlanterFeed() {
         })}
       </div>
 
-      {/* Feed */}
-      {!initialLoaded ? (
+      {/* Following tab: login prompt */}
+      {activeTab === "following" && !user ? (
+        <div className="flex flex-col items-center py-16 text-center">
+          <LogIn size={48} strokeWidth={1} className="mb-4 text-text-sage" />
+          <p className="mb-4 text-body-m text-text-secondary">
+            フォロー中のフィードを表示するにはログインが必要です。
+          </p>
+          <Link
+            href="/login"
+            className="rounded-md bg-primary px-4 py-2 text-body-m text-white transition-colors hover:bg-primary-dark"
+          >
+            ログイン
+          </Link>
+        </div>
+      ) : !initialLoaded ? (
         <div>
           {[0, 1, 2, 3, 4].map((i) => (
             <PlanterCardSkeleton key={i} />
