@@ -1,9 +1,12 @@
+import { Suspense } from "react";
 import { PlanterFeed } from "@/components/planter/PlanterFeed";
 
 export default function HomePage() {
   return (
     <div data-testid="home-page">
-      <PlanterFeed />
+      <Suspense>
+        <PlanterFeed />
+      </Suspense>
     </div>
   );
 }
