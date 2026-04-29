@@ -26,6 +26,7 @@ interface PlanterDetail {
   louge_content: string | null;
   louge_generated_at: string | null;
   bloom_pending: boolean;
+  is_following: boolean;
   created_at: string;
 }
 
