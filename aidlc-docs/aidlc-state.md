@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-04-05T00:00:00Z
-- **Current Stage**: CONSTRUCTION - U7 Admin - Code Generation 完了（Step 1〜42）。次は Build and Test。
+- **Current Stage**: CONSTRUCTION 全ステージ完了（U1〜U7 + Build and Test）。Operations は placeholder のため形式承認のみ実施し、MVP の AI-DLC ワークフローを 2026-05-04 にクローズ。
 
 ## Workspace State
 - **Existing Code**: No
@@ -80,4 +80,9 @@
         - Phase 17 (Step 41): apps/web/e2e/admin.spec.ts (smoke 5 シナリオ)
         - Phase 18 (Step 42): aidlc-docs/construction/u7-admin/code/code-summary.md
       - 検証: API テスト 350 件 全 Pass / Web TypeScript エラー 0
-- [ ] Build and Test
+- [x] Build and Test — Completed 2026-05-04
+  - 生成ファイル: `aidlc-docs/construction/build-and-test/{build-instructions,unit-test-instructions,integration-test-instructions,e2e-test-instructions,build-and-test-summary}.md`
+  - 検証結果: API 373/373 Pass（test 関数実測総数 / 33 ファイル）、Web build clean、E2E 13/13、CI/CD 緑、本番 Cloud Run へ U1〜U6 反映済み（U7 はローカル main が origin/main に対し 3 コミット ahead の未 push 状態。`git push origin main` 時点で CD が起動）
+
+### OPERATIONS PHASE
+- [x] Operations — placeholder（形式承認 2026-05-04）。本格的な運用設計（監視・SLO・インシデント対応）は MVP 範囲外として別途実施。`docs/operations.md` に admin 払い出し / BAN 緊急時 SQL / 構造化ログ等の最低限の運用手順は集約済み。
