@@ -1,5 +1,13 @@
 # AI-DLC Audit Log
 
+## U7 Admin - Functional Design Plan Created
+**Timestamp**: 2026-04-30T00:00:00Z
+**User Input**: "ok"（フェーズ確認後 U7 Admin Functional Design 着手承認）
+**AI Response**: U7 Admin Functional Design Plan を `aidlc-docs/construction/plans/u7-admin-functional-design-plan.md` に作成。10 件の [Answer]: タグ付き質問（BAN 副作用、アーカイブ／削除、Log 非表示、マスタ削除、監査ログ、Layout 方針、統計鮮度、初期 admin、タグ UI 粒度、ルート保護）を含む。Figma `223:16` 参照済み。
+**Context**: CONSTRUCTION - U7 Admin - Functional Design Step 1〜4（ユニット文脈解析・計画・質問・保存）
+
+---
+
 ## U6 User & Follow - Code Generation Stage Approval (Continue to Next Stage)
 **Timestamp**: 2026-04-30T00:00:00Z
 **User Input**: "u6を承認します。"
@@ -480,5 +488,104 @@
 **User Input**: "そうかんがえると、つぼみになるの早いか。60からだとね。" / "条件Bの惜しいところ、あと少しみたいなのをつぼみにしたいね。" / "OK"
 **AI Response**: Sprout/Progress Bar 設計を再定義。Progress=0〜50%が条件A、50〜100%が条件B。Sprout3（蕾）= progress≥80%（条件Bがもう少し）。plantersにmaturity_score/progressカラム追加。ai_configsにbud_threshold追加。requirements.md/business-rules.mdを更新。
 **Context**: Functional Design — Sprout状態遷移・Progress Bar 設計確定
+
+---
+## U7 Admin — Plan/Requirements を Figma に整合
+**Timestamp**: 2026-05-04T12:30:00Z
+**User Input**: "u7が実装されたら、どんなことができるようになる？" / "今ってどうしたら管理者機能が使えるようになるの？" / "ではなくて、今の設計だと、どんな人が管理者機能を使えるようになる想定・" / "ok、答えたけど、Figmaとかプランも更新しているから、改めて整合性が取れているか確認してみて。figmaの管理者ページは「admin」というページで見られるよ。" / "https://www.figma.com/design/RKsHkKG2GfOlaVxRzY81TG/Works-Logue---UI-Mockup?node-id=420-159&p=f&t=qSY6S3kY0xegKztO-0" / "タグ管理はそもそも不要とした。基本Figmaが今はは正しい。"
+**AI Response**: Figma の admin ページ（nodeId 420:159）と U7 プラン・要件定義の整合性を確認。3 点の不整合（タグ管理 UI、SeedType 操作粒度、Step 1f 未決）を検出。ユーザー指示「タグ管理は不要、Figma が正」に従い以下を更新: (1) requirements.md L66 の管理者機能 MVP からタグ管理を除外、(2) u7-admin-functional-design-plan.md の Plan Overview に Figma を真実源と明記し主要フレームの nodeId 一覧を追加、(3) Step 1c（Log 非表示フィールド整理）と Step 2e（Log 管理ロジック）を削除、(4) Step 2f / 4f / Q9 のタグ管理関連を Admin UI 不実装に修正、(5) Step 2f は SeedType の description 編集と is_active トグルのみに縮小、(6) Step 1f を「AdminAuditLog 導入しない（Q5=B 確定）」と確定、(7) Q3 を A→B に修正（Figma に Log 管理画面なし）、(8) Open Decisions を Resolved Decisions に変更し全 10 問を確定。
+**Context**: CONSTRUCTION - U7 Admin - Plan 整合性確認・Figma 真実源化
+
+---
+
+## U7 Admin — Functional Design Plan 承認
+**Timestamp**: 2026-05-04T13:10:00Z
+**User Input**: "ok"
+**AI Response**: U7 Admin の Functional Design Plan (`aidlc-docs/construction/plans/u7-admin-functional-design-plan.md`) を承認。Plan の Steps 1-4 と Q1-Q10 の Resolved Decisions に従い、Functional Design 本体の作成を開始。
+**Context**: CONSTRUCTION - U7 Admin - Functional Design Plan 承認
+
+---
+
+## U7 Admin — Functional Design 本体作成
+**Timestamp**: 2026-05-04T13:30:00Z
+**User Input**: (Plan 承認継続)
+**AI Response**: U7 Admin の Functional Design 4 ファイルを作成: (1) `domain-entities.md` — User/Planter/SeedType の admin 関連フィールド整理、AdminAuditLog 不採用 (Q5=B)、Cloud Logging 構造化ログ仕様。(2) `business-logic-model.md` — AdminMiddleware (BC-23) / AdminRouter (BC-24) / AdminRepository (BC-25) の新規定義、`/api/v1/admin/*` 11 エンドポイント (stats, users 一覧/BAN/解除, planters 一覧/archive/restore/delete, seed-types 一覧/PATCH/toggle)、既存ユニットへの BAN ガード差分。(3) `business-rules.md` — BR-A01〜A21 の 21 ルール (二重認可・存在秘匿、BAN 副作用、archive vs delete、typed confirmation、AdminLayout 独立、初期 admin 払い出し)。(4) `frontend-components.md` — `apps/web/app/admin/` の AdminGuard / AdminShell / AdminDashboard / UserManagementPage / PlanterManagementPage / SeedTypeAdminPage、Figma nodeId 紐付け、ダイアログ仕様、デスクトップ専用方針。aidlc-state.md の U7 Functional Design に [x] マーク追加。
+**Context**: CONSTRUCTION - U7 Admin - Functional Design 完了
+
+---
+
+## U7 Admin — Functional Design レビュー反映 (重大3 + 中程度5)
+**Timestamp**: 2026-05-04T13:55:00Z
+**User Input**: "これをコンテキストが独立しているサブエージェントにレビューさせて。" / "B"
+**AI Response**: 独立サブエージェント (general-purpose) に U7 Functional Design 4 ファイルをレビュー依頼。「GO with minor fixes」評価で重大3点・中程度5点・軽微6点を指摘。ユーザー判断「重大+中程度まで反映」(B) に従い 8 点を反映:
+重大 (1) email 検索を display_name のみに縮小 — users テーブルに email 列なし、Supabase Auth 側のみ存在のため。AdminUserItem から email 削除、business-logic-model.md §2a / business-rules.md BR-A04 / frontend-components.md UserManagementPage を更新。
+重大 (2/3) BAN ガードの二重実装回避 — apps/api/app/dependencies.py:87-89 の get_current_user に「非 GET = 403」が既に実装済みであることを確認。business-logic-model.md §7 を「追加実装不要、契約として固定するテストのみ U7 で書く」に書き換え。
+中-A BR-A02b (BAN ユーザー向けバナー) を新設。BannedBanner コンポーネント / AuthContext.AppUser に is_banned/deleted_at 追加 / GET /users/me レスポンス拡張を frontend-components.md の差分テーブルに追加。
+中-B BR-A09b (Planter 一覧「すべて」= フィードに出ているもの = seed/sprout/louge、archived は専用フィルタ) を新設。domain-entities.md / business-logic-model.md §3a / frontend-components.md FC-A05 を更新。
+中-C BR-A10 補足: 復元後最初の Log で apps/api/app/routers/logs.py:111-118 の既存 seed→sprout 遷移ロジックにより自動昇格する旨を明記。
+中-D BR-A21 を「昇格・降格・緊急時無効化」運用に拡張。Admin UI に降格機能を持たせず DB 直叩きで対処する方針を明記。
+中-E FC-A01 AdminGuard の前提として、apps/web には Server 用 getCurrentUser が未実装であることを確認。U7 で apps/web/lib/auth-server.ts (新規、@supabase/ssr 利用) を作成する仕様を確定。差分テーブルに追加。
+軽微: BR-A14 に request_id 補足 (access ログと操作ログの紐付け)、BR-A12 に「trim あり・大小区別あり」明記、BR-A10 三重記載を BR-A10 に集約し domain-entities.md / business-logic-model.md §3c から相互参照に変更。
+**Context**: CONSTRUCTION - U7 Admin - Functional Design 改訂 v1
+
+---
+
+## U7 Admin — Functional Design v2 再レビュー反映 (軽微 + 補足)
+**Timestamp**: 2026-05-04T14:20:00Z
+**User Input**: "再レビュー"
+**AI Response**: 独立サブエージェント (general-purpose) に v2 を再レビュー依頼。「GO with minor fixes」評価で v1 の重大3・中程度5は全解消、新たに軽微5点を指摘。Auto モードで以下を反映:
+(L2) business-logic-model.md §3a の `LOWER(title) LIKE '%q%'` を `title ILIKE :q_pattern` に統一。
+(L4) AdminHeader のログアウト動作を「Supabase signOut → /login にリダイレクト、useAuth.signOut を再利用」と明示。
+(新規・中) BR-A02b に「BannedBanner は AdminLayout に描画しない (BR-A19 により app/layout.tsx を継承しないため自動的に出ない)」を追記。BAN 中 admin は BR-A01 で /admin に到達できないため実害なし。
+(新規・軽) business-logic-model.md に §8 「既存ユニットへの API 拡張」を新設し、`GET /users/me` レスポンスに is_banned / deleted_at を追加することを独立項目として明示 (Code Generation 取りこぼし防止)。frontend-components.md 差分テーブルに `apps/api/app/schemas/users.py` の UserMeResponse 拡張を追加。
+(新規・軽) BR-A14 と §0 AdminMiddleware ログ例に request_id を追加し、ContextVar 経由で操作ログと trace 紐付けする実装方針を明記。
+(新規・軽) domain-entities.md §1 冒頭に「supabase/migrations/00001_create_tables.sql で確認済」の注記を追加 (v1 で email を見落としたのと同根の防止策)。
+(補足1) frontend-components.md 差分テーブルに `docs/operations.md` 新規作成を追加 (BR-A21 の admin 昇格・降格 SQL の保存先)。
+(補足2) §1a の pending_louge_count に「Sprout 全件 ≠ U4 開花閾値到達済」の NOTE を追加し、ハンドラ docstring にも同旨を残す方針を明記。
+(補足3) FC-A04 に「is_self は API 側で付与する責務分担」を明示。Server→Client への admin user 引き渡しが不要な理由を説明。
+**Context**: CONSTRUCTION - U7 Admin - Functional Design 改訂 v2
+
+---
+
+## U7 Admin — Code Generation Plan 作成 (Part 1)
+**Timestamp**: 2026-05-04T15:00:00Z
+**User Input**: "code generation"
+**AI Response**: U7 Admin の Functional Design v2 が承認済前提で Code Generation Stage Part 1 (Planning) に着手。`aidlc-docs/construction/plans/u7-admin-code-generation-plan.md` を新規作成。Phase 1〜18 / 全 41 Step を定義 (UserMeResponse 拡張 → request_id ContextVar → AdminMiddleware → AdminRepository TDD → admin schemas → 11 admin endpoints TDD → BAN ガード契約テスト → Web auth-context/auth-server → BannedBanner → AdminShell/Layout → ダッシュボード → ユーザー管理 → Planter 管理 → SeedType 管理 → 共通 Switch/Pagination/FilterChipGroup → operations.md → E2E smoke → code-summary.md)。新規 migration なし (Q4=B / Q5=B 確定)。BR-A01〜A21 と各 Step の traceability 表を含む。
+**Context**: CONSTRUCTION - U7 Admin - Code Generation Plan 作成、ユーザー承認待ち
+
+---
+
+## U7 Admin — Code Generation Plan 承認プロンプト
+**Timestamp**: 2026-05-04T15:00:30Z
+**User Input**: (Plan 提示直後、ユーザー応答待ち)
+**AI Response**: ユーザーに「u7-admin-code-generation-plan.md (全 41 Step / Phase 1〜18) を承認してよいか」の確認を提示。プラン参照: `aidlc-docs/construction/plans/u7-admin-code-generation-plan.md`。承認後 Part 2 (Generation) に進み、Step 順に Red→Green→Refactor を遂行する。
+**Context**: CONSTRUCTION - U7 Admin - Code Generation Plan 承認待ち
+
+---
+
+## U7 Admin — Code Generation Plan 独立サブエージェントレビュー & 全反映 (B)
+**Timestamp**: 2026-05-04T15:30:00Z
+**User Input**: "コンテキスト独立のサブエージェントにレビューさせて。" / "B" (= 重大+中程度+軽微+確認、全部反映)
+**AI Response**: 独立サブエージェント (general-purpose) に U7 Admin Code Generation Plan をレビュー依頼。「GO with minor fixes」評価。重大なし、中程度 4 件、軽微 5 件、確認補強 1 件。ユーザー判断「B」(全反映) に従い以下を反映:
+中-1: Step 20 (`@supabase/ssr` 追加) を「導入確認のみ」に縮小。`apps/web/package.json:12` に `^0.5.2` で既に存在。`npm install` 不要。
+中-2: Phase 15 に **Step 35 「Dialog コンポーネント (新設)」** を新規追加。`apps/web/components/` に共通 Dialog なし、`@radix-ui/*` 依存ゼロのため自作 (60〜100 行、ESC/背景クリック/focus trap/aria-modal/body スクロールロック)。Step 30/32/34 を「Step 35 の共通 Dialog 利用」に書き換え。
+中-3: Step 35 (旧 Switch) を「自作で実装 (約 30 行)」に確定 (`@radix-ui/*` 依存ゼロのため)。
+中-4: Step 2 の middleware 登録順記述を修正。「CORS の前」→「CORS の **後** に追加 (FastAPI add_middleware は LIFO スタックで後登録が外側、プリフライトにも request_id を付けるため外側化)」。
+軽-1: Step 11 / Step 4 の Planter q フィルタを `title ILIKE :q_pattern` に明記。
+軽-2: Step 4 と Step 5 の q_pattern を `f"%{q.strip().lower()}%"` (前後空白除去 + 大小無視) に統一。
+軽-3: Estimated Scope の修正 Web ファイル数を 3 (auth-context.tsx, app/layout.tsx, lib/api-client.ts) に正定義 (package.json は Step 20 縮小により変更なし)。
+軽-4: BR-A17 契約テストを Step 17 に追加 (`apps/api/app/tests/test_seed_types.py` に「is_active=false トグル後に公開エンドポイントから即座に消える」テスト 1 件)。
+軽-5: 新規 Web ファイル数を 18 → 19 (Dialog 追加)。
+確認補強: Step 21 に `serverFetch<T>(path, accessToken, init?)` ヘルパを同梱と明記、Step 28 の AdminDashboard で `getCurrentUser()` → `serverFetch<AdminStatsResponse>("/api/v1/admin/stats", user.accessToken)` パターンに修正。`ServerUser` interface に `accessToken: string` を追加。
+番号付け替え: 旧 Step 35-41 → 新 Step 36-42。Total Steps 41 → **42**。Traceability 表の BR-A18 / BR-A21 の Step 番号も 39 → 40 に更新。
+**Context**: CONSTRUCTION - U7 Admin - Code Generation Plan v2 (レビュー全反映)
+
+---
+
+## U7 Admin — Code Generation Plan v2 再レビュー & 承認
+**Timestamp**: 2026-05-04T16:00:00Z
+**User Input**: "再レビュー" / "承諾する"
+**AI Response**: 独立サブエージェントに v2 を再レビュー依頼。「GO」評価、v1 指摘 10/10 反映確認、新規致命傷なし。軽微 4 件の改善余地 (Step 17 ログ event 名分離、Step 28 二重 fetch、Step 21 Supabase ssr cookie 記述、Step 39 api-client パターン) を提示。ユーザー承諾を受け Plan v2 を最終承認。Code Generation Part 2 (Generation) に着手。Phase 1〜18 / Step 1〜42 を順次 Red→Green→Refactor で実装する。
+**Context**: CONSTRUCTION - U7 Admin - Code Generation Plan 承認、Generation 開始
 
 ---

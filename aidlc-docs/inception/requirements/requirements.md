@@ -63,7 +63,9 @@ seed ──→ sprout ──→ louge
 ### 管理者機能（MVP）
 - ユーザー制限（BAN / 解除）
 - Planter アーカイブ・削除
-- マスタデータ管理（Seed ジャンル・タグ等）
+- SeedType マスタの説明編集・公開／非公開切替（slug・名称・並び順・新規追加はマイグレーション運用）
+
+タグマスタの Admin UI は MVP スコープ外（マイグレーション運用のみ）。
 
 ---
 
@@ -293,7 +295,7 @@ AI が Log 全体を読み取り、ビジネスノウハウとしての「必須
 - Property-Based Testing 拡張: **無効**（MVP フェーズ）
 
 ### NFR-06: デザイン
-- カラー: ティールグリーン（#00B4CC）+ クリーム背景 + ダークフォレストグリーン（#1A5C42）
+- カラー: Primary `#29736B`（CTA）+ Primary Dark `#1F3833`（テキスト）+ Accent Teal `#00B4CC`（ロゴ）+ クリーム背景（`#F7F5ED` / `#FBF9F5`）
 - アイコン: Lucide（絵文字禁止）
 - 雰囲気: ボタニカル・オーガニック（`docs/design-style.md` 準拠）
 

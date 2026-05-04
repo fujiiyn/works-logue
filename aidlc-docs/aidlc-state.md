@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-04-05T00:00:00Z
-- **Current Stage**: CONSTRUCTION - U7 Admin - Functional Design 待ち (U6 承認済み 2026-04-30)
+- **Current Stage**: CONSTRUCTION - U7 Admin - Code Generation Plan v2 承認、Generation 開始 (Step 1〜42)
 
 ## Workspace State
 - **Existing Code**: No
@@ -57,4 +57,8 @@
     - [x] Functional Design — Completed 2026-04-18
     - [x] Code Generation — Completed 2026-04-19
   - [ ] U7 Admin
+    - [x] Functional Design — Completed 2026-05-04
+    - [ ] Code Generation
+      - [x] Part 1 Plan v2 — Approved 2026-05-04 (`construction/plans/u7-admin-code-generation-plan.md`、全 42 Step / Phase 1〜18、独立サブエージェント再レビュー GO)
+      - [ ] Part 2 Generation
 - [ ] Build and Test
