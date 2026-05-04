@@ -79,7 +79,7 @@ works-logue/               ← monorepo
 
 デザインガイド: @docs/design-style.md
 
-- カラー: ティールグリーン（#00B4CC）+ クリーム背景 + ダークフォレストグリーン（#1A5C42）
+- カラー: Primary `#29736B`（CTA）+ Primary Dark `#1F3833`（テキスト）+ Accent Teal `#00B4CC`（ロゴ）+ クリーム背景（`#F7F5ED` / `#FBF9F5`）
 - アイコン: Lucide（絵文字は使わない）
 - 雰囲気: ボタニカル・オーガニック
 
