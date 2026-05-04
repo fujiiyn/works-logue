@@ -7,7 +7,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import engine
-from app.routers import contributors, health, logs, planters, scores, search, seed_types, tags, users
+from app.middleware.request_id import RequestIdMiddleware
+from app.routers import (
+    contributors,
+    health,
+    logs,
+    planters,
+    scores,
+    search,
+    seed_types,
+    tags,
+    users,
+)
 
 structlog.configure(
     processors=[
@@ -39,6 +50,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Registered AFTER CORS so it sits OUTER on FastAPI's LIFO stack: every request
+# (including CORS preflight) gets a request_id bound to structlog contextvars.
+app.add_middleware(RequestIdMiddleware)
 
 app.include_router(health.router)
 app.include_router(users.router, prefix="/api/v1")

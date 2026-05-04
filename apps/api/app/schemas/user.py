@@ -4,7 +4,6 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, field_validator
 
-
 # --- SNS URL Validators (D12) ---
 
 _SNS_ALLOWLIST: dict[str, list[str]] = {
@@ -61,6 +60,8 @@ class UserResponse(BaseModel):
     website_url: str | None = None
     insight_score: float
     role: str
+    is_banned: bool
+    deleted_at: datetime | None = None
     onboarded_at: datetime | None = None
     pending_avatar_path: str | None = None
     pending_cover_path: str | None = None

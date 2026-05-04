@@ -10,7 +10,7 @@ from app.models.user import User
 from app.services.supabase_auth import SupabaseAuthClient, SupabaseAuthError
 
 
-def _get_auth_client() -> SupabaseAuthClient:
+def get_auth_client() -> SupabaseAuthClient:
     from app.config import settings
 
     return SupabaseAuthClient(
@@ -20,11 +20,16 @@ def _get_auth_client() -> SupabaseAuthClient:
     )
 
 
-def _extract_bearer_token(request: Request) -> str | None:
+def extract_bearer_token(request: Request) -> str | None:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
     return auth_header[7:]
+
+
+# Backward-compat aliases used by older callers within this module.
+_get_auth_client = get_auth_client
+_extract_bearer_token = extract_bearer_token
 
 
 async def _find_or_create_user(

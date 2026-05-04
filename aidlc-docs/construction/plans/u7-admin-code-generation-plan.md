@@ -47,14 +47,14 @@
 
 ### Phase 1: API スキーマ拡張 (UserMeResponse)
 
-- [ ] **Step 1**: `UserResponse` に `is_banned: bool` と `deleted_at: datetime | None` を追加
+- [x] **Step 1**: `UserResponse` に `is_banned: bool` と `deleted_at: datetime | None` を追加
   - 修正: `apps/api/app/schemas/user.py`
   - `UserResponse` のみ拡張 (UserPublicResponse は対象外。他人から `is_banned` は見せない)
   - TDD: `apps/api/app/tests/test_users.py` の `GET /users/me` テストに「`is_banned` / `deleted_at` フィールドが含まれる」アサーションを追加 (Red→Green)
 
 ### Phase 2: request_id ContextVar / 構造化ログ基盤
 
-- [ ] **Step 2**: request_id ミドルウェア + ContextVar
+- [x] **Step 2**: request_id ミドルウェア + ContextVar
   - 新規: `apps/api/app/middleware/__init__.py`、`apps/api/app/middleware/request_id.py`
   - FastAPI middleware で UUID v7 (or v4) を生成、`ContextVar` に格納
   - structlog の `contextvars.bind_contextvars(request_id=...)` で全ログに自動付与
@@ -63,7 +63,7 @@
 
 ### Phase 3: AdminMiddleware (require_admin)
 
-- [ ] **Step 3**: `require_admin` Depends 関数とテスト
+- [x] **Step 3**: `require_admin` Depends 関数とテスト
   - 新規: `apps/api/app/tests/test_admin_middleware.py` (TDD Red)
   - 検証ケース:
     - 未ログイン → 404 Not Found (401 ではない)
@@ -79,7 +79,7 @@
 
 ### Phase 4: AdminRepository (TDD)
 
-- [ ] **Step 4**: AdminRepository テスト
+- [x] **Step 4**: AdminRepository テスト
   - 新規: `apps/api/app/tests/test_admin_repository.py`
   - メソッド別テストケース:
     - `get_dashboard_stats()`: 4 つの COUNT (total_users, total_planters, new_planters_today=JST 本日, pending_louge_count=sprout 全件)
@@ -94,7 +94,7 @@
     - `update_seed_type_description(seed_type, description)`: description のみ更新
     - `toggle_seed_type_active(seed_type)`: is_active を反転
 
-- [ ] **Step 5**: AdminRepository 実装
+- [x] **Step 5**: AdminRepository 実装
   - 新規: `apps/api/app/repositories/admin_repository.py`
   - 既存 UserRepository / PlanterRepository を呼び出すラッパーとして実装、admin 専用の集計と検索のみ本リポジトリに置く
   - `_q_pattern(q: str) -> str`: `f"%{q.strip().lower()}%"` (ILIKE と組み合わせる)

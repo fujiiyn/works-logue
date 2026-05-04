@@ -7,7 +7,7 @@ from app.models.log import Log
 from app.models.planter import Planter
 from app.models.score import InsightScoreEvent
 from app.models.seed_type import SeedType
-from app.models.tag import Tag, UserTag
+from app.models.tag import Tag
 from app.models.user import User
 
 
@@ -62,6 +62,16 @@ class TestGetMe:
     async def test_unauthenticated_returns_401(self, client):
         resp = await client.get("/api/v1/users/me")
         assert resp.status_code == 401
+
+    async def test_response_includes_is_banned_and_deleted_at(self, client):
+        """U7 Step 1: UserResponse must include is_banned and deleted_at."""
+        resp = await client.get("/api/v1/users/me", headers=AUTH_HEADERS)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "is_banned" in data
+        assert data["is_banned"] is False
+        assert "deleted_at" in data
+        assert data["deleted_at"] is None
 
 
 class TestUpdateMe:
