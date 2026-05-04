@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
-import { Suspense } from "react";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
 import { RightSidebarProvider } from "@/contexts/right-sidebar-context";
-import { Header } from "@/components/header";
-import { Sidebar } from "@/components/sidebar";
-import { RightSidebar } from "@/components/right-sidebar";
+import { PublicChrome } from "@/components/layout/public-chrome";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,19 +31,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <RightSidebarProvider>
-          <Header />
-          <div
-            className="flex min-h-[calc(100vh-3.5rem)]"
-            data-testid="layout-container"
-          >
-            <Suspense>
-              <Sidebar />
-            </Suspense>
-            <main className="min-w-0 flex-1 px-10 py-6 xl:ml-[92px]" data-testid="main-content">
-              {children}
-            </main>
-            <RightSidebar />
-          </div>
+            <PublicChrome>{children}</PublicChrome>
           </RightSidebarProvider>
         </AuthProvider>
       </body>

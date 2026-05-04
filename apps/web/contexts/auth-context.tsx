@@ -26,6 +26,8 @@ interface AppUser {
   website_url: string | null;
   insight_score: number;
   role: string;
+  is_banned: boolean;
+  deleted_at: string | null;
   onboarded_at: string | null;
   created_at: string;
 }

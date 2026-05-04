@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-04-05T00:00:00Z
-- **Current Stage**: CONSTRUCTION - U7 Admin - Code Generation Part 2 進行中 (Phase 1〜4 / Step 1〜5 完了、Phase 5 から再開)
+- **Current Stage**: CONSTRUCTION - U7 Admin - Code Generation 完了（Step 1〜42）。次は Build and Test。
 
 ## Workspace State
 - **Existing Code**: No
@@ -56,15 +56,28 @@
   - [x] U6 User & Follow — Approved 2026-04-30
     - [x] Functional Design — Completed 2026-04-18
     - [x] Code Generation — Completed 2026-04-19
-  - [ ] U7 Admin
+  - [x] U7 Admin — Completed 2026-05-04
     - [x] Functional Design — Completed 2026-05-04
-    - [ ] Code Generation
-      - [x] Part 1 Plan v2 — Approved 2026-05-04 (`construction/plans/u7-admin-code-generation-plan.md`、全 42 Step / Phase 1〜18、独立サブエージェント再レビュー GO)
-      - [ ] Part 2 Generation
-        - [x] Phase 1 — Step 1: UserResponse 拡張 (is_banned/deleted_at) — 2026-05-04
-        - [x] Phase 2 — Step 2: RequestIdMiddleware + structlog contextvars — 2026-05-04
-        - [x] Phase 3 — Step 3: require_admin Depends + 7 テスト (404 秘匿) — 2026-05-04
-        - [x] Phase 4 — Step 4: AdminRepository テスト 34 件 (TDD Red) — 2026-05-04
-        - [x] Phase 4 — Step 5: AdminRepository 実装 + Reviewer フィードバック反映 — 2026-05-04
-        - [ ] Phase 5〜18 — Step 6〜42 未着手 (次セッション)
+    - [x] Code Generation — Completed 2026-05-04
+      - [x] Part 1 Plan v2 — Approved 2026-05-04 (`construction/plans/u7-admin-code-generation-plan.md`、全 42 Step / Phase 1〜18)
+      - [x] Part 2 Generation — Step 1〜42 完了
+        - Phase 1 (Step 1): UserResponse 拡張
+        - Phase 2 (Step 2): RequestIdMiddleware + structlog contextvars
+        - Phase 3 (Step 3): require_admin Depends + 7 テスト
+        - Phase 4 (Step 4-5): AdminRepository (テスト 34 件 + 実装)
+        - Phase 5 (Step 6): Admin Pydantic スキーマ
+        - Phase 6 (Step 7-17): AdminRouter 11 エンドポイント (router テスト 57 件、契約 1 件)
+        - Phase 7 (Step 18): BAN ガード契約テスト 10 件
+        - Phase 8 (Step 19-21): AppUser 拡張 + auth-server.ts (getCurrentUser / serverFetch)
+        - Phase 9 (Step 22-23): BannedBanner + ルートレイアウト挿入
+        - Phase 10 (Step 24-27): AdminLayout / Shell / Header / Sidebar + PublicChrome bypass
+        - Phase 11 (Step 28): Dashboard ページ + StatCard
+        - Phase 12 (Step 29-30): UserManagement + Ban/Unban ダイアログ
+        - Phase 13 (Step 31-32): PlanterManagement + Archive/Restore/Delete ダイアログ
+        - Phase 14 (Step 33-34): SeedType マスタ + EditDescription ダイアログ
+        - Phase 15 (Step 35-39): 共通 Dialog/Switch/Pagination/FilterChipGroup + adminApi
+        - Phase 16 (Step 40): docs/operations.md
+        - Phase 17 (Step 41): apps/web/e2e/admin.spec.ts (smoke 5 シナリオ)
+        - Phase 18 (Step 42): aidlc-docs/construction/u7-admin/code/code-summary.md
+      - 検証: API テスト 350 件 全 Pass / Web TypeScript エラー 0
 - [ ] Build and Test

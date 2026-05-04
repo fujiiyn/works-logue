@@ -103,7 +103,7 @@
 
 ### Phase 5: Admin スキーマ
 
-- [ ] **Step 6**: Admin Pydantic スキーマ
+- [x] **Step 6**: Admin Pydantic スキーマ
   - 新規: `apps/api/app/schemas/admin.py`
   - `AdminStatsResponse { total_users, total_planters, new_planters_today, pending_louge_count }`
   - `AdminAuthorSummary { id, display_name, avatar_url }`
@@ -119,7 +119,7 @@
 
 ### Phase 6: AdminRouter (TDD per endpoint)
 
-- [ ] **Step 7**: `GET /api/v1/admin/stats` テスト & 実装
+- [x] **Step 7**: `GET /api/v1/admin/stats` テスト & 実装
   - テスト: `apps/api/app/tests/test_admin_router.py` を新規作成、最初のテスト群
     - 非 admin → 404
     - admin → 200 + 4 フィールド
@@ -128,7 +128,7 @@
   - 実装: `apps/api/app/routers/admin.py` を新規作成、`/api/v1/admin` prefix で `APIRouter(tags=["admin"])`、`stats` エンドポイント追加
   - `apps/api/app/main.py` に `app.include_router(admin.router, prefix="/api/v1")` を追加
 
-- [ ] **Step 8**: `GET /api/v1/admin/users` テスト & 実装
+- [x] **Step 8**: `GET /api/v1/admin/users` テスト & 実装
   - テスト追加 (test_admin_router.py に同居):
     - 一覧基本動作
     - q フィルタ (display_name 部分一致、大小無視)
@@ -139,7 +139,7 @@
     - deleted_at IS NOT NULL のユーザーは除外
   - 実装: ハンドラ + AdminRepository 呼び出し + is_self 付与 + 構造化ログ `admin.access` (middleware で付与済) のみ。一覧操作自体は別途のログを出さない (operation log は変更操作のみ BR-A14)
 
-- [ ] **Step 9**: `POST /api/v1/admin/users/{user_id}/ban` テスト & 実装
+- [x] **Step 9**: `POST /api/v1/admin/users/{user_id}/ban` テスト & 実装
   - テスト:
     - 正常: 200 + 更新後 AdminUserItem 返却、`is_banned=true`、`banned_at` 設定、`ban_reason` 保存
     - reason 省略 → `ban_reason=NULL`
@@ -151,7 +151,7 @@
     - 構造化ログ `event=admin.user.ban` が 1 回出力、`actor_user_id` / `target_user_id` / `ban_reason` を含む
   - 実装: `update_user_ban` ハンドラ + AdminRepository.ban_user + structlog 出力
 
-- [ ] **Step 10**: `POST /api/v1/admin/users/{user_id}/unban` テスト & 実装
+- [x] **Step 10**: `POST /api/v1/admin/users/{user_id}/unban` テスト & 実装
   - テスト:
     - 正常: 200 + 3 列が NULL/false に戻る
     - 既に解除済み → 200 (冪等)
@@ -159,7 +159,7 @@
     - 構造化ログ `event=admin.user.unban`
   - 実装: ハンドラ + AdminRepository.unban_user + structlog 出力
 
-- [ ] **Step 11**: `GET /api/v1/admin/planters` テスト & 実装
+- [x] **Step 11**: `GET /api/v1/admin/planters` テスト & 実装
   - テスト:
     - status='all' フィルタ (seed/sprout/louge かつ deleted_at IS NULL のみ、archived 除外)
     - status='archived' / 'deleted' / 'seed' / 'sprout' / 'louge'
@@ -169,7 +169,7 @@
     - ページング
   - 実装: ハンドラ + AdminRepository.list_planters
 
-- [ ] **Step 12**: `POST /api/v1/admin/planters/{planter_id}/archive` テスト & 実装
+- [x] **Step 12**: `POST /api/v1/admin/planters/{planter_id}/archive` テスト & 実装
   - テスト:
     - 正常: status='archived' に遷移、更新後 AdminPlanterItem 返却
     - 既に archived → 200 (冪等)
@@ -178,7 +178,7 @@
     - 構造化ログ `event=admin.planter.archive`
   - 実装
 
-- [ ] **Step 13**: `POST /api/v1/admin/planters/{planter_id}/restore` テスト & 実装
+- [x] **Step 13**: `POST /api/v1/admin/planters/{planter_id}/restore` テスト & 実装
   - テスト:
     - archived → 'seed' に復元、更新後 AdminPlanterItem 返却
     - status != archived → 400 "アーカイブされていません"
@@ -187,7 +187,7 @@
     - 構造化ログ `event=admin.planter.restore`
   - 実装
 
-- [ ] **Step 14**: `DELETE /api/v1/admin/planters/{planter_id}` テスト & 実装
+- [x] **Step 14**: `DELETE /api/v1/admin/planters/{planter_id}` テスト & 実装
   - テスト:
     - typed confirmation 一致 → 204 + deleted_at が設定される (ソフトデリート)
     - 不一致 (前後空白あり/大小違い) → 400 "タイトルが一致しません"
@@ -195,11 +195,11 @@
     - 構造化ログ `event=admin.planter.delete` に title を含める (削除後の trace 用)
   - 実装
 
-- [ ] **Step 15**: `GET /api/v1/admin/seed-types` テスト & 実装
+- [x] **Step 15**: `GET /api/v1/admin/seed-types` テスト & 実装
   - テスト: status='all'/'active'/'inactive'、ORDER BY sort_order ASC
   - 実装
 
-- [ ] **Step 16**: `PATCH /api/v1/admin/seed-types/{seed_type_id}` テスト & 実装
+- [x] **Step 16**: `PATCH /api/v1/admin/seed-types/{seed_type_id}` テスト & 実装
   - テスト:
     - description 更新成功
     - 1〜1000 字バリデーション (空文字 → 422 "説明は必須です"、1001 字 → 422)
@@ -208,7 +208,7 @@
     - 構造化ログ `event=admin.seed_type.update` に before/after を含める
   - 実装
 
-- [ ] **Step 17**: `POST /api/v1/admin/seed-types/{seed_type_id}/toggle-active` テスト & 実装
+- [x] **Step 17**: `POST /api/v1/admin/seed-types/{seed_type_id}/toggle-active` テスト & 実装
   - テスト:
     - true → false / false → true 反転
     - 存在しない → 404
@@ -218,7 +218,7 @@
 
 ### Phase 7: BAN ガード契約テスト (実装は既存のまま)
 
-- [ ] **Step 18**: 既存 `get_current_user` の BAN ガード契約テスト
+- [x] **Step 18**: 既存 `get_current_user` の BAN ガード契約テスト
   - 新規: `apps/api/app/tests/test_ban_guard_contract.py` (Functional Design §7 を契約として固定)
   - パラメトリックに以下を網羅:
     - BAN ユーザーが POST `/api/v1/planters` → 403
@@ -235,17 +235,17 @@
 
 ### Phase 8: Web — auth-context 拡張 + Server 用 auth ヘルパ
 
-- [ ] **Step 19**: `AppUser` interface に `is_banned` / `deleted_at` を追加
+- [x] **Step 19**: `AppUser` interface に `is_banned` / `deleted_at` を追加
   - 修正: `apps/web/contexts/auth-context.tsx`
   - `AppUser` interface に `is_banned: boolean` と `deleted_at: string | null` を追加
   - fetcher (`/users/me`) のレスポンスマッピングに含める
 
-- [ ] **Step 20**: `@supabase/ssr` 依存確認
+- [x] **Step 20**: `@supabase/ssr` 依存確認
   - **`apps/web/package.json:12` に `"@supabase/ssr": "^0.5.2"` が既に存在することを確認**するのみ
   - 追加 `npm install` は不要 (現行依存で実装可能)
   - もし将来的に未導入環境で実装する場合に備え、確認手順だけ Step として残す
 
-- [ ] **Step 21**: Server 用 `getCurrentUser` + `serverFetch` ヘルパ
+- [x] **Step 21**: Server 用 `getCurrentUser` + `serverFetch` ヘルパ
   - 新規: `apps/web/lib/auth-server.ts`
   - `import { cookies } from "next/headers"` + `createServerClient` from `@supabase/ssr`
   - `ServerUser` interface: `{ id, display_name, role, is_banned, deleted_at, accessToken: string }` ← access_token もメンバとして返す
@@ -262,7 +262,7 @@
 
 ### Phase 9: BannedBanner
 
-- [ ] **Step 22**: BannedBanner コンポーネント
+- [x] **Step 22**: BannedBanner コンポーネント
   - 新規: `apps/web/components/layout/banned-banner.tsx`
   - "use client"
   - `useAuth()` から `user` を取得、`user?.is_banned` のときのみ render
@@ -270,33 +270,33 @@
   - 配色: `border-red-300 bg-red-50 text-red-900`、`role="alert"`、dismiss 不可
   - data-testid="banned-banner"
 
-- [ ] **Step 23**: ルートレイアウトに BannedBanner を挿入
+- [x] **Step 23**: ルートレイアウトに BannedBanner を挿入
   - 修正: `apps/web/app/layout.tsx`
   - `<Header />` の直下、`<div className="flex min-h-...">` の前に `<BannedBanner />` を挿入
   - import 追加
 
 ### Phase 10: AdminLayout / AdminShell / AdminHeader / AdminSidebar
 
-- [ ] **Step 24**: AdminLayout (Server Component) + AdminGuard
+- [x] **Step 24**: AdminLayout (Server Component) + AdminGuard
   - 新規: `apps/web/app/admin/layout.tsx`
   - Server Component: `getCurrentUser()` を呼び、admin 以外なら `notFound()` (BR-A01, Q10=B)
   - admin なら `<AdminShell user={user}>{children}</AdminShell>` を render
   - **`useRightSidebar` は呼ばない** (Right Sidebar は AdminShell でレンダリングしない、BR-A19)
 
-- [ ] **Step 25**: AdminShell (Client Component)
+- [x] **Step 25**: AdminShell (Client Component)
   - 新規: `apps/web/components/admin/admin-shell.tsx`
   - "use client"
   - `<div className="flex min-h-screen bg-cream">` 直下に `<AdminHeader user={user} />` + `<div className="flex flex-1">` + `<AdminSidebar />` + `<main className="flex-1 px-10 py-6">{children}</main>` + `</div>` + `</div>`
   - `bg-primary-dark` (#1F3833) ベース、サイドバーはダーク緑
   - Figma `422:159` を参照 (`get_design_context` で nodeId 取得)
 
-- [ ] **Step 26**: AdminHeader
+- [x] **Step 26**: AdminHeader
   - 新規: `apps/web/components/admin/admin-header.tsx`
   - 蓮ロゴ + "Admin Panel" + (右側) avatar + display_name + "Admin" + "公開サイトに戻る" + "ログアウト"
   - ログアウト: `useAuth().signOut()` → `router.push("/login")`
   - data-testid: `admin-header`, `admin-header-logout`, `admin-header-back-to-site`
 
-- [ ] **Step 27**: AdminSidebar
+- [x] **Step 27**: AdminSidebar
   - 新規: `apps/web/components/admin/admin-sidebar.tsx`
   - `usePathname` で active 判定、active な NavItem に左 4px の teal アクセント線 (`bg-accent-teal`)
   - 項目: ダッシュボード `/admin`、ユーザー管理 `/admin/users`、Planter 管理 `/admin/planters`、SeedType 管理 `/admin/seed-types` (タグ管理は出さない、BR-A18)
@@ -305,7 +305,7 @@
 
 ### Phase 11: AdminDashboard `/admin`
 
-- [ ] **Step 28**: AdminDashboard ページ
+- [x] **Step 28**: AdminDashboard ページ
   - 新規: `apps/web/app/admin/page.tsx`
   - Server Component で `getCurrentUser()` を呼び (Step 24 の AdminLayout で既に検証済だが、access_token 取得のため再度呼ぶ)、`serverFetch<AdminStatsResponse>("/api/v1/admin/stats", user.accessToken)` で stats を取得 (Step 21 のヘルパを利用)
   - Figma `424:159` 参照
@@ -314,7 +314,7 @@
 
 ### Phase 12: UserManagementPage `/admin/users`
 
-- [ ] **Step 29**: UserManagementPage Client Component
+- [x] **Step 29**: UserManagementPage Client Component
   - 新規: `apps/web/app/admin/users/page.tsx`
   - "use client"
   - state: q, status, page, items, total, loading, dialog
@@ -329,7 +329,7 @@
   - Pagination (前後ボタン + ページ番号、MVP は簡易)
   - data-testid: `admin-users-search-input`, `admin-users-filter-chip-{key}`, `admin-users-row-{user_id}`, `admin-users-ban-button-{user_id}`, `admin-users-unban-button-{user_id}`
 
-- [ ] **Step 30**: BanUserDialog / UnbanUserDialog
+- [x] **Step 30**: BanUserDialog / UnbanUserDialog
   - 新規: `apps/web/components/admin/ban-user-dialog.tsx`、`apps/web/components/admin/unban-user-dialog.tsx`
   - Step 35 で新設する共通 Dialog コンポーネント (`apps/web/components/common/dialog.tsx`) を利用 + Textarea (BAN理由、500 字、省略可)
   - Figma `427:159` / `427:400` 参照
@@ -339,7 +339,7 @@
 
 ### Phase 13: PlanterManagementPage `/admin/planters`
 
-- [ ] **Step 31**: PlanterManagementPage Client Component
+- [x] **Step 31**: PlanterManagementPage Client Component
   - 新規: `apps/web/app/admin/planters/page.tsx`
   - "use client"
   - state: q, status, page, items, total, loading, dialog
@@ -353,7 +353,7 @@
   - Pagination
   - data-testid: `admin-planters-row-{planter_id}`, `admin-planters-archive-button-{planter_id}`, `admin-planters-restore-button-{planter_id}`, `admin-planters-delete-button-{planter_id}`
 
-- [ ] **Step 32**: ArchivePlanterDialog / RestorePlanterDialog / DeletePlanterDialog
+- [x] **Step 32**: ArchivePlanterDialog / RestorePlanterDialog / DeletePlanterDialog
   - 新規: `apps/web/components/admin/archive-planter-dialog.tsx` (Step 35 の共通 Dialog 利用)
   - 新規: `apps/web/components/admin/restore-planter-dialog.tsx` (Step 35 の共通 Dialog 利用)
     - 補足文 "復元後の状態は Seed になります" (BR-A10)
@@ -365,7 +365,7 @@
 
 ### Phase 14: SeedTypeAdminPage `/admin/seed-types`
 
-- [ ] **Step 33**: SeedTypeAdminPage Client Component
+- [x] **Step 33**: SeedTypeAdminPage Client Component
   - 新規: `apps/web/app/admin/seed-types/page.tsx`
   - "use client"
   - 補足テキスト: "新規追加・並び替え・名称変更は migration で行います" (BR-A15)
@@ -375,7 +375,7 @@
   - Figma `433:159` / `464:2` (編集モーダル) 参照
   - data-testid: `admin-seed-types-row-{seed_type_id}`, `admin-seed-types-toggle-{seed_type_id}`, `admin-seed-types-edit-{seed_type_id}`
 
-- [ ] **Step 34**: EditDescriptionDialog
+- [x] **Step 34**: EditDescriptionDialog
   - 新規: `apps/web/components/admin/edit-description-dialog.tsx` (Step 35 の共通 Dialog 利用)
   - Read-only: name / slug / sort_order
   - Textarea: description (1〜1000 字、文字数カウンター)
@@ -384,7 +384,7 @@
 
 ### Phase 15: 共通 admin コンポーネント
 
-- [ ] **Step 35**: Dialog コンポーネント (新設)
+- [x] **Step 35**: Dialog コンポーネント (新設)
   - 新規: `apps/web/components/common/dialog.tsx`
   - `apps/web/components/` 配下に共通 Dialog 実装が **存在しない** ため、本 Step で新設する (`@radix-ui/*` 依存も未導入のため自作)
   - 仕様:
@@ -398,25 +398,25 @@
   - 実装規模目安: 60〜100 行 (依存追加なし、React の `useEffect` + `useRef` のみで実装)
   - **本 Step を Phase 15 の先頭に置く理由**: Step 30 / 32 / 34 の各 Dialog コンポーネントが本 Dialog に依存するため、Generation 順序として先に必要。ただし Step 番号は実装順 (Phase 通りの直列) であり、Step 30 を実装する前に Step 35 を先回り実装してよい (Generation Phase で柔軟に並び替える)
 
-- [ ] **Step 36**: Switch コンポーネント
+- [x] **Step 36**: Switch コンポーネント
   - 新規: `apps/web/components/common/switch.tsx`
   - **`@radix-ui/*` 依存ゼロのため自作で実装** (約 30 行)。`button[role="switch"][aria-checked]` ベース、Tailwind トランジション
   - `checked` / `onCheckedChange` / `disabled` / `data-testid` props
   - スタイル: checked = `bg-primary` (`#29736B`)、unchecked = `bg-gray-300`、つまみは `bg-white` で translate
 
-- [ ] **Step 37**: Pagination コンポーネント
+- [x] **Step 37**: Pagination コンポーネント
   - 新規: `apps/web/components/admin/pagination.tsx`
   - `page` / `per_page` / `total` / `onPageChange` props
   - 「前へ / N ページ目 / 全 M 件 / 次へ」の簡易表示 (MVP)
   - data-testid: `pagination-prev`, `pagination-next`, `pagination-info`
 
-- [ ] **Step 38**: FilterChipGroup コンポーネント
+- [x] **Step 38**: FilterChipGroup コンポーネント
   - 新規: `apps/web/components/admin/filter-chip-group.tsx`
   - `options: { value: string; label: string; suffix?: string }[]` / `value` / `onChange` props
   - active chip は primary 色背景、inactive は border のみ
   - data-testid: `filter-chip-{value}`
 
-- [ ] **Step 39**: api-client への admin エンドポイント追加
+- [x] **Step 39**: api-client への admin エンドポイント追加
   - 修正: `apps/web/lib/api-client.ts`
   - `adminClient` (or `admin` namespace) に 11 エンドポイントを追加:
     - `getStats()` / `listUsers(params)` / `banUser(id, body)` / `unbanUser(id)`
@@ -426,7 +426,7 @@
 
 ### Phase 16: 運用ドキュメント
 
-- [ ] **Step 40**: `docs/operations.md` 新規作成
+- [x] **Step 40**: `docs/operations.md` 新規作成
   - 内容:
     - **初期 admin の作成 SQL**: `UPDATE users SET role = 'admin' WHERE auth_id = '<UUID>'`
     - **降格 SQL**: `UPDATE users SET role = 'user' WHERE id = '<UUID>'`
@@ -438,7 +438,7 @@
 
 ### Phase 17: E2E (smoke)
 
-- [ ] **Step 41**: Playwright admin smoke テスト
+- [x] **Step 41**: Playwright admin smoke テスト
   - 新規: `apps/web/e2e/admin.spec.ts`
   - 既存 test アカウント (`reference_test_accounts.md`) のうち 1 名を **手動 SQL で role='admin' に昇格**して使う前提 (Step 40 の SQL を流用、ローカル/ステージングのみ)
   - シナリオ:
@@ -451,7 +451,7 @@
 
 ### Phase 18: ドキュメント
 
-- [ ] **Step 42**: 生成物サマリ markdown
+- [x] **Step 42**: 生成物サマリ markdown
   - 新規: `aidlc-docs/construction/u7-admin/code/code-summary.md`
   - 構成:
     - 生成 / 修正ファイル一覧 (パスと役割)

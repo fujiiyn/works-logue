@@ -9,6 +9,7 @@ from app.config import settings
 from app.database import engine
 from app.middleware.request_id import RequestIdMiddleware
 from app.routers import (
+    admin,
     contributors,
     health,
     logs,
@@ -63,3 +64,4 @@ app.include_router(logs.router, prefix="/api/v1")
 app.include_router(scores.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
 app.include_router(contributors.router, prefix="/api/v1")
+app.include_router(admin.router, prefix="/api/v1")
