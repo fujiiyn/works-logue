@@ -66,8 +66,18 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const headers = await getAuthHeaders();
 
+  // Google Frontend (Cloud Run の手前) は Content-Length 無しの
+  // POST/PUT/PATCH/DELETE を 411 で蹴る。body 未指定の場合は空文字で補う。
+  const method = options.method?.toUpperCase();
+  const needsBody =
+    method !== undefined &&
+    method !== "GET" &&
+    method !== "HEAD" &&
+    options.body == null;
+
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
+    body: needsBody ? "" : options.body,
     headers: {
       ...headers,
       ...options.headers,
