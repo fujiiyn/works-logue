@@ -244,9 +244,11 @@ export const LogThread = forwardRef<LogThreadHandle, LogThreadProps>(
           onAtBottomChange?.(entry.isIntersecting);
         }
       },
-      // root: null = viewport. rootMargin nudges the trigger ~40px above the
-      // very bottom so a user pinned to the latest log counts as "at bottom".
-      { root: null, rootMargin: "0px 0px -40px 0px", threshold: 0 },
+      // root: null = viewport. Positive bottom rootMargin grows the effective
+      // viewport downward by ~120px so the sentinel — which sits behind the
+      // fixed composer at the very bottom of the page — still counts as
+      // intersecting when the user is scrolled to the latest log.
+      { root: null, rootMargin: "0px 0px 120px 0px", threshold: 0 },
     );
     observer.observe(el);
     return () => observer.disconnect();

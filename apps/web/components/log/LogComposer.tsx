@@ -113,11 +113,11 @@ export function LogComposer({
   if (!user) {
     return (
       <div
-        className="sticky bottom-0 z-30 -mx-10 bg-bg px-10 py-3"
+        className="sticky bottom-0 z-30 bg-bg py-3"
         data-testid="log-composer-login"
       >
         {topOverlay}
-        <div className="flex items-center justify-center gap-2">
+        <div className="mx-auto max-w-[700px] flex items-center justify-center gap-2">
           <Link
             href="/login"
             className="rounded-md bg-primary px-5 py-2.5 text-[13px] font-medium text-white hover:bg-primary/90"
@@ -131,48 +131,50 @@ export function LogComposer({
 
   return (
     <div
-      className="sticky bottom-0 z-30 -mx-10 bg-bg px-10 py-3"
+      className="sticky bottom-0 z-30 bg-bg py-3"
       data-testid="log-composer"
     >
       {topOverlay}
-      {/* Reply indicator */}
-      {replyTo && (
-        <div className="mb-2 flex items-center gap-2 text-caption text-text-muted">
-          <span>
-            {replyTo.displayName} に返信中
-          </span>
+      <div className="mx-auto max-w-[700px]">
+        {/* Reply indicator */}
+        {replyTo && (
+          <div className="mb-2 flex items-center gap-2 text-caption text-text-muted">
+            <span>
+              {replyTo.displayName} に返信中
+            </span>
+            <button
+              onClick={onCancelReply}
+              className="hover:text-primary"
+              data-testid="log-composer-cancel-reply"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-end gap-3">
+          <textarea
+            ref={textareaRef}
+            value={body}
+            onChange={(e) => {
+              setBody(e.target.value);
+              handleInput();
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder="あなたの経験や知恵を共有..."
+            rows={1}
+            className="min-h-[40px] max-h-[120px] flex-1 resize-none overflow-y-auto rounded-lg border border-border bg-white px-3.5 py-2.5 text-[13px] text-primary-dark placeholder:text-text-muted focus:border-primary focus:outline-none [&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-text-muted/40 hover:[&::-webkit-scrollbar-thumb]:bg-text-muted [scrollbar-width:thin] [scrollbar-color:rgba(153,153,143,0.4)_transparent]"
+            data-testid="log-composer-input"
+          />
           <button
-            onClick={onCancelReply}
-            className="hover:text-primary"
-            data-testid="log-composer-cancel-reply"
+            onClick={handleSubmit}
+            disabled={!body.trim() || isSubmitting}
+            className="rounded-md bg-primary px-5 py-2.5 text-[13px] font-medium text-white hover:bg-primary/90 disabled:bg-primary/40 disabled:cursor-not-allowed"
+            data-testid="log-composer-submit"
           >
-            <X size={14} />
+            Logを投稿
           </button>
         </div>
-      )}
-
-      <div className="flex items-end gap-3">
-        <textarea
-          ref={textareaRef}
-          value={body}
-          onChange={(e) => {
-            setBody(e.target.value);
-            handleInput();
-          }}
-          onKeyDown={handleKeyDown}
-          placeholder="あなたの経験や知恵を共有..."
-          rows={1}
-          className="min-h-[40px] max-h-[120px] flex-1 resize-none overflow-y-auto rounded-lg border border-border bg-white px-3.5 py-2.5 text-[13px] text-primary-dark placeholder:text-text-muted focus:border-primary focus:outline-none [&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-text-muted/40 hover:[&::-webkit-scrollbar-thumb]:bg-text-muted [scrollbar-width:thin] [scrollbar-color:rgba(153,153,143,0.4)_transparent]"
-          data-testid="log-composer-input"
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={!body.trim() || isSubmitting}
-          className="rounded-md bg-primary px-5 py-2.5 text-[13px] font-medium text-white hover:bg-primary/90 disabled:bg-primary/40 disabled:cursor-not-allowed"
-          data-testid="log-composer-submit"
-        >
-          Logを投稿
-        </button>
       </div>
     </div>
   );
