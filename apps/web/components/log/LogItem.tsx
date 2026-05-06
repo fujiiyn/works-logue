@@ -28,13 +28,13 @@ interface LogItemProps {
 
 export function LogItem({ log, isReply = false, onReply }: LogItemProps) {
   const displayName = log.is_ai_generated
-    ? "AI アシスタント"
+    ? "Wisp"
     : log.user?.display_name ?? "Unknown";
 
   const avatarContent = log.is_ai_generated ? (
     <img
-      src="/works-logue-logo-icon.png"
-      alt="AI"
+      src="/img/wisp.svg"
+      alt="Wisp"
       className="h-7 w-7 rounded-full object-cover"
     />
   ) : log.user?.avatar_url ? (

@@ -88,7 +88,7 @@ class TestScorePipelineExecute:
     async def test_condition_a_only(
         self, mock_score_engine, mock_ai_facilitator, mock_session_factory, mock_db_session
     ):
-        """execute() should run only condition A when minimum participation not met."""
+        """execute() should run only condition A when structure is not fully fulfilled."""
         from app.pipelines.score_pipeline import ScorePipeline
 
         planter = _make_planter_mock(log_count=2, contributor_count=1)
@@ -107,6 +107,7 @@ class TestScorePipelineExecute:
         )
         pipeline._save_snapshot = AsyncMock()
         pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
 
         await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
 
@@ -139,6 +140,7 @@ class TestScorePipelineExecute:
         )
         pipeline._save_snapshot = AsyncMock()
         pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
 
         await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
 
@@ -171,6 +173,7 @@ class TestScorePipelineExecute:
         )
         pipeline._save_snapshot = AsyncMock()
         pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
 
         await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
 
@@ -208,13 +211,56 @@ class TestScorePipelineExecute:
         )
         pipeline._save_snapshot = AsyncMock()
         pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
         pipeline._create_ai_log = AsyncMock()
 
         await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
 
-        mock_ai_facilitator.should_facilitate.assert_called_once()
+        # should_facilitate is called twice: once before generate, once
+        # right before insert as a race-protection re-check.
+        assert mock_ai_facilitator.should_facilitate.call_count == 2
         mock_ai_facilitator.generate_facilitation.assert_called_once()
         pipeline._create_ai_log.assert_called_once()
+
+    async def test_facilitation_skipped_when_recheck_false(
+        self, mock_score_engine, mock_ai_facilitator, mock_session_factory, mock_db_session
+    ):
+        """If a concurrent pipeline posted Wisp during generate, the post-Vertex re-check should suppress the duplicate."""
+        from app.pipelines.score_pipeline import ScorePipeline
+
+        planter = _make_planter_mock(log_count=5, contributor_count=3)
+        logs = [MagicMock(body=f"Log {i}", user_id=uuid.uuid4(), is_ai_generated=False) for i in range(5)]
+
+        mock_score_engine.evaluate_structure.return_value = StructureResult(
+            parts={"context": True, "problem": True, "solution": True, "name": True},
+            fulfillment=1.0,
+        )
+        mock_score_engine.evaluate_maturity.return_value = MaturityResult(
+            scores={"comprehensiveness": 0.5, "diversity": 0.4, "counterarguments": 0.3, "specificity": 0.6},
+            total=0.45,
+        )
+
+        # First call: greenlight generate. Second call (post-Vertex): rival
+        # pipeline already posted, so suppress.
+        mock_ai_facilitator.should_facilitate.side_effect = [True, False]
+        mock_ai_facilitator.generate_facilitation.return_value = "具体的な経験をお聞かせください"
+
+        pipeline = ScorePipeline(mock_session_factory)
+        pipeline._get_planter = AsyncMock(return_value=planter)
+        pipeline._get_logs_with_users = AsyncMock(return_value=(logs, {}))
+        pipeline._get_settings = AsyncMock(
+            return_value={"min_contributors": 3, "min_logs": 5, "bloom_threshold": 0.7, "bud_threshold": 0.8}
+        )
+        pipeline._save_snapshot = AsyncMock()
+        pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
+        pipeline._create_ai_log = AsyncMock()
+
+        await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
+
+        assert mock_ai_facilitator.should_facilitate.call_count == 2
+        mock_ai_facilitator.generate_facilitation.assert_called_once()
+        pipeline._create_ai_log.assert_not_called()
 
     async def test_error_does_not_propagate(
         self, mock_score_engine, mock_ai_facilitator, mock_session_factory, mock_db_session
@@ -230,6 +276,7 @@ class TestScorePipelineExecute:
         pipeline._get_settings = AsyncMock(
             return_value={"min_contributors": 3, "min_logs": 5, "bloom_threshold": 0.7, "bud_threshold": 0.8}
         )
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
 
         # Should not raise
         await pipeline.execute(uuid.uuid4(), uuid.uuid4(), mock_db_session)
@@ -260,6 +307,7 @@ class TestScorePipelineExecute:
         )
         pipeline._save_snapshot = AsyncMock()
         pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
 
         await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
 
@@ -297,6 +345,7 @@ class TestScorePipelineExecute:
         )
         pipeline._save_snapshot = AsyncMock()
         pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
 
         # Should not raise
         await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)

@@ -1,0 +1,24 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d0d0"/>
+      <stop offset="100%" stop-color="#3aa8b8"/>
+    </linearGradient>
+    <linearGradient id="wR" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00d0d0"/>
+      <stop offset="100%" stop-color="#3aa8b8"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7fe8e8" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#00d0d0" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#7fe8e8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(16 16) scale(0.17)">
+    <circle cx="0" cy="0" r="85" fill="url(#halo)"/>
+    <path d="M -4 -8 Q -50 -70 -78 -50 Q -88 -28 -68 -12 Q -45 -2 -4 -4 Z" fill="url(#wL)"/>
+    <path d="M 4 -8 Q 50 -70 78 -50 Q 88 -28 68 -12 Q 45 -2 4 -4 Z" fill="url(#wR)"/>
+    <path d="M -4 2 Q -42 22 -55 55 Q -48 70 -28 60 Q -8 45 -4 8 Z" fill="#3aa8b8"/>
+    <path d="M 4 2 Q 42 22 55 55 Q 48 70 28 60 Q 8 45 4 8 Z" fill="#3aa8b8"/>
+  </g>
+</svg>

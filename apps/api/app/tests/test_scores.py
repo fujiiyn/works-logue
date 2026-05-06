@@ -142,7 +142,7 @@ class TestGetScoreSettings:
         data = resp.json()
         assert data["min_contributors"] == 3
         assert data["min_logs"] == 5
-        assert data["bloom_threshold"] == 0.7
+        assert data["bloom_threshold"] == 0.85
         assert data["bud_threshold"] == 0.8
 
     async def test_settings_response_shape(self, client: AsyncClient):

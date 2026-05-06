@@ -14,7 +14,7 @@ from app.repositories.score_repository import ScoreRepository
 from app.repositories.settings_repository import SettingsRepository
 from app.services.ai_facilitator import AIFacilitator
 from app.services.louge_generator import LougeGenerator
-from app.services.score_engine import ScoreEngine
+from app.services.score_engine import STRUCTURE_PARTS, ScoreEngine
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +60,7 @@ class ScorePipeline:
 
         settings = await self._get_settings(db)
         logs, users_map = await self._get_logs_with_users(planter_id, db)
+        prev_snapshot = await self._get_latest_snapshot(planter_id, db)
 
         log_bodies = [log.body for log in logs]
 
@@ -68,14 +69,23 @@ class ScorePipeline:
             planter.title, planter.body, log_bodies
         )
 
+        # Monotonic merge: LLM may flip parts back; OR with prev to keep
+        # progress non-decreasing.
+        if prev_snapshot is not None and prev_snapshot.structure_parts:
+            prev_parts = prev_snapshot.structure_parts
+            merged_parts = {
+                k: bool(prev_parts.get(k)) or bool(structure.parts.get(k))
+                for k in STRUCTURE_PARTS
+            }
+            structure.parts = merged_parts
+            structure.fulfillment = (
+                sum(1 for v in merged_parts.values() if v) / len(STRUCTURE_PARTS)
+            )
+
         # Condition B: Maturity evaluation (only if thresholds met)
         maturity_result = None
         passed_maturity = None
-        should_run_b = (
-            structure.fulfillment == 1.0
-            and planter.contributor_count >= settings["min_contributors"]
-            and planter.log_count >= settings["min_logs"]
-        )
+        should_run_b = structure.fulfillment == 1.0
 
         if should_run_b:
             logs_with_users = []
@@ -85,7 +95,7 @@ class ScorePipeline:
                         f"{users_map[log.user_id].display_name}: {log.body}"
                     )
                 else:
-                    logs_with_users.append(f"AI アシスタント: {log.body}")
+                    logs_with_users.append(f"Wisp: {log.body}")
 
             maturity_result = await self.score_engine.evaluate_maturity(
                 planter.title, planter.body, logs_with_users
@@ -103,7 +113,12 @@ class ScorePipeline:
                         maturity_scores=maturity_result.scores,
                     )
                     if text:
-                        await self._create_ai_log(planter_id, text, db)
+                        # Re-check after Vertex AI round-trip: a concurrent
+                        # pipeline may have committed its own Wisp post while
+                        # we were generating. Probabilistic guard, not
+                        # atomic — narrow race remains.
+                        if await self.facilitator.should_facilitate(planter_id, db):
+                            await self._create_ai_log(planter_id, text, db)
 
         # Calculate progress
         maturity_total = maturity_result.total if maturity_result else None
@@ -172,6 +187,12 @@ class ScorePipeline:
     async def _get_settings(self, db: AsyncSession) -> dict:
         repo = SettingsRepository(db)
         return await repo.get_score_settings()
+
+    async def _get_latest_snapshot(
+        self, planter_id: uuid.UUID, db: AsyncSession
+    ) -> LougeScoreSnapshot | None:
+        repo = ScoreRepository(db)
+        return await repo.get_latest_snapshot(planter_id)
 
     async def _save_snapshot(
         self, db: AsyncSession, snapshot: LougeScoreSnapshot

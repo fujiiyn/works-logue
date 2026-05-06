@@ -33,5 +33,5 @@ class TestGetScoreSettings:
         result = await repo.get_score_settings()
         assert result["min_contributors"] == 3
         assert result["min_logs"] == 5
-        assert result["bloom_threshold"] == 0.7
+        assert result["bloom_threshold"] == 0.85
         assert result["bud_threshold"] == 0.8

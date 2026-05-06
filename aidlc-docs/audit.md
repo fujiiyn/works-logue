@@ -1,5 +1,29 @@
 # AI-DLC Audit Log
 
+## Operations: Domain Mapping ステージ開始
+**Timestamp**: 2026-05-04T00:00:00Z
+**User Input**: "ドメインマッピングをやりたい。ai-dlcの枠組みで必要なドキュメントを更新して。"
+**AI Response**: Operations フェーズの placeholder を解除し、Domain Mapping ステージを正式に開始。`aidlc-docs/operations/` 配下に plans/domain-mapping-plan.md と domain-mapping/ サブディレクトリ（dns-records.md / cloud-run-mapping.md / verification.md / rollback.md）を生成。`docs/operations.md` にドメイン運用セクションを追記。
+**Context**: OPERATIONS PHASE - Domain Mapping ステージ着手
+
+---
+
+## Operations: Domain Mapping 設計の確認質問
+**Timestamp**: 2026-05-04T00:00:00Z
+**User Input**: "ベースドメインは何にしますか？" → "https://workslogue.com/", "Web/API のサブドメイン構成はどうしますか？" → "apex(Web) + api サブドメイン (Recommended)", "Cloud Run へのドメイン接続方式はどちらにしますか？" → "この1ってなに？"
+**AI Response**: 選択肢1（Cloud Run domain mappings）の挙動・コスト・制約（apex は A/AAAA 直設定、Cloud Armor/CDN 非対応、asia-northeast1 GA、Let's Encrypt SSL 自動更新）を補足説明。決定事項を記録: ベース `workslogue.com`、Web=apex、API=`api.workslogue.com`、方式=Cloud Run domain mappings。
+**Context**: OPERATIONS PHASE - Domain Mapping 要件確認
+
+---
+
+## Operations: Domain Mapping 接続方式 確定
+**Timestamp**: 2026-05-04T00:00:00Z
+**User Input**: "ok, 1で行こう。"
+**AI Response**: Cloud Run domain mappings 方式で確定。aidlc-state.md の OPERATIONS PHASE に Domain Mapping ステージを追加し、Brownfield 変更点（cd.yml の CORS_ORIGINS と NEXT_PUBLIC_API_URL、Supabase Auth Site URL）も明記。後続でドキュメント一式を生成する。
+**Context**: OPERATIONS PHASE - Domain Mapping 方式決定
+
+---
+
 ## Operations Stage 形式承認 / MVP AI-DLC ワークフロー クローズ
 **Timestamp**: 2026-05-04T00:00:00Z
 **User Input**: "A"（ドキュメント commit + U7 push + Operations 承認 → 完全クローズ）

@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-04-05T00:00:00Z
-- **Current Stage**: CONSTRUCTION 全ステージ完了（U1〜U7 + Build and Test）。Operations は placeholder のため形式承認のみ実施し、MVP の AI-DLC ワークフローを 2026-05-04 にクローズ。
+- **Current Stage**: OPERATIONS / Domain Mapping を 2026-05-04 に再開。CONSTRUCTION 全ステージ完了（U1〜U7 + Build and Test）。本番 URL は `*.run.app` のままで稼働中。`workslogue.com`（apex=Web、`api.workslogue.com`=API）への切替を Cloud Run domain mappings 方式で実施するため、Operations の placeholder を解除して正式ステージに昇格。
 
 ## Workspace State
 - **Existing Code**: No
@@ -85,4 +85,22 @@
   - 検証結果: API 373/373 Pass（test 関数実測総数 / 33 ファイル）、Web build clean、E2E 13/13、CI/CD 緑、本番 Cloud Run へ U1〜U6 反映済み（U7 はローカル main が origin/main に対し 3 コミット ahead の未 push 状態。`git push origin main` 時点で CD が起動）
 
 ### OPERATIONS PHASE
-- [x] Operations — placeholder（形式承認 2026-05-04）。本格的な運用設計（監視・SLO・インシデント対応）は MVP 範囲外として別途実施。`docs/operations.md` に admin 払い出し / BAN 緊急時 SQL / 構造化ログ等の最低限の運用手順は集約済み。
+- [x] Operations (placeholder) — 形式承認 2026-05-04。本格的な運用設計（監視・SLO・インシデント対応）は MVP 範囲外として別途実施。`docs/operations.md` に admin 払い出し / BAN 緊急時 SQL / 構造化ログ等の最低限の運用手順は集約済み。
+- [ ] Domain Mapping — 開始 2026-05-04
+  - **目的**: Cloud Run の `*.run.app` URL から本番ドメイン `workslogue.com` への切替。SSL は Google managed cert（Let's Encrypt）で自動運用。
+  - **構成**:
+    - apex `workslogue.com` → `works-logue-web`（A/AAAA レコード 4 本）
+    - `api.workslogue.com` → `works-logue-api`（CNAME → `ghs.googlehosted.com.`）
+    - `www.workslogue.com` → 301 リダイレクト（DNS or Cloud Run リライト、後続検討）
+  - **方式**: Cloud Run domain mappings（asia-northeast1 GA）。Load Balancer / Cloud Armor は MVP 不要のため採用しない。
+  - **対応する Brownfield 変更**:
+    - `.github/workflows/cd.yml` の `CORS_ORIGINS` を `https://workslogue.com` に切替
+    - 同 workflow の `--build-arg NEXT_PUBLIC_API_URL` を `https://api.workslogue.com` に切替
+    - Supabase Auth の **Site URL / Redirect URLs** に新ドメインを追加（旧 URL は移行期間中は残す）
+  - **生成ドキュメント**:
+    - `aidlc-docs/operations/plans/domain-mapping-plan.md` — 実行プラン（チェックボックス）
+    - `aidlc-docs/operations/domain-mapping/dns-records.md` — DNS レコード仕様
+    - `aidlc-docs/operations/domain-mapping/cloud-run-mapping.md` — gcloud / コンソール手順
+    - `aidlc-docs/operations/domain-mapping/verification.md` — 疎通・SSL・CORS 検証手順
+    - `aidlc-docs/operations/domain-mapping/rollback.md` — DNS / mapping 削除によるロールバック
+  - **運用ドキュメント反映**: `docs/operations.md` にドメイン運用セクション追加（証明書再発行・サブドメイン追加・CORS 切替・cutover 手順）

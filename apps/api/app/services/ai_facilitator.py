@@ -1,5 +1,6 @@
 import logging
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +9,10 @@ from app.infra.vertex_ai_client import VertexAIClient
 from app.models.log import Log
 
 logger = logging.getLogger(__name__)
+
+# Outlasts burst posts + Vertex AI round-trip so concurrent pipelines don't
+# each fire a Wisp.
+AI_COOLDOWN_SECONDS = 30
 
 FACILITATION_SYSTEM_INSTRUCTION = """\
 あなたはビジネスナレッジの共創を促進するファシリテーターです。
@@ -78,6 +83,16 @@ class AIFacilitator:
             .limit(1)
         )
         ai_log = latest_ai_log.scalar_one_or_none()
+
+        # Cooldown: if Wisp posted very recently, another pipeline already
+        # handled this burst — skip even if user_log_count would otherwise
+        # qualify.
+        if ai_log is not None:
+            age_seconds = (
+                datetime.now(timezone.utc) - ai_log.created_at
+            ).total_seconds()
+            if age_seconds < AI_COOLDOWN_SECONDS:
+                return False
 
         # Count user logs since the last AI log (or all user logs if no AI log exists)
         conditions = [

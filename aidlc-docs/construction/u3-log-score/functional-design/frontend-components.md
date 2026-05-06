@@ -52,8 +52,9 @@ U3 で実装・拡張するフロントエンドコンポーネント:
 ### データ取得
 
 1. **Planter 詳細**: `GET /api/v1/planters/{id}` — SSR（Server Component）
-2. **Log 一覧**: `GET /api/v1/planters/{id}/logs` — CSR（Client Component、無限スクロール）
-3. **スコア設定**: `GET /api/v1/settings/score` — SSR（bloom_threshold を取得）
+2. **Log 一覧（初回）**: `GET /api/v1/planters/{id}/logs` — CSR（Client Component、無限スクロール）
+3. **Log の差分反映**: Supabase Realtime チャネル `planter:{id}:logs` で `logs` テーブルの INSERT を購読
+4. **スコア設定**: `GET /api/v1/settings/score` — SSR（bloom_threshold を取得）
 
 ### 状態管理
 
@@ -117,6 +118,15 @@ interface LogItemProps {
 - 「もっと読み込む」ボタンで追加取得（IntersectionObserver ではなく明示ボタン）
   - Log は古い順なので、上方向にスクロールで追加読み込みするとUXが複雑になるため
   - 初回50件で十分な場合が多い
+
+### Realtime 反映
+
+- mount 時に Supabase Realtime チャネル `planter:{planter_id}:logs` を購読
+- `postgres_changes` の INSERT イベント（`table=logs, filter=planter_id=eq.{planter_id}`）を受信
+- 自分の投稿はレスポンス即時反映で表示済みのため、Log ID の重複排除を行う
+- 受信した Log の user_id が既知マップになければ `GET /api/v1/users/{id}` で取得しキャッシュ
+- AI 投稿（user_id=null）は固定アバター/名前で表示
+- unmount 時にチャネルを unsubscribe
 
 ### Log 投稿フロー
 

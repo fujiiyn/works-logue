@@ -5,13 +5,26 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { MessageSquare, Users, ChevronDown, ChevronRight, Flower2 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/format-time";
 import { apiFetch } from "@/lib/api-client";
+import { supabase } from "@/lib/supabase";
 import { useRightSidebar } from "@/contexts/right-sidebar-context";
-import { LogThread } from "@/components/log/LogThread";
+import { LogThread, type LogThreadHandle } from "@/components/log/LogThread";
 import { LogComposer } from "@/components/log/LogComposer";
 import { ScoreCard } from "@/components/planter/ScoreCard";
 import { PlanterFollowButton } from "@/components/planter/PlanterFollowButton";
 import { LougeArticle } from "@/components/louge/LougeArticle";
 import { ContributorsSidebar } from "@/components/louge/ContributorsSidebar";
+
+interface RealtimePlanterRow {
+  id: string;
+  status: string;
+  log_count: number;
+  contributor_count: number;
+  progress: number;
+  structure_fulfillment: number;
+  maturity_score: number | null;
+  louge_content: string | null;
+  louge_generated_at: string | null;
+}
 
 interface StructureParts {
   context: boolean;
@@ -94,7 +107,7 @@ export function PlanterDetailClient({
     id: string;
     displayName: string;
   } | null>(null);
-  const logThreadKeyRef = useRef(0);
+  const logThreadRef = useRef<LogThreadHandle>(null);
   const { setContent } = useRightSidebar();
   const isLouge = planter.status === "louge";
 
@@ -216,6 +229,72 @@ export function PlanterDetailClient({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Supabase Realtime: subscribe to planters UPDATE to reflect score changes,
+  // status transitions and Louge bloom across browsers without polling. The
+  // user's own posts still drive pollScore for snappier local feedback; for
+  // OTHER users' / AI posts this is the only sync path.
+  useEffect(() => {
+    const planterId = initialPlanter.id;
+    const channel = supabase
+      .channel(`planter:${planterId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "planters",
+          filter: `id=eq.${planterId}`,
+        },
+        async (payload) => {
+          const row = payload.new as RealtimePlanterRow;
+          // Defensive: ignore malformed payloads (e.g. future schema drift).
+          if (typeof row?.status !== "string") return;
+
+          // structure_parts is not a column on planters; pull it from /score
+          // (which reads the latest LougeScoreSnapshot).
+          let structureParts: StructureParts | null = null;
+          try {
+            const data = await apiFetch<ScoreResponse>(
+              `/api/v1/planters/${planterId}/score`,
+            );
+            structureParts = data.score.structure_parts;
+          } catch {
+            // leave structure_parts unchanged on fetch failure
+          }
+
+          setPlanter((prev) => ({
+            ...prev,
+            status: row.status,
+            log_count: row.log_count,
+            contributor_count: row.contributor_count,
+            progress: row.progress,
+            structure_fulfillment: row.structure_fulfillment,
+            maturity_score: row.maturity_score,
+            structure_parts: structureParts ?? prev.structure_parts,
+            louge_content: row.louge_content ?? prev.louge_content,
+            louge_generated_at:
+              row.louge_generated_at ?? prev.louge_generated_at,
+          }));
+
+          // Score has landed — clear the calculating indicator.
+          setScorePending(false);
+
+          // Bloom transition handling
+          if (row.status === "louge" && !row.louge_content) {
+            setBloomPending(true);
+          } else if (row.louge_content) {
+            setBloomPending(false);
+            void fetchContributors();
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [initialPlanter.id, fetchContributors]);
+
   // Fetch contributors on initial load if already bloomed
   useEffect(() => {
     if (isLouge && planter.louge_content) {
@@ -273,7 +352,19 @@ export function PlanterDetailClient({
 
   const handleLogCreated = useCallback(
     (response: {
-      log: { id: string; planter_id: string };
+      log: {
+        id: string;
+        planter_id: string;
+        user: {
+          id: string;
+          display_name: string;
+          avatar_url: string | null;
+        } | null;
+        body: string;
+        parent_log_id: string | null;
+        is_ai_generated: boolean;
+        created_at: string;
+      };
       planter: {
         status: string;
         log_count: number;
@@ -296,7 +387,7 @@ export function PlanterDetailClient({
         structure_parts: response.planter.structure_parts,
       }));
 
-      logThreadKeyRef.current += 1;
+      logThreadRef.current?.addLog(response.log);
 
       if (response.score_pending) {
         setScorePending(true);
@@ -312,6 +403,13 @@ export function PlanterDetailClient({
     },
     [],
   );
+
+  // A log just got committed by *anyone* (other user, AI, or echo of our
+  // own post) — show "calculating" until the planter UPDATE Realtime brings
+  // back the new score.
+  const handleRealtimeLogInsert = useCallback(() => {
+    setScorePending(true);
+  }, []);
 
   return (
     <div
@@ -424,9 +522,10 @@ export function PlanterDetailClient({
             {/* Logs section (read-only) */}
             <h2 className="mb-4 text-heading-m text-primary-dark">Logs</h2>
             <LogThread
-              key={logThreadKeyRef.current}
+              ref={logThreadRef}
               planterId={planter.id}
               onReply={handleReply}
+              onRealtimeInsert={handleRealtimeLogInsert}
             />
           </>
         ) : isLouge && bloomPending ? (
@@ -496,9 +595,10 @@ export function PlanterDetailClient({
             {/* Logs section */}
             <h2 className="mb-4 text-heading-m text-primary-dark">Logs</h2>
             <LogThread
-              key={logThreadKeyRef.current}
+              ref={logThreadRef}
               planterId={planter.id}
               onReply={handleReply}
+              onRealtimeInsert={handleRealtimeLogInsert}
             />
           </>
         )}

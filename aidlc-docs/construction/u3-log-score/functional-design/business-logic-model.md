@@ -2,14 +2,15 @@
 
 ## 概要
 
-U3 のビジネスロジックは7つのフローで構成される:
+U3 のビジネスロジックは8つのフローで構成される:
 1. **Log 投稿フロー** — Log を作成し、ScorePipeline をバックグラウンドで起動する
-2. **Log 一覧取得フロー** — Planter に紐づく Log をスレッド構造で取得する
-3. **ScorePipeline（バックグラウンド）** — 条件A → 条件B → AI ファシリテートのオーケストレーション
-4. **Planter 詳細取得（拡張）** — スコア情報・構造パーツ詳細を含むレスポンスを返す
-5. **AI ファシリテート** — 条件B 未達時に AI が問いかけを投稿する
-6. **スコア polling** — フロントエンドがバックグラウンド計算の完了を確認する
-7. **スコア設定取得フロー** — 開花閾値等の設定を取得する
+2. **Log 一覧取得フロー** — Planter に紐づく Log をスレッド構造で取得する（初回ロード）
+3. **Log Realtime 購読フロー** — Supabase Realtime で他ユーザー / AI ファシリテーション投稿を即時反映する
+4. **ScorePipeline（バックグラウンド）** — 条件A → 条件B → AI ファシリテートのオーケストレーション
+5. **Planter 詳細取得（拡張）** — スコア情報・構造パーツ詳細を含むレスポンスを返す
+6. **AI ファシリテート** — 条件B 未達時に AI が問いかけを投稿する
+7. **スコア polling** — フロントエンドがバックグラウンド計算の完了を確認する
+8. **スコア設定取得フロー** — 開花閾値等の設定を取得する
 
 ---
 
@@ -117,6 +118,55 @@ LogRouter.list_logs()
 
 ---
 
+## フロー2.5: Log Realtime 購読
+
+### 目的
+
+SNS的な体験のため、自分のページを開いている他ユーザーの投稿や AI ファシリテーション投稿を、ページ再読込なしで即時表示する。
+
+### 構成
+
+- 経路: Supabase Realtime（Postgres logical replication → WebSocket）
+- 認可: 公開読み取り（logs テーブルに RLS の SELECT ポリシーを付与し、anon ロールに許可）
+- 書き込み: 既存通り FastAPI 経由のみ（DB への直接 INSERT/UPDATE はブラウザから行わない）
+
+### シーケンス
+
+```
+Client (LogThread mount)
+  |
+  |-- 1. 初回ロード: GET /api/v1/planters/{id}/logs (既存)
+  |
+  |-- 2. Supabase Realtime に購読
+  |     |-- channel: `planter:{planter_id}:logs`
+  |     |-- event: postgres_changes (INSERT, schema=public, table=logs,
+  |     |          filter=`planter_id=eq.{planter_id}`)
+  |
+  |-- 3. INSERT イベント受信時:
+  |     a. 自分が直前に投稿した Log なら無視（楽観的更新で既に表示済み）
+  |     b. parent_log_id が NULL → トップレベル Log として末尾に追加
+  |     c. parent_log_id が指定 → 該当 Log の replies 末尾に追加
+  |     d. ペイロードは Log 行のみ（user 情報なし）
+  |        → user_id でユーザーを GET /api/v1/users/{id} から取得して合成
+  |        → user_id が NULL（is_ai_generated=true）の場合は固定の AI アシスタント表示
+  |
+  |-- 4. unmount 時: channel を unsubscribe
+```
+
+### Realtime 公開設定
+
+- マイグレーションで `logs` テーブルを `supabase_realtime` パブリケーションに追加
+- `logs` の RLS を有効化、SELECT ポリシーで `deleted_at IS NULL` のレコードを anon に公開
+- INSERT/UPDATE/DELETE は **FastAPI（直接 Postgres 接続）** からのみ実施するため、ブラウザ向け書き込みポリシーは作成しない
+
+### 設計上の決定
+
+- **WebSocket / SSE / FastAPI でのカスタム実装ではなく Supabase Realtime を採用**: 既存スタックでインフラ追加なし。
+- **新規 Log だけを差分追加**: 全件再取得するとスクロール位置が飛ぶため、INSERT 行を末尾に追加するのみ。
+- **score 更新は引き続き polling**: スコア計算は Vertex AI を呼ぶバックグラウンド処理なので、Realtime ではなく既存の polling で完了確認する。
+
+---
+
 ## フロー3: ScorePipeline（バックグラウンドオーケストレーション）
 
 FastAPI の `BackgroundTasks` で非同期実行。Log 投稿のレスポンス返却後に開始される。
@@ -143,11 +193,10 @@ ScorePipeline.execute(planter_id, trigger_log_id)  <- BackgroundTasks で実行
   |     |-- structure_fulfillment = fulfillment
   |     |-- progress の前半50% を更新: progress = min(fulfillment * 0.5, 0.5)
   |
-  |-- 4. 条件B 判定: 最低参加ラインチェック
-  |     |-- ScoreSettings から閾値を取得（min_contributors, min_logs）
-  |     |-- contributor_count >= min_contributors AND log_count >= min_logs
-  |     |-- AND structure_fulfillment == 1.0（条件A 完全充足）
+  |-- 4. 条件B ゲート判定
+  |     |-- structure_fulfillment == 1.0（条件A 完全充足）のみ
   |     |-- 未達: 条件B スキップ、Step 6 へ
+  |     |-- ※ 旧仕様の min_contributors / min_logs ゲートは廃止（2026-05-06）
   |
   |-- 5. 条件B: ScoreEngine.evaluate_maturity(seed, logs)
   |     |-- Vertex AI (Gemini Flash) に Seed + Log 全文を送信
@@ -171,7 +220,7 @@ ScorePipeline.execute(planter_id, trigger_log_id)  <- BackgroundTasks で実行
   |
   |-- 8. 開花判定
   |     |-- passed_structure AND passed_maturity (maturity_total >= bloom_threshold)
-  |     |-- bloom_threshold: ScoreSettings から取得（デフォルト 0.7）
+  |     |-- bloom_threshold: ScoreSettings から取得（デフォルト 0.85）
   |     |-- 開花条件を満たした場合:
   |     |     Planter.status = 'louge' への遷移は U4 で実装
   |     |     U3 では「開花準備完了」フラグのみ（passed_maturity=true をスナップショットに記録）
@@ -197,7 +246,7 @@ Log 投稿
   |
   |-- 条件A 未完全充足 → progress 前半のみ更新、終了
   |
-  |-- 条件A 完全充足 (1.0) かつ 最低参加ライン到達
+  |-- 条件A 完全充足 (1.0) → 即座に条件B へ（参加ラインゲートは撤廃）
         |
         v
       条件B 実行 ── maturity_score 更新
@@ -336,9 +385,9 @@ SettingsRouter.get_score_settings()  <- 認証不要（公開情報）
 
 | キー | 型 | デフォルト | 説明 |
 |---|---|---|---|
-| min_contributors | int | 3 | 条件B 開始の最低参加者数 |
-| min_logs | int | 5 | 条件B 開始の最低 Log 数 |
-| bloom_threshold | float | 0.7 | 条件B の開花閾値（0.0〜1.0） |
+| min_contributors | int | 3 | （旧条件B ゲート用 / 現在パイプラインから未参照。admin 設定UIで運用が将来再導入する余地のため row 自体は保持） |
+| min_logs | int | 5 | （旧条件B ゲート用 / 現在パイプラインから未参照。同上） |
+| bloom_threshold | float | 0.85 | 条件B の開花閾値（0.0〜1.0） |
 | bud_threshold | float | 0.8 | Sprout 3（蕾）の progress 閾値 |
 
 - `app_settings` テーブル（key-value 形式）に保存

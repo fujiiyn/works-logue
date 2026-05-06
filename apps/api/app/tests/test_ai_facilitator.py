@@ -100,15 +100,17 @@ class TestShouldFacilitate:
         self, facilitator, planter, test_user, db_session
     ):
         """should_facilitate() should return true when 3+ user logs since last AI log."""
+        # Place the prior AI log well outside the cooldown window so we are
+        # only testing the user_log_count branch.
         now = datetime.now(timezone.utc)
+        ai_log_at = now - timedelta(minutes=5)
 
-        # AI facilitation log
         ai_log = Log(
             planter_id=planter.id,
             user_id=None,
             body="AI facilitation",
             is_ai_generated=True,
-            created_at=now,
+            created_at=ai_log_at,
         )
         db_session.add(ai_log)
         await db_session.commit()
@@ -121,7 +123,7 @@ class TestShouldFacilitate:
                     user_id=test_user.id,
                     body=f"User log {i}",
                     is_ai_generated=False,
-                    created_at=now + timedelta(seconds=i + 1),
+                    created_at=ai_log_at + timedelta(seconds=i + 1),
                 )
             )
         await db_session.commit()
@@ -135,12 +137,13 @@ class TestShouldFacilitate:
         """should_facilitate() should return false when fewer than 3 user logs since last AI log."""
         now = datetime.now(timezone.utc)
 
+        ai_log_at = now - timedelta(minutes=5)
         ai_log = Log(
             planter_id=planter.id,
             user_id=None,
             body="AI facilitation",
             is_ai_generated=True,
-            created_at=now,
+            created_at=ai_log_at,
         )
         db_session.add(ai_log)
         await db_session.commit()
@@ -153,7 +156,7 @@ class TestShouldFacilitate:
                     user_id=test_user.id,
                     body=f"User log {i}",
                     is_ai_generated=False,
-                    created_at=now + timedelta(seconds=i + 1),
+                    created_at=ai_log_at + timedelta(seconds=i + 1),
                 )
             )
         await db_session.commit()

@@ -114,3 +114,137 @@ Cloud Logging クエリ例:
 jsonPayload.event="admin.user.ban"
 jsonPayload.actor_user_id="<UUID>"
 ```
+
+---
+
+## ドメイン運用（workslogue.com）
+
+本サービスの本番ドメインは `workslogue.com`。Cloud Run の domain mappings 機能を
+使って `*.run.app` URL から切り替えている。詳細な切替手順・DNS 仕様・ロール
+バック手順は AI-DLC ドキュメントを参照する。
+
+| 用途 | URL | バックエンド |
+|---|---|---|
+| Web | `https://workslogue.com` | Cloud Run `works-logue-web` |
+| API | `https://api.workslogue.com` | Cloud Run `works-logue-api` |
+
+**詳細ドキュメント**:
+
+- 切替プラン: `aidlc-docs/operations/plans/domain-mapping-plan.md`
+- DNS レコード仕様: `aidlc-docs/operations/domain-mapping/dns-records.md`
+- gcloud / Search Console 操作: `aidlc-docs/operations/domain-mapping/cloud-run-mapping.md`
+- 検証手順: `aidlc-docs/operations/domain-mapping/verification.md`
+- ロールバック: `aidlc-docs/operations/domain-mapping/rollback.md`
+
+### 1. SSL 証明書の状態確認 / 強制再発行
+
+Google managed certificate は自動で更新されるため、通常は何もしなくて良い。
+状態確認のみ:
+
+```bash
+gcloud run domain-mappings describe \
+  --domain=workslogue.com --region=asia-northeast1 \
+  --format='value(status.conditions)'
+
+gcloud run domain-mappings describe \
+  --domain=api.workslogue.com --region=asia-northeast1 \
+  --format='value(status.conditions)'
+```
+
+万一再発行が必要な場合は mapping を削除→再作成する（DNS は維持で OK、伝播済みのため）:
+
+```bash
+gcloud run domain-mappings delete --domain=<domain> --region=asia-northeast1
+gcloud run domain-mappings create --service=<service> --domain=<domain> --region=asia-northeast1
+```
+
+### 2. サブドメインの追加（例: `blog.workslogue.com`）
+
+新しい Cloud Run サービスを公開する場合の手順:
+
+```bash
+# (1) サービスをデプロイした後
+gcloud run domain-mappings create \
+  --service=<new-service> \
+  --domain=blog.workslogue.com \
+  --region=asia-northeast1
+
+# (2) 出力された CNAME を DNS に登録
+# blog CNAME ghs.googlehosted.com.
+
+# (3) 証明書発行を待つ
+gcloud run domain-mappings describe --domain=blog.workslogue.com --region=asia-northeast1
+```
+
+### 3. CORS 許可元の変更
+
+Web のドメインを増やしたい場合、`.github/workflows/cd.yml` の `CORS_ORIGINS`
+にカンマ区切りで追加する:
+
+```yaml
+CORS_ORIGINS=https://workslogue.com,https://staging.workslogue.com
+```
+
+push 後に CD が走り API 側に反映される。確認は開発者ツールの Network タブで
+`Access-Control-Allow-Origin` レスポンスヘッダを見る。
+
+### 4. Supabase Auth の URL 設定
+
+ドメイン切替時は Supabase Console → Authentication → URL Configuration の
+**Site URL** と **Redirect URLs** も合わせて更新する。移行期間中は新旧両方を
+Redirect URLs に登録しておき、安定確認後に旧 URL を削除する。
+
+### 5. cutover（旧 URL → 新ドメイン）の安全手順
+
+ダウンタイムを避けるため、以下の順番を厳守:
+
+1. domain mapping 作成 + DNS 設定（ここまでは既存 `*.run.app` URL は影響なし）
+2. SSL 証明書発行確認（`CertificateProvisioned: True`）
+3. 新ドメインでブラウザ目視確認（旧 CORS 設定なので Web → API は失敗するが、Web の表示自体は OK）
+4. Supabase Auth Site URL を新ドメインに更新（Redirect URLs に旧も残す）
+5. `cd.yml` の `CORS_ORIGINS` と `NEXT_PUBLIC_API_URL` を新ドメインに更新 → CD 起動
+6. 新ドメインで E2E ゴールデンパス確認
+7. （1〜2 週間後）旧 URL を Redirect URLs / CORS から削除
+
+逆順にやると CORS で全 API リクエストが落ちて全機能が止まる。注意。
+
+### 6. ロールバック判断
+
+`aidlc-docs/operations/domain-mapping/rollback.md` の判断基準を満たした場合、
+即座に `cd.yml` を revert + push し、Supabase Auth Site URL を旧値に戻す。
+
+---
+
+## Supabase Realtime（logs / planters テーブル）
+
+`logs` テーブルは Supabase Realtime の `postgres_changes` 経由でフロントエンド
+へ配信される（Planter 詳細ページの LogThread が購読）。`planters` も同様に
+スコア更新・status 遷移・Louge 開花を全画面同期するために配信される。
+マイグレーションで以下をセットアップ済み:
+
+- `logs` / `planters` を `supabase_realtime` パブリケーションに追加
+- 両テーブルの RLS を有効化、`deleted_at IS NULL` の SELECT のみ anon に公開
+- `anon`/`authenticated` に対し schema USAGE と table SELECT を GRANT、
+  INSERT/UPDATE/DELETE は明示 REVOKE（書き込みは FastAPI=postgres role 経由のみ）
+- `planters` は UPDATE 時にフル行を配信するため `REPLICA IDENTITY FULL`
+
+### 動作確認
+
+新しい environment / プロジェクトを立ち上げた際、Supabase ダッシュボードの
+**Database → Replication** で `logs` と `planters` が `supabase_realtime`
+パブリケーションに含まれていることを確認する。含まれていなければ migration
+再適用。
+
+### マイグレーション適用方針
+
+CD でのマイグレーション自動適用機構は現状なし。本番 Supabase へは手元から
+psql で直接適用している（`.env.local` の `DATABASE_URL` を使用）:
+
+```bash
+DB_URL=$(grep "^DATABASE_URL=" apps/api/.env.local | sed 's/^DATABASE_URL=//; s|+asyncpg||')
+psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/<file>.sql
+```
+
+`supabase_migrations.schema_migrations` には記録されないため、`supabase db
+push` を将来導入する場合は冪等性に依存する（既存マイグレーションは IF NOT
+EXISTS / DROP IF EXISTS / UPDATE WHERE 等で再実行安全）。

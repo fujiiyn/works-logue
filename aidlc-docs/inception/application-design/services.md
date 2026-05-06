@@ -127,6 +127,7 @@ Client --> SearchRouter.search_planters(keyword, tag_ids, status)
 |---|---|---|
 | ページロード（フィード・Planter詳細・プロフィール） | Next.js Server Components → FastAPI | SEO・初期描画速度。サーバー間通信でレイテンシ低 |
 | ユーザー操作（Seed投稿・Log投稿・フォロー・プロフィール編集） | Client Component → FastAPI 直接 | リアルタイムなUI更新。楽観的更新が可能 |
+| 他ユーザー / AI 投稿の差分反映（Log） | Client Component → Supabase Realtime（postgres_changes） | SNS的な体験のため。FastAPI は書き込み経路、Realtime は読み取り差分経路 |
 | 認証 | Client Component（Supabase Auth JS）→ JWT を FastAPI に送信 | Supabase Auth SDK はブラウザで動作。取得した JWT を Authorization ヘッダーで送信 |
 
 ---
