@@ -7,7 +7,11 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { apiFetch } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase";
 import { useRightSidebar } from "@/contexts/right-sidebar-context";
-import { LogThread, type LogThreadHandle } from "@/components/log/LogThread";
+import {
+  LogThread,
+  type LogThreadHandle,
+  type RealtimeLogRow,
+} from "@/components/log/LogThread";
 import { LogComposer } from "@/components/log/LogComposer";
 import { ScoreCard } from "@/components/planter/ScoreCard";
 import { PlanterFollowButton } from "@/components/planter/PlanterFollowButton";
@@ -105,7 +109,20 @@ export function PlanterDetailClient({
     id: string;
     displayName: string;
   } | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const logThreadRef = useRef<LogThreadHandle>(null);
+  // Tracked imperatively so handleRealtimeLogInsert can react synchronously
+  // without waiting for a re-render.
+  const isAtBottomRef = useRef(true);
+  // IDs of logs the current user just posted via the composer. Realtime
+  // echoes these back, but they should not bump unreadCount — the user is
+  // already at the bottom (we scrolled them there) and the message is theirs.
+  const ownPostIdsRef = useRef<Set<string>>(new Set());
+  // Re-entry guard for pollBloom. Without it, a second trigger (e.g. another
+  // pollScore landing on "louge", or the mount-time effect overlapping with a
+  // user-posted log's pollScore) starts a parallel chain with its own
+  // BLOOM_TIMEOUT_MS — multiplying the request rate against /api/v1/planters.
+  const bloomPollingRef = useRef(false);
   const { setContent } = useRightSidebar();
   const isLouge = planter.status === "louge";
 
@@ -165,12 +182,15 @@ export function PlanterDetailClient({
   // Bloom polling (check for louge_content)
   const pollBloom = useCallback(
     async (attempt: number = 0) => {
+      if (bloomPollingRef.current) return;
+      bloomPollingRef.current = true;
       const startTime = Date.now();
 
       const poll = async (idx: number) => {
         if (Date.now() - startTime > BLOOM_TIMEOUT_MS) {
           setBloomTimedOut(true);
           setBloomPending(false);
+          bloomPollingRef.current = false;
           return;
         }
 
@@ -190,13 +210,18 @@ export function PlanterDetailClient({
               bloom_pending: false,
             }));
             setBloomPending(false);
+            bloomPollingRef.current = false;
             // Fetch contributors
             fetchContributors();
           } else {
             poll(idx + 1);
           }
         } catch {
-          setBloomPending(false);
+          // Transient fetch error mid-bloom (Cloud Run cold start, network
+          // blip, Vertex AI latency). Clearing bloomPending here would drop
+          // the user back to the Sprout UI while bloom is still in flight.
+          // Retry until the outer BLOOM_TIMEOUT_MS guard.
+          poll(idx + 1);
         }
       };
 
@@ -377,7 +402,23 @@ export function PlanterDetailClient({
         structure_parts: response.planter.structure_parts,
       }));
 
+      // Suppress unread bump from the Realtime echo of our own post. Bound
+      // memory growth: if the echo never arrives (channel drop, backgrounded
+      // tab, network loss), drop the id after 5 minutes so the Set cannot
+      // grow unbounded over a long session. There is also a tiny race where
+      // the echo lands BEFORE this add — see handleRealtimeLogInsert below.
+      const ownPostId = response.log.id;
+      ownPostIdsRef.current.add(ownPostId);
+      window.setTimeout(() => {
+        ownPostIdsRef.current.delete(ownPostId);
+      }, 5 * 60 * 1000);
+      // We're about to scroll to the bottom — assert this synchronously so
+      // any echo that races the IntersectionObserver still sees at-bottom.
+      isAtBottomRef.current = true;
+      setUnreadCount(0);
+
       logThreadRef.current?.addLog(response.log);
+      logThreadRef.current?.scrollToBottom("smooth");
 
       if (response.score_pending) {
         setScorePending(true);
@@ -396,9 +437,37 @@ export function PlanterDetailClient({
 
   // A log just got committed by *anyone* (other user, AI, or echo of our
   // own post) — show "calculating" until the planter UPDATE Realtime brings
-  // back the new score.
-  const handleRealtimeLogInsert = useCallback(() => {
+  // back the new score. Also drives the unreadCount used by the
+  // jump-to-latest button: echoes of the current user's own posts are
+  // filtered out via ownPostIdsRef.
+  //
+  // Tiny race: an echo for the user's own post can arrive on the WebSocket
+  // BEFORE the POST response resolves — i.e. before handleLogCreated has run
+  // ownPostIdsRef.add(). In that window the echo is treated as a stranger's
+  // log. Mitigated by handleLogCreated also forcing isAtBottomRef.current =
+  // true and clearing unreadCount, so as long as the user is actively
+  // posting, an out-of-order echo cannot leave a stale unread badge.
+  const handleRealtimeLogInsert = useCallback((row: RealtimeLogRow) => {
     setScorePending(true);
+    if (ownPostIdsRef.current.has(row.id)) {
+      ownPostIdsRef.current.delete(row.id);
+      return;
+    }
+    if (!isAtBottomRef.current) {
+      setUnreadCount((c) => c + 1);
+    }
+  }, []);
+
+  const handleAtBottomChange = useCallback((atBottom: boolean) => {
+    isAtBottomRef.current = atBottom;
+    if (atBottom) {
+      setUnreadCount(0);
+    }
+  }, []);
+
+  const handleJumpToLatest = useCallback(() => {
+    logThreadRef.current?.scrollToBottom("smooth");
+    setUnreadCount(0);
   }, []);
 
   return (
@@ -516,6 +585,7 @@ export function PlanterDetailClient({
               planterId={planter.id}
               onReply={handleReply}
               onRealtimeInsert={handleRealtimeLogInsert}
+              onAtBottomChange={handleAtBottomChange}
             />
           </>
         ) : isLouge && bloomPending ? (
@@ -589,6 +659,7 @@ export function PlanterDetailClient({
               planterId={planter.id}
               onReply={handleReply}
               onRealtimeInsert={handleRealtimeLogInsert}
+              onAtBottomChange={handleAtBottomChange}
             />
           </>
         )}
@@ -601,6 +672,18 @@ export function PlanterDetailClient({
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
         onLogCreated={handleLogCreated}
+        topOverlay={
+          unreadCount > 0 ? (
+            <button
+              onClick={handleJumpToLatest}
+              className="absolute -top-12 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-primary px-4 py-2 text-[13px] font-medium text-white shadow-lg transition-colors hover:bg-primary/90"
+              data-testid="log-jump-to-latest"
+            >
+              <span>新着メッセージ {unreadCount}件</span>
+              <ChevronDown size={14} />
+            </button>
+          ) : null
+        }
       />
     </div>
   );
