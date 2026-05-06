@@ -109,15 +109,11 @@ export function PlanterDetailClient({
     id: string;
     displayName: string;
   } | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
+  // Drives the floating jump-to-latest button: visible whenever the user is
+  // scrolled away from the bottom of the log list, regardless of whether new
+  // logs have arrived. IntersectionObserver inside LogThread flips this.
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const logThreadRef = useRef<LogThreadHandle>(null);
-  // Tracked imperatively so handleRealtimeLogInsert can react synchronously
-  // without waiting for a re-render.
-  const isAtBottomRef = useRef(true);
-  // IDs of logs the current user just posted via the composer. Realtime
-  // echoes these back, but they should not bump unreadCount — the user is
-  // already at the bottom (we scrolled them there) and the message is theirs.
-  const ownPostIdsRef = useRef<Set<string>>(new Set());
   // Re-entry guard for pollBloom. Without it, a second trigger (e.g. another
   // pollScore landing on "louge", or the mount-time effect overlapping with a
   // user-posted log's pollScore) starts a parallel chain with its own
@@ -402,24 +398,12 @@ export function PlanterDetailClient({
         structure_parts: response.planter.structure_parts,
       }));
 
-      // Suppress unread bump from the Realtime echo of our own post. Bound
-      // memory growth: if the echo never arrives (channel drop, backgrounded
-      // tab, network loss), drop the id after 5 minutes so the Set cannot
-      // grow unbounded over a long session. There is also a tiny race where
-      // the echo lands BEFORE this add — see handleRealtimeLogInsert below.
-      const ownPostId = response.log.id;
-      ownPostIdsRef.current.add(ownPostId);
-      window.setTimeout(() => {
-        ownPostIdsRef.current.delete(ownPostId);
-      }, 5 * 60 * 1000);
-
-      // Append silently. We deliberately do NOT auto-scroll on post — the
-      // user's scroll position is sacrosanct. If the user is currently
-      // pinned to the bottom, the new log lands in view via the natural
-      // sticky composer layout. If they're scrolled up, their own post
-      // appends below the viewport and stays out of sight; we still skip
-      // the unread bump (own posts never trigger the jump-to-latest button).
+      // Append the user's own log and snap to the latest. Auto-scrolling on
+      // own post is the one allowed exception to "never move the user's
+      // scroll position" — the user just took an explicit action and
+      // expects to see the result.
       logThreadRef.current?.addLog(response.log);
+      logThreadRef.current?.scrollToBottom("smooth");
 
       if (response.score_pending) {
         setScorePending(true);
@@ -438,37 +422,17 @@ export function PlanterDetailClient({
 
   // A log just got committed by *anyone* (other user, AI, or echo of our
   // own post) — show "calculating" until the planter UPDATE Realtime brings
-  // back the new score. Also drives the unreadCount used by the
-  // jump-to-latest button: echoes of the current user's own posts are
-  // filtered out via ownPostIdsRef.
-  //
-  // Tiny race: an echo for the user's own post can arrive on the WebSocket
-  // BEFORE the POST response resolves — i.e. before handleLogCreated has run
-  // ownPostIdsRef.add(). In that window the echo is treated as a stranger's
-  // log. Mitigated by handleLogCreated also forcing isAtBottomRef.current =
-  // true and clearing unreadCount, so as long as the user is actively
-  // posting, an out-of-order echo cannot leave a stale unread badge.
-  const handleRealtimeLogInsert = useCallback((row: RealtimeLogRow) => {
+  // back the new score.
+  const handleRealtimeLogInsert = useCallback((_row: RealtimeLogRow) => {
     setScorePending(true);
-    if (ownPostIdsRef.current.has(row.id)) {
-      ownPostIdsRef.current.delete(row.id);
-      return;
-    }
-    if (!isAtBottomRef.current) {
-      setUnreadCount((c) => c + 1);
-    }
   }, []);
 
   const handleAtBottomChange = useCallback((atBottom: boolean) => {
-    isAtBottomRef.current = atBottom;
-    if (atBottom) {
-      setUnreadCount(0);
-    }
+    setIsAtBottom(atBottom);
   }, []);
 
   const handleJumpToLatest = useCallback(() => {
     logThreadRef.current?.scrollToBottom("smooth");
-    setUnreadCount(0);
   }, []);
 
   return (
@@ -674,7 +638,7 @@ export function PlanterDetailClient({
         onCancelReply={() => setReplyTo(null)}
         onLogCreated={handleLogCreated}
         topOverlay={
-          unreadCount > 0 ? (
+          !isAtBottom ? (
             <button
               onClick={handleJumpToLatest}
               className="absolute -top-12 left-1/2 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-bg-card text-text-secondary shadow-md transition-colors hover:bg-bg hover:text-primary-dark"
