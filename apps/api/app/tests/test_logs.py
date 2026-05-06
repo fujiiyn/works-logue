@@ -344,3 +344,244 @@ class TestListLogs:
         # All 5 logs returned across both pages
         all_bodies = {item["body"] for item in data["items"] + data2["items"]}
         assert len(all_bodies) == 5
+
+    async def test_list_logs_order_desc(
+        self, client: AsyncClient, planter, db_session: AsyncSession, test_user
+    ):
+        """order=desc で最新順にカーソルページネーション"""
+        from datetime import datetime, timedelta, timezone
+
+        base_time = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i in range(5):
+            log = Log(
+                planter_id=planter.id,
+                user_id=test_user.id,
+                body=f"Log {i}",
+                is_ai_generated=False,
+                created_at=base_time + timedelta(minutes=i),
+            )
+            db_session.add(log)
+        await db_session.commit()
+
+        # First page (latest first)
+        resp = await client.get(
+            f"/api/v1/planters/{planter.id}/logs",
+            params={"limit": 3, "order": "desc"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        bodies = [item["body"] for item in data["items"]]
+        assert bodies == ["Log 4", "Log 3", "Log 2"]
+        assert data["has_next"] is True
+
+        # Second page (older)
+        resp2 = await client.get(
+            f"/api/v1/planters/{planter.id}/logs",
+            params={"limit": 3, "order": "desc", "cursor": data["next_cursor"]},
+        )
+        assert resp2.status_code == 200
+        data2 = resp2.json()
+        bodies2 = [item["body"] for item in data2["items"]]
+        assert bodies2 == ["Log 1", "Log 0"]
+        assert data2["has_next"] is False
+
+    async def test_list_logs_order_desc_same_created_at(
+        self, client: AsyncClient, planter, db_session: AsyncSession, test_user
+    ):
+        """同一 created_at 複数行を desc カーソルが id 比較で正しく分割"""
+        from datetime import datetime, timezone
+
+        same_time = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i in range(4):
+            log = Log(
+                planter_id=planter.id,
+                user_id=test_user.id,
+                body=f"Same {i}",
+                is_ai_generated=False,
+                created_at=same_time,
+            )
+            db_session.add(log)
+        await db_session.commit()
+
+        resp = await client.get(
+            f"/api/v1/planters/{planter.id}/logs",
+            params={"limit": 2, "order": "desc"},
+        )
+        data = resp.json()
+        assert len(data["items"]) == 2
+        assert data["has_next"] is True
+        first_ids = {item["id"] for item in data["items"]}
+
+        resp2 = await client.get(
+            f"/api/v1/planters/{planter.id}/logs",
+            params={"limit": 2, "order": "desc", "cursor": data["next_cursor"]},
+        )
+        data2 = resp2.json()
+        assert len(data2["items"]) == 2
+        second_ids = {item["id"] for item in data2["items"]}
+        # No overlap between pages
+        assert first_ids.isdisjoint(second_ids)
+        assert len(first_ids | second_ids) == 4
+
+    async def test_list_logs_cursor_direction_independent(
+        self, client: AsyncClient, planter, db_session: AsyncSession, test_user
+    ):
+        """同じカーソル文字列が asc / desc どちらの方向でも復号できる
+        (cursor encode/decode が順序情報を持たない実装の回帰防止)"""
+        from datetime import datetime, timedelta, timezone
+
+        base_time = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i in range(5):
+            log = Log(
+                planter_id=planter.id,
+                user_id=test_user.id,
+                body=f"Log {i}",
+                is_ai_generated=False,
+                created_at=base_time + timedelta(minutes=i),
+            )
+            db_session.add(log)
+        await db_session.commit()
+
+        # asc fetch produces a cursor pointing at Log 2 (3rd)
+        asc_resp = await client.get(
+            f"/api/v1/planters/{planter.id}/logs",
+            params={"limit": 3},
+        )
+        asc_cursor = asc_resp.json()["next_cursor"]
+        assert asc_cursor is not None
+
+        # Re-using the same cursor with order=desc must not 4xx; the
+        # comparison just walks "older than Log 2" — i.e. Log 1 and Log 0.
+        desc_resp = await client.get(
+            f"/api/v1/planters/{planter.id}/logs",
+            params={"limit": 10, "order": "desc", "cursor": asc_cursor},
+        )
+        assert desc_resp.status_code == 200
+        bodies = [item["body"] for item in desc_resp.json()["items"]]
+        assert bodies == ["Log 1", "Log 0"]
+
+    async def test_list_logs_default_order_is_asc(
+        self, client: AsyncClient, planter, db_session: AsyncSession, test_user
+    ):
+        """order 未指定時は asc 順 (公開API契約のピン留め)"""
+        from datetime import datetime, timedelta, timezone
+
+        base_time = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i in range(3):
+            log = Log(
+                planter_id=planter.id,
+                user_id=test_user.id,
+                body=f"Log {i}",
+                is_ai_generated=False,
+                created_at=base_time + timedelta(minutes=i),
+            )
+            db_session.add(log)
+        await db_session.commit()
+
+        resp = await client.get(f"/api/v1/planters/{planter.id}/logs")
+        assert resp.status_code == 200
+        bodies = [item["body"] for item in resp.json()["items"]]
+        assert bodies == ["Log 0", "Log 1", "Log 2"]
+
+    async def test_list_logs_invalid_order_returns_422(
+        self, client: AsyncClient, planter
+    ):
+        """order=foo は Literal バリデーションで 422"""
+        resp = await client.get(
+            f"/api/v1/planters/{planter.id}/logs", params={"order": "foo"}
+        )
+        assert resp.status_code == 422
+
+    async def test_list_logs_order_desc_with_replies(
+        self, client: AsyncClient, planter, db_session: AsyncSession, test_user
+    ):
+        """desc 順でも返信が正しい親 log の replies にネストされる"""
+        from datetime import datetime, timedelta, timezone
+
+        base_time = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        parent_old = Log(
+            planter_id=planter.id,
+            user_id=test_user.id,
+            body="Old parent",
+            is_ai_generated=False,
+            created_at=base_time,
+        )
+        parent_new = Log(
+            planter_id=planter.id,
+            user_id=test_user.id,
+            body="New parent",
+            is_ai_generated=False,
+            created_at=base_time + timedelta(minutes=10),
+        )
+        db_session.add_all([parent_old, parent_new])
+        await db_session.flush()
+        await db_session.refresh(parent_old)
+        await db_session.refresh(parent_new)
+
+        reply_to_old = Log(
+            planter_id=planter.id,
+            user_id=test_user.id,
+            body="Reply to old",
+            parent_log_id=parent_old.id,
+            is_ai_generated=False,
+        )
+        reply_to_new = Log(
+            planter_id=planter.id,
+            user_id=test_user.id,
+            body="Reply to new",
+            parent_log_id=parent_new.id,
+            is_ai_generated=False,
+        )
+        db_session.add_all([reply_to_old, reply_to_new])
+        await db_session.commit()
+
+        resp = await client.get(
+            f"/api/v1/planters/{planter.id}/logs", params={"order": "desc"}
+        )
+        assert resp.status_code == 200
+        items = resp.json()["items"]
+        # desc: New parent first, then Old parent (top-level only)
+        assert [it["body"] for it in items] == ["New parent", "Old parent"]
+        assert [r["body"] for r in items[0]["replies"]] == ["Reply to new"]
+        assert [r["body"] for r in items[1]["replies"]] == ["Reply to old"]
+
+    async def test_list_logs_order_desc_empty(
+        self, client: AsyncClient, planter
+    ):
+        """desc 順で空 planter: items=[], has_next=False"""
+        resp = await client.get(
+            f"/api/v1/planters/{planter.id}/logs", params={"order": "desc"}
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["items"] == []
+        assert data["has_next"] is False
+        assert data["next_cursor"] is None
+
+    async def test_list_logs_order_desc_no_next_when_under_limit(
+        self, client: AsyncClient, planter, db_session: AsyncSession, test_user
+    ):
+        """desc 順で件数 < limit のとき has_next=False (limit+1 トリムが direction-safe)"""
+        from datetime import datetime, timedelta, timezone
+
+        base_time = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i in range(3):
+            log = Log(
+                planter_id=planter.id,
+                user_id=test_user.id,
+                body=f"Log {i}",
+                is_ai_generated=False,
+                created_at=base_time + timedelta(minutes=i),
+            )
+            db_session.add(log)
+        await db_session.commit()
+
+        resp = await client.get(
+            f"/api/v1/planters/{planter.id}/logs",
+            params={"limit": 10, "order": "desc"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["items"]) == 3
+        assert data["has_next"] is False
+        assert data["next_cursor"] is None

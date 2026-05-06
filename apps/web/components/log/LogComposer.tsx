@@ -40,6 +40,11 @@ interface LogComposerProps {
   replyTo: { id: string; displayName: string } | null;
   onCancelReply: () => void;
   onLogCreated: (response: LogCreateResponse) => void;
+  // Rendered as the first child of the sticky outer wrapper. The composer's
+  // outer div is `position: sticky` (a positioned ancestor), so an
+  // `absolute -top-12 left-1/2 -translate-x-1/2` element here floats just
+  // above the composer's top edge, centered to the content column.
+  topOverlay?: React.ReactNode;
 }
 
 export function LogComposer({
@@ -48,6 +53,7 @@ export function LogComposer({
   replyTo,
   onCancelReply,
   onLogCreated,
+  topOverlay,
 }: LogComposerProps) {
   const { user } = useAuth();
   const [body, setBody] = useState("");
@@ -107,9 +113,10 @@ export function LogComposer({
   if (!user) {
     return (
       <div
-        className="sticky bottom-0 z-30 -mx-10 border-t border-border bg-bg-page px-10 py-3"
+        className="sticky bottom-0 z-30 -mx-10 bg-bg px-10 py-3"
         data-testid="log-composer-login"
       >
+        {topOverlay}
         <div className="flex items-center justify-center gap-2">
           <Link
             href="/login"
@@ -124,9 +131,10 @@ export function LogComposer({
 
   return (
     <div
-      className="sticky bottom-0 z-30 -mx-10 border-t border-border bg-bg-page px-10 py-3"
+      className="sticky bottom-0 z-30 -mx-10 bg-bg px-10 py-3"
       data-testid="log-composer"
     >
+      {topOverlay}
       {/* Reply indicator */}
       {replyTo && (
         <div className="mb-2 flex items-center gap-2 text-caption text-text-muted">

@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import Literal
 
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,28 +30,42 @@ class LogRepository:
         limit: int = 20,
         cursor_created_at: datetime | None = None,
         cursor_id: uuid.UUID | None = None,
+        order: Literal["asc", "desc"] = "asc",
     ) -> list[Log]:
-        stmt = (
-            select(Log)
-            .where(
-                Log.planter_id == planter_id,
-                Log.deleted_at.is_(None),
-                Log.parent_log_id.is_(None),
-            )
-            .order_by(Log.created_at.asc(), Log.id.asc())
-            .limit(limit)
+        # Cursor encodes (created_at, id) without a direction; comparison flips
+        # with `order` so the same cursor string can paginate in either direction.
+        stmt = select(Log).where(
+            Log.planter_id == planter_id,
+            Log.deleted_at.is_(None),
+            Log.parent_log_id.is_(None),
         )
 
-        if cursor_created_at is not None and cursor_id is not None:
-            stmt = stmt.where(
-                or_(
-                    Log.created_at > cursor_created_at,
-                    and_(
-                        Log.created_at == cursor_created_at,
-                        Log.id > cursor_id,
-                    ),
+        if order == "desc":
+            stmt = stmt.order_by(Log.created_at.desc(), Log.id.desc())
+            if cursor_created_at is not None and cursor_id is not None:
+                stmt = stmt.where(
+                    or_(
+                        Log.created_at < cursor_created_at,
+                        and_(
+                            Log.created_at == cursor_created_at,
+                            Log.id < cursor_id,
+                        ),
+                    )
                 )
-            )
+        else:
+            stmt = stmt.order_by(Log.created_at.asc(), Log.id.asc())
+            if cursor_created_at is not None and cursor_id is not None:
+                stmt = stmt.where(
+                    or_(
+                        Log.created_at > cursor_created_at,
+                        and_(
+                            Log.created_at == cursor_created_at,
+                            Log.id > cursor_id,
+                        ),
+                    )
+                )
+
+        stmt = stmt.limit(limit)
 
         result = await self.db.execute(stmt)
         return list(result.scalars().all())

@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy import select
@@ -165,6 +165,7 @@ async def list_logs(
     _user: Annotated[User | None, Depends(get_optional_user)],
     limit: int = Query(20, ge=1, le=50),
     cursor: str | None = Query(None),
+    order: Literal["asc", "desc"] = Query("asc"),
 ) -> dict:
     # Verify planter exists
     planter_repo = PlanterRepository(db)
@@ -186,6 +187,7 @@ async def list_logs(
         limit=limit + 1,
         cursor_created_at=cursor_created_at,
         cursor_id=cursor_id,
+        order=order,
     )
 
     has_next = len(top_logs) > limit

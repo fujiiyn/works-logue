@@ -7,7 +7,11 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { apiFetch } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase";
 import { useRightSidebar } from "@/contexts/right-sidebar-context";
-import { LogThread, type LogThreadHandle } from "@/components/log/LogThread";
+import {
+  LogThread,
+  type LogThreadHandle,
+  type RealtimeLogRow,
+} from "@/components/log/LogThread";
 import { LogComposer } from "@/components/log/LogComposer";
 import { ScoreCard } from "@/components/planter/ScoreCard";
 import { PlanterFollowButton } from "@/components/planter/PlanterFollowButton";
@@ -105,7 +109,16 @@ export function PlanterDetailClient({
     id: string;
     displayName: string;
   } | null>(null);
+  // Drives the floating jump-to-latest button: visible whenever the user is
+  // scrolled away from the bottom of the log list, regardless of whether new
+  // logs have arrived. IntersectionObserver inside LogThread flips this.
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const logThreadRef = useRef<LogThreadHandle>(null);
+  // Re-entry guard for pollBloom. Without it, a second trigger (e.g. another
+  // pollScore landing on "louge", or the mount-time effect overlapping with a
+  // user-posted log's pollScore) starts a parallel chain with its own
+  // BLOOM_TIMEOUT_MS — multiplying the request rate against /api/v1/planters.
+  const bloomPollingRef = useRef(false);
   const { setContent } = useRightSidebar();
   const isLouge = planter.status === "louge";
 
@@ -165,12 +178,15 @@ export function PlanterDetailClient({
   // Bloom polling (check for louge_content)
   const pollBloom = useCallback(
     async (attempt: number = 0) => {
+      if (bloomPollingRef.current) return;
+      bloomPollingRef.current = true;
       const startTime = Date.now();
 
       const poll = async (idx: number) => {
         if (Date.now() - startTime > BLOOM_TIMEOUT_MS) {
           setBloomTimedOut(true);
           setBloomPending(false);
+          bloomPollingRef.current = false;
           return;
         }
 
@@ -190,13 +206,18 @@ export function PlanterDetailClient({
               bloom_pending: false,
             }));
             setBloomPending(false);
+            bloomPollingRef.current = false;
             // Fetch contributors
             fetchContributors();
           } else {
             poll(idx + 1);
           }
         } catch {
-          setBloomPending(false);
+          // Transient fetch error mid-bloom (Cloud Run cold start, network
+          // blip, Vertex AI latency). Clearing bloomPending here would drop
+          // the user back to the Sprout UI while bloom is still in flight.
+          // Retry until the outer BLOOM_TIMEOUT_MS guard.
+          poll(idx + 1);
         }
       };
 
@@ -407,7 +428,12 @@ export function PlanterDetailClient({
         structure_parts: response.planter.structure_parts,
       }));
 
+      // Append the user's own log and snap to the latest. Auto-scrolling on
+      // own post is the one allowed exception to "never move the user's
+      // scroll position" — the user just took an explicit action and
+      // expects to see the result.
       logThreadRef.current?.addLog(response.log);
+      logThreadRef.current?.scrollToBottom("smooth");
 
       if (response.score_pending) {
         setScorePending(true);
@@ -428,13 +454,18 @@ export function PlanterDetailClient({
   // show "calculating" until the planter UPDATE Realtime brings back the new
   // score. Wisp (AI) posts are part of the running pipeline, not a separate
   // user action, so don't toggle the indicator on for them.
-  const handleRealtimeLogInsert = useCallback(
-    (row: { is_ai_generated: boolean }) => {
-      if (row.is_ai_generated) return;
-      setScorePending(true);
-    },
-    [],
-  );
+  const handleRealtimeLogInsert = useCallback((row: RealtimeLogRow) => {
+    if (row.is_ai_generated) return;
+    setScorePending(true);
+  }, []);
+
+  const handleAtBottomChange = useCallback((atBottom: boolean) => {
+    setIsAtBottom(atBottom);
+  }, []);
+
+  const handleJumpToLatest = useCallback(() => {
+    logThreadRef.current?.scrollToBottom("smooth");
+  }, []);
 
   return (
     <div
@@ -511,7 +542,7 @@ export function PlanterDetailClient({
             />
 
             {/* Collapsible original Seed */}
-            <div className="mb-5 rounded-lg bg-bg-page" data-testid="seed-collapsible">
+            <div className="mb-5 rounded-lg bg-bg" data-testid="seed-collapsible">
               <button
                 className="flex w-full items-center justify-between px-4 py-3 text-left"
                 onClick={() => setSeedExpanded(!seedExpanded)}
@@ -551,6 +582,7 @@ export function PlanterDetailClient({
               planterId={planter.id}
               onReply={handleReply}
               onRealtimeInsert={handleRealtimeLogInsert}
+              onAtBottomChange={handleAtBottomChange}
             />
           </>
         ) : isLouge && bloomPending ? (
@@ -624,6 +656,7 @@ export function PlanterDetailClient({
               planterId={planter.id}
               onReply={handleReply}
               onRealtimeInsert={handleRealtimeLogInsert}
+              onAtBottomChange={handleAtBottomChange}
             />
           </>
         )}
@@ -636,6 +669,18 @@ export function PlanterDetailClient({
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
         onLogCreated={handleLogCreated}
+        topOverlay={
+          !isAtBottom ? (
+            <button
+              onClick={handleJumpToLatest}
+              className="absolute -top-12 left-1/2 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-bg-card text-text-secondary shadow-md transition-colors hover:bg-bg hover:text-primary-dark"
+              data-testid="log-jump-to-latest"
+              aria-label="最新のLogへスクロール"
+            >
+              <ChevronDown size={18} strokeWidth={2} />
+            </button>
+          ) : null
+        }
       />
     </div>
   );
