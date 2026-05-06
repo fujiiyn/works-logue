@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import and_, func, or_, select, update
+from sqlalchemy import and_, case, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.log import Log
@@ -70,14 +70,39 @@ class PlanterRepository:
         progress: float,
         status: str,
     ) -> None:
+        # Monotonic UPDATE: protect against concurrent / stale pipeline runs
+        # that could otherwise demote a bloomed planter back to sprout or
+        # push the displayed progress backwards. Per-row CASE is portable
+        # across PostgreSQL and SQLite (GREATEST is Postgres-only).
+        new_status = case(
+            (Planter.status == "louge", Planter.status),
+            else_=status,
+        )
+        new_progress = case(
+            (Planter.progress > progress, Planter.progress),
+            else_=progress,
+        )
+        new_structure = case(
+            (Planter.structure_fulfillment > structure_fulfillment, Planter.structure_fulfillment),
+            else_=structure_fulfillment,
+        )
+        # COALESCE both sides so a NULL prior maturity is treated as 0 for
+        # comparison; the new value still wins when prior is NULL.
+        prior_maturity = func.coalesce(Planter.maturity_score, 0.0)
+        incoming_maturity = func.coalesce(maturity_score, 0.0)
+        new_maturity = case(
+            (prior_maturity > incoming_maturity, Planter.maturity_score),
+            else_=maturity_score,
+        )
+
         await self.db.execute(
             update(Planter)
             .where(Planter.id == planter_id)
             .values(
-                structure_fulfillment=structure_fulfillment,
-                maturity_score=maturity_score,
-                progress=progress,
-                status=status,
+                structure_fulfillment=new_structure,
+                maturity_score=new_maturity,
+                progress=new_progress,
+                status=new_status,
             )
         )
         await self.db.flush()

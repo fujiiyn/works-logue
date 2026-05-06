@@ -249,13 +249,19 @@ export function PlanterDetailClient({
           if (typeof row?.status !== "string") return;
 
           // structure_parts is not a column on planters; pull it from /score
-          // (which reads the latest LougeScoreSnapshot).
+          // (which reads the latest LougeScoreSnapshot). The same response
+          // tells us whether the score is still pending — log_count++ /
+          // contributor_count / seed→sprout UPDATEs precede the pipeline
+          // commit, so a planter UPDATE alone doesn't mean the score has
+          // landed.
           let structureParts: StructureParts | null = null;
+          let scorePendingFromApi: boolean | null = null;
           try {
             const data = await apiFetch<ScoreResponse>(
               `/api/v1/planters/${planterId}/score`,
             );
             structureParts = data.score.structure_parts;
+            scorePendingFromApi = data.score_pending;
           } catch {
             // leave structure_parts unchanged on fetch failure
           }
@@ -274,8 +280,11 @@ export function PlanterDetailClient({
               row.louge_generated_at ?? prev.louge_generated_at,
           }));
 
-          // Score has landed — clear the calculating indicator.
-          setScorePending(false);
+          // Defer to /score's score_pending — true while the pipeline still
+          // owes us a snapshot for a recent user log.
+          if (scorePendingFromApi !== null) {
+            setScorePending(scorePendingFromApi);
+          }
 
           // Bloom transition handling
           if (row.status === "louge" && !row.louge_content) {
@@ -292,6 +301,23 @@ export function PlanterDetailClient({
       supabase.removeChannel(channel);
     };
   }, [initialPlanter.id, fetchContributors]);
+
+  // Scroll to top when Louge bloom completes mid-page so the user sees
+  // the article from its title, not from wherever they were scrolled in
+  // the Sprout view. Compares against the initial state via ref so that
+  // navigating directly to an already-bloomed planter does NOT auto-scroll
+  // (the browser handles initial scroll position).
+  const initialLougeContentRef = useRef<string | null>(initialPlanter.louge_content);
+  useEffect(() => {
+    if (
+      planter.louge_content &&
+      !initialLougeContentRef.current &&
+      typeof window !== "undefined"
+    ) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      initialLougeContentRef.current = planter.louge_content;
+    }
+  }, [planter.louge_content]);
 
   // Fetch contributors on initial load if already bloomed
   useEffect(() => {
@@ -314,6 +340,10 @@ export function PlanterDetailClient({
           loading={contributorsLoading}
         />,
       );
+    } else if (bloomPending) {
+      // Mid-bloom: score progression no longer applies and Contributors
+      // aren't ready yet. Fall back to the default sidebar (AboutCard).
+      setContent(null);
     } else {
       setContent(
         <ScoreCard
@@ -321,7 +351,7 @@ export function PlanterDetailClient({
           logCount={planter.log_count}
           contributorCount={planter.contributor_count}
           progress={planter.progress}
-          scorePending={scorePending || bloomPending}
+          scorePending={scorePending}
         />,
       );
     }
@@ -394,12 +424,17 @@ export function PlanterDetailClient({
     [],
   );
 
-  // A log just got committed by *anyone* (other user, AI, or echo of our
-  // own post) — show "calculating" until the planter UPDATE Realtime brings
-  // back the new score.
-  const handleRealtimeLogInsert = useCallback(() => {
-    setScorePending(true);
-  }, []);
+  // A user's log just got committed (other user or echo of our own post) —
+  // show "calculating" until the planter UPDATE Realtime brings back the new
+  // score. Wisp (AI) posts are part of the running pipeline, not a separate
+  // user action, so don't toggle the indicator on for them.
+  const handleRealtimeLogInsert = useCallback(
+    (row: { is_ai_generated: boolean }) => {
+      if (row.is_ai_generated) return;
+      setScorePending(true);
+    },
+    [],
+  );
 
   return (
     <div

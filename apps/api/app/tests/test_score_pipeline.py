@@ -353,3 +353,276 @@ class TestScorePipelineExecute:
         # Status should still be set to louge (committed before bloom attempt)
         update_call = pipeline._update_planter.call_args
         assert update_call[1]["status"] == "louge"
+
+
+class TestWispExclusion:
+    """Wisp (is_ai_generated=True) logs must not influence score evaluation."""
+
+    async def test_get_logs_with_users_excludes_ai_generated(self):
+        """_get_logs_with_users() must drop AI-generated logs at the source.
+
+        After this filter, every downstream consumer (evaluate_structure /
+        evaluate_maturity / AIFacilitator) sees only human contributions.
+        """
+        from app.pipelines.score_pipeline import ScorePipeline
+
+        user_id = uuid.uuid4()
+        human_log = MagicMock()
+        human_log.body = "Human knowledge"
+        human_log.user_id = user_id
+        human_log.is_ai_generated = False
+
+        wisp_log = MagicMock()
+        wisp_log.body = "Wisp facilitation"
+        wisp_log.user_id = None
+        wisp_log.is_ai_generated = True
+
+        # Mock the database call inside _get_logs_with_users for users_map lookup
+        users_result = MagicMock()
+        scalars_mock = MagicMock()
+        scalars_mock.all.return_value = []
+        users_result.scalars.return_value = scalars_mock
+
+        db = AsyncMock()
+        db.execute = AsyncMock(return_value=users_result)
+
+        with patch("app.pipelines.score_pipeline.LogRepository") as mock_repo_cls:
+            mock_repo = MagicMock()
+            mock_repo.get_all_by_planter = AsyncMock(return_value=[human_log, wisp_log])
+            mock_repo_cls.return_value = mock_repo
+
+            pipeline = ScorePipeline()
+            logs, _users_map = await pipeline._get_logs_with_users(uuid.uuid4(), db)
+
+        assert logs == [human_log], (
+            "AI-generated (Wisp) logs must be filtered out of pipeline inputs"
+        )
+
+    async def test_pipeline_drops_wisp_before_llm_eval(
+        self, mock_score_engine, mock_ai_facilitator, mock_session_factory, mock_db_session
+    ):
+        """End-to-end: with a Wisp log returned by LogRepository, the real
+        _get_logs_with_users filter must keep Wisp out of both LLM calls.
+
+        This is the regression guard for Bug #1 — if the filter is removed,
+        evaluate_structure / evaluate_maturity will see "Wisp facilitation"
+        in their inputs and this test fails.
+        """
+        from app.pipelines.score_pipeline import ScorePipeline
+
+        planter = _make_planter_mock(log_count=2, contributor_count=1)
+        user_id = uuid.uuid4()
+        user_obj = MagicMock()
+        user_obj.id = user_id
+        user_obj.display_name = "Tanaka"
+
+        human_log = MagicMock()
+        human_log.body = "Human knowledge"
+        human_log.user_id = user_id
+        human_log.is_ai_generated = False
+
+        wisp_log = MagicMock()
+        wisp_log.body = "Wisp facilitation question"
+        wisp_log.user_id = None
+        wisp_log.is_ai_generated = True
+
+        # Real _get_logs_with_users issues a SELECT against User; return
+        # the matching user so users_map is populated.
+        users_result = MagicMock()
+        scalars = MagicMock()
+        scalars.all.return_value = [user_obj]
+        users_result.scalars.return_value = scalars
+        mock_db_session.execute = AsyncMock(return_value=users_result)
+
+        mock_score_engine.evaluate_structure.return_value = StructureResult(
+            parts={"context": True, "problem": True, "solution": True, "name": True},
+            fulfillment=1.0,
+        )
+        mock_score_engine.evaluate_maturity.return_value = MaturityResult(
+            scores={"comprehensiveness": 0.5, "diversity": 0.5, "counterarguments": 0.5, "specificity": 0.5},
+            total=0.5,
+        )
+
+        pipeline = ScorePipeline(mock_session_factory)
+        pipeline._get_planter = AsyncMock(return_value=planter)
+        pipeline._get_settings = AsyncMock(
+            return_value={"min_contributors": 3, "min_logs": 5, "bloom_threshold": 0.7, "bud_threshold": 0.8}
+        )
+        pipeline._save_snapshot = AsyncMock()
+        pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
+        pipeline._create_ai_log = AsyncMock()
+        # Block facilitator from posting another Wisp during this test.
+        mock_ai_facilitator.should_facilitate.return_value = False
+
+        with patch("app.pipelines.score_pipeline.LogRepository") as mock_repo_cls:
+            mock_repo = MagicMock()
+            mock_repo.get_all_by_planter = AsyncMock(return_value=[human_log, wisp_log])
+            mock_repo_cls.return_value = mock_repo
+
+            await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
+
+        # evaluate_structure receives raw bodies — must contain only the human one.
+        structure_bodies = mock_score_engine.evaluate_structure.call_args[0][2]
+        assert structure_bodies == ["Human knowledge"]
+
+        # evaluate_maturity receives "Name: body" formatted entries — must not
+        # mention the Wisp text or the "Wisp" speaker label.
+        maturity_entries = mock_score_engine.evaluate_maturity.call_args[0][2]
+        assert all("Wisp" not in entry for entry in maturity_entries)
+        assert all("Wisp facilitation question" not in entry for entry in maturity_entries)
+        assert any("Human knowledge" in entry for entry in maturity_entries)
+
+
+class TestMaturityMonotonicity:
+    """Maturity scores must never decrease across pipeline runs (per-key max merge)."""
+
+    async def test_per_key_max_merge_with_prev_snapshot(
+        self, mock_score_engine, mock_ai_facilitator, mock_session_factory, mock_db_session
+    ):
+        """Each maturity key keeps its highest historical value."""
+        from app.pipelines.score_pipeline import ScorePipeline
+
+        planter = _make_planter_mock(log_count=5, contributor_count=3)
+        logs = [MagicMock(body=f"Log {i}", user_id=uuid.uuid4(), is_ai_generated=False) for i in range(5)]
+
+        # Previous snapshot had high diversity and counterarguments
+        prev_snapshot = MagicMock()
+        prev_snapshot.structure_parts = {
+            "context": True, "problem": True, "solution": True, "name": True
+        }
+        prev_snapshot.maturity_scores = {
+            "comprehensiveness": 0.5,
+            "diversity": 0.9,
+            "counterarguments": 0.8,
+            "specificity": 0.4,
+        }
+        prev_snapshot.maturity_total = 0.65
+
+        mock_score_engine.evaluate_structure.return_value = StructureResult(
+            parts={"context": True, "problem": True, "solution": True, "name": True},
+            fulfillment=1.0,
+        )
+        # Current LLM run is noisier — diversity dropped, but specificity rose
+        mock_score_engine.evaluate_maturity.return_value = MaturityResult(
+            scores={
+                "comprehensiveness": 0.7,
+                "diversity": 0.4,
+                "counterarguments": 0.5,
+                "specificity": 0.9,
+            },
+            total=0.625,
+        )
+
+        pipeline = ScorePipeline(mock_session_factory)
+        pipeline._get_planter = AsyncMock(return_value=planter)
+        pipeline._get_logs_with_users = AsyncMock(return_value=(logs, {}))
+        pipeline._get_settings = AsyncMock(
+            return_value={"min_contributors": 3, "min_logs": 5, "bloom_threshold": 0.7, "bud_threshold": 0.8}
+        )
+        pipeline._save_snapshot = AsyncMock()
+        pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=prev_snapshot)
+
+        await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
+
+        snapshot = pipeline._save_snapshot.call_args[0][1]
+        assert snapshot.maturity_scores == {
+            "comprehensiveness": 0.7,  # new is higher
+            "diversity": 0.9,           # prev is higher → preserved
+            "counterarguments": 0.8,    # prev is higher → preserved
+            "specificity": 0.9,         # new is higher
+        }
+        # total = (0.7 + 0.9 + 0.8 + 0.9) / 4 = 0.825
+        assert snapshot.maturity_total == pytest.approx(0.825)
+
+    async def test_maturity_total_does_not_decrease(
+        self, mock_score_engine, mock_ai_facilitator, mock_session_factory, mock_db_session
+    ):
+        """Snapshot total maturity must be >= previous snapshot total."""
+        from app.pipelines.score_pipeline import ScorePipeline
+
+        planter = _make_planter_mock(log_count=5, contributor_count=3)
+        logs = [MagicMock(body=f"Log {i}", user_id=uuid.uuid4(), is_ai_generated=False) for i in range(5)]
+
+        prev_snapshot = MagicMock()
+        prev_snapshot.structure_parts = {
+            "context": True, "problem": True, "solution": True, "name": True
+        }
+        prev_snapshot.maturity_scores = {
+            "comprehensiveness": 0.7,
+            "diversity": 0.7,
+            "counterarguments": 0.7,
+            "specificity": 0.7,
+        }
+        prev_snapshot.maturity_total = 0.7
+
+        mock_score_engine.evaluate_structure.return_value = StructureResult(
+            parts={"context": True, "problem": True, "solution": True, "name": True},
+            fulfillment=1.0,
+        )
+        # Whole new run is uniformly worse
+        mock_score_engine.evaluate_maturity.return_value = MaturityResult(
+            scores={
+                "comprehensiveness": 0.4,
+                "diversity": 0.4,
+                "counterarguments": 0.4,
+                "specificity": 0.4,
+            },
+            total=0.4,
+        )
+
+        pipeline = ScorePipeline(mock_session_factory)
+        pipeline._get_planter = AsyncMock(return_value=planter)
+        pipeline._get_logs_with_users = AsyncMock(return_value=(logs, {}))
+        pipeline._get_settings = AsyncMock(
+            return_value={"min_contributors": 3, "min_logs": 5, "bloom_threshold": 0.7, "bud_threshold": 0.8}
+        )
+        pipeline._save_snapshot = AsyncMock()
+        pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=prev_snapshot)
+
+        await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
+
+        snapshot = pipeline._save_snapshot.call_args[0][1]
+        assert snapshot.maturity_total >= prev_snapshot.maturity_total
+
+    async def test_no_prev_snapshot_uses_raw_maturity(
+        self, mock_score_engine, mock_ai_facilitator, mock_session_factory, mock_db_session
+    ):
+        """First run (no prev snapshot) must use the LLM result as-is."""
+        from app.pipelines.score_pipeline import ScorePipeline
+
+        planter = _make_planter_mock(log_count=5, contributor_count=3)
+        logs = [MagicMock(body=f"Log {i}", user_id=uuid.uuid4(), is_ai_generated=False) for i in range(5)]
+
+        mock_score_engine.evaluate_structure.return_value = StructureResult(
+            parts={"context": True, "problem": True, "solution": True, "name": True},
+            fulfillment=1.0,
+        )
+        raw_scores = {
+            "comprehensiveness": 0.6,
+            "diversity": 0.5,
+            "counterarguments": 0.4,
+            "specificity": 0.7,
+        }
+        mock_score_engine.evaluate_maturity.return_value = MaturityResult(
+            scores=raw_scores,
+            total=0.55,
+        )
+
+        pipeline = ScorePipeline(mock_session_factory)
+        pipeline._get_planter = AsyncMock(return_value=planter)
+        pipeline._get_logs_with_users = AsyncMock(return_value=(logs, {}))
+        pipeline._get_settings = AsyncMock(
+            return_value={"min_contributors": 3, "min_logs": 5, "bloom_threshold": 0.7, "bud_threshold": 0.8}
+        )
+        pipeline._save_snapshot = AsyncMock()
+        pipeline._update_planter = AsyncMock()
+        pipeline._get_latest_snapshot = AsyncMock(return_value=None)
+
+        await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
+
+        snapshot = pipeline._save_snapshot.call_args[0][1]
+        assert snapshot.maturity_scores == raw_scores
+        assert snapshot.maturity_total == pytest.approx(0.55)

@@ -88,18 +88,37 @@ class ScorePipeline:
         should_run_b = structure.fulfillment == 1.0
 
         if should_run_b:
+            # _get_logs_with_users filters AI logs, so every log here has a
+            # user_id. Fall back to "匿名" if the User row was deleted (e.g.
+            # GDPR deletion) — same convention as LougeGenerator.
             logs_with_users = []
             for log in logs:
-                if log.user_id and log.user_id in users_map:
-                    logs_with_users.append(
-                        f"{users_map[log.user_id].display_name}: {log.body}"
-                    )
-                else:
-                    logs_with_users.append(f"Wisp: {log.body}")
+                user = users_map.get(log.user_id)
+                name = user.display_name if user else "匿名"
+                logs_with_users.append(f"{name}: {log.body}")
 
             maturity_result = await self.score_engine.evaluate_maturity(
                 planter.title, planter.body, logs_with_users
             )
+
+            # Monotonic merge: LLM is non-deterministic, and structure_parts
+            # already merge with prev. Mirror that for maturity per-key so a
+            # noisy run can't drop the displayed progress. Use the union of
+            # keys so a future schema change (added or removed maturity
+            # dimension) doesn't silently drop preserved-prev values.
+            if prev_snapshot is not None and prev_snapshot.maturity_scores:
+                prev_scores = prev_snapshot.maturity_scores
+                all_keys = set(prev_scores) | set(maturity_result.scores)
+                merged_scores = {
+                    k: max(
+                        float(prev_scores.get(k, 0.0)),
+                        float(maturity_result.scores.get(k, 0.0)),
+                    )
+                    for k in all_keys
+                }
+                maturity_result.scores = merged_scores
+                maturity_result.total = sum(merged_scores.values()) / len(merged_scores)
+
             passed_maturity = maturity_result.total >= settings["bloom_threshold"]
 
             # AI Facilitation (when maturity below threshold)
@@ -174,7 +193,10 @@ class ScorePipeline:
         self, planter_id: uuid.UUID, db: AsyncSession
     ) -> tuple[list[Log], dict[uuid.UUID, User]]:
         log_repo = LogRepository(db)
-        logs = await log_repo.get_all_by_planter(planter_id)
+        all_logs = await log_repo.get_all_by_planter(planter_id)
+        # Wisp (AI facilitator) posts must not influence structure / maturity
+        # evaluation — they are facilitation prompts, not contributor knowledge.
+        logs = [log for log in all_logs if not log.is_ai_generated]
 
         user_ids = list({log.user_id for log in logs if log.user_id})
         users_map: dict[uuid.UUID, User] = {}

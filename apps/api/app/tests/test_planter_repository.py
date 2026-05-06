@@ -216,6 +216,152 @@ class TestUpdateScores:
         assert created.progress == 0.5
         assert created.status == "sprout"
 
+    async def test_status_does_not_downgrade_from_louge(
+        self, repo, test_user, seed_type, db_session
+    ):
+        """A stale pipeline must not be able to demote a louge planter back to sprout."""
+        planter = Planter(
+            user_id=test_user.id,
+            title="Bloomed",
+            body="Body",
+            seed_type_id=seed_type.id,
+            status="louge",
+            progress=1.0,
+            structure_fulfillment=1.0,
+            maturity_score=0.85,
+        )
+        created = await repo.create(planter)
+
+        # Stale concurrent pipeline tries to overwrite with sprout-era values.
+        await repo.update_scores(
+            created.id,
+            structure_fulfillment=0.75,
+            maturity_score=0.6,
+            progress=0.5,
+            status="sprout",
+        )
+        await db_session.refresh(created)
+
+        assert created.status == "louge"
+        assert created.progress == 1.0
+        assert created.structure_fulfillment == 1.0
+        assert created.maturity_score == 0.85
+
+    async def test_progress_never_decreases(
+        self, repo, test_user, seed_type, db_session
+    ):
+        """update_scores() must keep the higher progress when a smaller value comes in."""
+        planter = Planter(
+            user_id=test_user.id,
+            title="Score",
+            body="Body",
+            seed_type_id=seed_type.id,
+            progress=0.8,
+            structure_fulfillment=0.75,
+            maturity_score=0.6,
+            status="sprout",
+        )
+        created = await repo.create(planter)
+
+        await repo.update_scores(
+            created.id,
+            structure_fulfillment=0.5,
+            maturity_score=0.4,
+            progress=0.3,
+            status="sprout",
+        )
+        await db_session.refresh(created)
+
+        assert created.progress == 0.8
+        assert created.structure_fulfillment == 0.75
+        assert created.maturity_score == 0.6
+
+    async def test_progress_can_increase(
+        self, repo, test_user, seed_type, db_session
+    ):
+        """update_scores() must accept higher progress / scores."""
+        planter = Planter(
+            user_id=test_user.id,
+            title="Score",
+            body="Body",
+            seed_type_id=seed_type.id,
+            progress=0.3,
+            structure_fulfillment=0.5,
+            maturity_score=0.4,
+            status="sprout",
+        )
+        created = await repo.create(planter)
+
+        await repo.update_scores(
+            created.id,
+            structure_fulfillment=0.75,
+            maturity_score=0.6,
+            progress=0.8,
+            status="sprout",
+        )
+        await db_session.refresh(created)
+
+        assert created.progress == 0.8
+        assert created.structure_fulfillment == 0.75
+        assert created.maturity_score == 0.6
+        assert created.status == "sprout"
+
+    async def test_maturity_score_handles_null_prev(
+        self, repo, test_user, seed_type, db_session
+    ):
+        """update_scores() must promote a NULL maturity_score to a real value."""
+        planter = Planter(
+            user_id=test_user.id,
+            title="Null Maturity",
+            body="Body",
+            seed_type_id=seed_type.id,
+            maturity_score=None,
+            progress=0.0,
+            structure_fulfillment=0.0,
+            status="seed",
+        )
+        created = await repo.create(planter)
+
+        await repo.update_scores(
+            created.id,
+            structure_fulfillment=0.5,
+            maturity_score=0.5,
+            progress=0.25,
+            status="sprout",
+        )
+        await db_session.refresh(created)
+
+        assert created.maturity_score == 0.5
+        assert created.progress == 0.25
+        assert created.status == "sprout"
+
+    async def test_maturity_score_keeps_existing_when_new_is_lower(
+        self, repo, test_user, seed_type, db_session
+    ):
+        """update_scores() must keep the higher maturity_score across runs."""
+        planter = Planter(
+            user_id=test_user.id,
+            title="Maturity",
+            body="Body",
+            seed_type_id=seed_type.id,
+            maturity_score=0.7,
+            progress=0.6,
+            structure_fulfillment=0.8,
+            status="sprout",
+        )
+        created = await repo.create(planter)
+
+        await repo.update_scores(
+            created.id,
+            structure_fulfillment=0.8,
+            maturity_score=0.4,
+            progress=0.6,
+            status="sprout",
+        )
+        await db_session.refresh(created)
+
+        assert created.maturity_score == 0.7
+
 
 class TestIncrementLogCount:
     async def test_increment_log_count(self, repo, test_user, seed_type, db_session):

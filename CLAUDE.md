@@ -75,6 +75,18 @@ works-logue/               ← monorepo
 
 ---
 
+## Code Review Workflow
+
+ロジック実装（Python/TypeScript のコード追加・変更）が一段落したら、コミット前に必ず `/pr-review-toolkit:review-pr` でローカル差分レビューを実行する。
+
+- デフォルト対象: `git diff`（unstaged + staged）。PR/GitHub は不要
+- 最小起動セット: `code errors tests` aspect → `code-reviewer` / `silent-failure-hunter` / `pr-test-analyzer` の 3 並列
+- 信頼度 ≥ 80（CRITICAL: 91-100, Important: 80-89）の指摘は**解消してからコミット**
+- UI のみの変更（コンポーネント生成・スタイル調整）はこのフロー対象外。`/frontend-design` ＋ Playwright で別途検証
+- 旧 `/writer-reviewer` カスタムスキルは廃止済み（参照しない）
+
+---
+
 ## Design Rules
 
 デザインガイド: @docs/design-style.md
