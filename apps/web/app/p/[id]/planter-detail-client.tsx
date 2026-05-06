@@ -91,10 +91,8 @@ const BLOOM_TIMEOUT_MS = 60000;
 
 export function PlanterDetailClient({
   planter: initialPlanter,
-  bloomThreshold,
 }: {
   planter: PlanterDetail;
-  bloomThreshold: number;
 }) {
   const [planter, setPlanter] = useState(initialPlanter);
   const [scorePending, setScorePending] = useState(false);
@@ -320,13 +318,9 @@ export function PlanterDetailClient({
       setContent(
         <ScoreCard
           status={planter.status}
-          structureFulfillment={planter.structure_fulfillment}
-          maturityScore={planter.maturity_score}
           logCount={planter.log_count}
           contributorCount={planter.contributor_count}
           progress={planter.progress}
-          bloomThreshold={bloomThreshold}
-          structureParts={planter.structure_parts}
           scorePending={scorePending || bloomPending}
         />,
       );
@@ -334,14 +328,10 @@ export function PlanterDetailClient({
     return () => setContent(null);
   }, [
     planter.status,
-    planter.structure_fulfillment,
-    planter.maturity_score,
     planter.log_count,
     planter.contributor_count,
     planter.progress,
-    planter.structure_parts,
     planter.louge_content,
-    bloomThreshold,
     scorePending,
     bloomPending,
     contributors,

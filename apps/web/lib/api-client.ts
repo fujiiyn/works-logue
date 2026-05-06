@@ -93,6 +93,16 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
+// ---- Public stats (right-sidebar About card) -------------------------------
+
+export interface PublicStats {
+  seeds: number;
+  louges: number;
+  contributors: number;
+}
+
+export const getPublicStats = () => apiFetch<PublicStats>("/api/v1/stats");
+
 // ---- Admin API (U7) ---------------------------------------------------------
 
 export interface AdminStats {

@@ -17,6 +17,7 @@ from app.routers import (
     scores,
     search,
     seed_types,
+    stats,
     tags,
     users,
 )
@@ -64,4 +65,5 @@ app.include_router(logs.router, prefix="/api/v1")
 app.include_router(scores.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
 app.include_router(contributors.router, prefix="/api/v1")
+app.include_router(stats.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")

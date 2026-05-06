@@ -30,13 +30,6 @@ interface PlanterDetail {
   created_at: string;
 }
 
-interface ScoreSettings {
-  min_contributors: number;
-  min_logs: number;
-  bloom_threshold: number;
-  bud_threshold: number;
-}
-
 async function fetchPlanter(id: string): Promise<PlanterDetail | null> {
   try {
     const res = await fetch(`${API_URL}/api/v1/planters/${id}`, {
@@ -49,37 +42,17 @@ async function fetchPlanter(id: string): Promise<PlanterDetail | null> {
   }
 }
 
-async function fetchScoreSettings(): Promise<ScoreSettings> {
-  try {
-    const res = await fetch(`${API_URL}/api/v1/settings/score`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return { min_contributors: 3, min_logs: 5, bloom_threshold: 0.7, bud_threshold: 0.8 };
-    return res.json();
-  } catch {
-    return { min_contributors: 3, min_logs: 5, bloom_threshold: 0.7, bud_threshold: 0.8 };
-  }
-}
-
 export default async function PlanterDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [planter, settings] = await Promise.all([
-    fetchPlanter(id),
-    fetchScoreSettings(),
-  ]);
+  const planter = await fetchPlanter(id);
 
   if (!planter) {
     notFound();
   }
 
-  return (
-    <PlanterDetailClient
-      planter={planter}
-      bloomThreshold={settings.bloom_threshold}
-    />
-  );
+  return <PlanterDetailClient planter={planter} />;
 }

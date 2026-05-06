@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Sprout } from "lucide-react";
 import { useRightSidebar } from "@/contexts/right-sidebar-context";
+import { getPublicStats, type PublicStats } from "@/lib/api-client";
 
 export function RightSidebar() {
   const { content } = useRightSidebar();
@@ -17,6 +19,23 @@ export function RightSidebar() {
 }
 
 function AboutCard() {
+  const [stats, setStats] = useState<PublicStats | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getPublicStats()
+      .then((s) => {
+        if (!cancelled) setStats(s);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const fmt = (n: number | undefined) =>
+    n === undefined ? "--" : n.toLocaleString();
+
   return (
     <div
       className="rounded-lg border border-border bg-bg-card p-5"
@@ -30,9 +49,9 @@ function AboutCard() {
       </p>
 
       <div className="mb-4 flex gap-5">
-        <Stat label="Seeds" value="--" />
-        <Stat label="Louges" value="--" />
-        <Stat label="Contributors" value="--" />
+        <Stat label="Seeds" value={fmt(stats?.seeds)} />
+        <Stat label="Louges" value={fmt(stats?.louges)} />
+        <Stat label="Contributors" value={fmt(stats?.contributors)} />
       </div>
 
       <Link

@@ -21,6 +21,8 @@ export function Dialog({
   children,
 }: DialogProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const onOpenChangeRef = useRef(onOpenChange);
+  onOpenChangeRef.current = onOpenChange;
 
   useEffect(() => {
     if (!open) return;
@@ -30,7 +32,7 @@ export function Dialog({
 
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        onOpenChange(false);
+        onOpenChangeRef.current(false);
         return;
       }
       if (e.key === "Tab") {
@@ -67,7 +69,7 @@ export function Dialog({
       document.removeEventListener("keydown", handleKey);
       document.body.style.overflow = previousOverflow;
     };
-  }, [open, onOpenChange]);
+  }, [open]);
 
   if (!open) return null;
 
