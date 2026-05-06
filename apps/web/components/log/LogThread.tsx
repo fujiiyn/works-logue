@@ -197,17 +197,23 @@ export const LogThread = forwardRef<LogThreadHandle, LogThreadProps>(
 
   // Initial jump to the bottom (latest log) after the first batch mounts.
   // Use useLayoutEffect so the user never sees the "scrolled to top" frame.
-  // requestAnimationFrame retry covers late-arriving layout shifts (avatar
-  // images have h-7 w-7 fixed but code blocks / wrap variations can still
-  // nudge height).
+  // window.scrollTo with the document's max scrollHeight is more reliable
+  // than scrollIntoView({block:"end"}) because the sticky composer overlaps
+  // the viewport bottom and scrollIntoView's idea of "in view" can stop
+  // short. requestAnimationFrame retry covers late-arriving layout shifts.
   useLayoutEffect(() => {
     if (didInitialScrollRef.current) return;
     if (!initialLoaded || logs.length === 0) return;
+    if (typeof window === "undefined") return;
     didInitialScrollRef.current = true;
-    bottomRef.current?.scrollIntoView({ block: "end" });
-    const raf = requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({ block: "end" });
-    });
+    const jump = () => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "instant" as ScrollBehavior,
+      });
+    };
+    jump();
+    const raf = requestAnimationFrame(jump);
     return () => cancelAnimationFrame(raf);
   }, [initialLoaded, logs.length]);
 
@@ -334,7 +340,14 @@ export const LogThread = forwardRef<LogThreadHandle, LogThreadProps>(
     ref,
     () => ({
       scrollToBottom: (behavior: ScrollBehavior = "smooth") => {
-        bottomRef.current?.scrollIntoView({ behavior, block: "end" });
+        if (typeof window === "undefined") return;
+        // window.scrollTo to documentElement.scrollHeight always lands at the
+        // absolute end of the page, even when the sticky composer would
+        // otherwise shadow scrollIntoView's "in-view" target.
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior,
+        });
       },
       addLog: (log: NewLogPayload) => {
         if (log.user) {

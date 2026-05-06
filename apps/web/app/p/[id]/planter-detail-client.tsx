@@ -677,11 +677,11 @@ export function PlanterDetailClient({
           unreadCount > 0 ? (
             <button
               onClick={handleJumpToLatest}
-              className="absolute -top-12 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-primary px-4 py-2 text-[13px] font-medium text-white shadow-lg transition-colors hover:bg-primary/90"
+              className="absolute -top-12 left-1/2 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-bg-card text-text-secondary shadow-md transition-colors hover:bg-bg hover:text-primary-dark"
               data-testid="log-jump-to-latest"
+              aria-label="最新のLogへスクロール"
             >
-              <span>最新のLog</span>
-              <ChevronDown size={14} />
+              <ChevronDown size={18} strokeWidth={2} />
             </button>
           ) : null
         }
