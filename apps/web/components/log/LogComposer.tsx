@@ -113,7 +113,7 @@ export function LogComposer({
   if (!user) {
     return (
       <div
-        className="sticky bottom-0 z-30 -mx-10 border-t border-border bg-bg-page px-10 py-3"
+        className="sticky bottom-0 z-30 -mx-10 bg-bg-page px-10 py-3"
         data-testid="log-composer-login"
       >
         {topOverlay}
@@ -131,7 +131,7 @@ export function LogComposer({
 
   return (
     <div
-      className="sticky bottom-0 z-30 -mx-10 border-t border-border bg-bg-page px-10 py-3"
+      className="sticky bottom-0 z-30 -mx-10 bg-bg-page px-10 py-3"
       data-testid="log-composer"
     >
       {topOverlay}

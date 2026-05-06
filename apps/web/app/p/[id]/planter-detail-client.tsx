@@ -412,13 +412,14 @@ export function PlanterDetailClient({
       window.setTimeout(() => {
         ownPostIdsRef.current.delete(ownPostId);
       }, 5 * 60 * 1000);
-      // We're about to scroll to the bottom — assert this synchronously so
-      // any echo that races the IntersectionObserver still sees at-bottom.
-      isAtBottomRef.current = true;
-      setUnreadCount(0);
 
+      // Append silently. We deliberately do NOT auto-scroll on post — the
+      // user's scroll position is sacrosanct. If the user is currently
+      // pinned to the bottom, the new log lands in view via the natural
+      // sticky composer layout. If they're scrolled up, their own post
+      // appends below the viewport and stays out of sight; we still skip
+      // the unread bump (own posts never trigger the jump-to-latest button).
       logThreadRef.current?.addLog(response.log);
-      logThreadRef.current?.scrollToBottom("smooth");
 
       if (response.score_pending) {
         setScorePending(true);
@@ -679,7 +680,7 @@ export function PlanterDetailClient({
               className="absolute -top-12 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-primary px-4 py-2 text-[13px] font-medium text-white shadow-lg transition-colors hover:bg-primary/90"
               data-testid="log-jump-to-latest"
             >
-              <span>新着メッセージ {unreadCount}件</span>
+              <span>最新のLog</span>
               <ChevronDown size={14} />
             </button>
           ) : null
