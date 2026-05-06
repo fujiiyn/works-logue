@@ -23,7 +23,7 @@ export function LougeCopyButton({ content }: LougeCopyButtonProps) {
   return (
     <button
       onClick={handleCopy}
-      className="flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-[12px] font-medium text-primary-dark transition-colors hover:bg-bg-page"
+      className="flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-[12px] font-medium text-primary-dark transition-colors hover:bg-bg"
       data-testid="louge-copy-button"
     >
       {copied ? (

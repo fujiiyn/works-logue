@@ -109,7 +109,7 @@ export function ContributorsSidebar({
       </div>
 
       {/* Stats */}
-      <div className="mt-3 flex items-center gap-3 rounded-md bg-bg-page px-3 py-2.5">
+      <div className="mt-3 flex items-center gap-3 rounded-md bg-bg px-3 py-2.5">
         <p className="text-[11px] font-bold text-primary-dark">
           {logCount} logs · {contributorCount} contributors
         </p>

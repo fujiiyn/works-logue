@@ -510,7 +510,7 @@ export function PlanterDetailClient({
             />
 
             {/* Collapsible original Seed */}
-            <div className="mb-5 rounded-lg bg-bg-page" data-testid="seed-collapsible">
+            <div className="mb-5 rounded-lg bg-bg" data-testid="seed-collapsible">
               <button
                 className="flex w-full items-center justify-between px-4 py-3 text-left"
                 onClick={() => setSeedExpanded(!seedExpanded)}
