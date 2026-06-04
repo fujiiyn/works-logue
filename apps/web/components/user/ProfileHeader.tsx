@@ -32,6 +32,11 @@ export function ProfileHeader({
 }: ProfileHeaderProps) {
   if (!user) return null;
 
+  // BR-U09: profile shows industry/occupation tags only.
+  const profileTags = tags.filter(
+    (t) => t.category === "industry" || t.category === "occupation",
+  );
+
   return (
     <div>
       {/* Cover Image */}
@@ -112,9 +117,9 @@ export function ProfileHeader({
         </div>
 
         {/* Tags */}
-        {tags.length > 0 && (
+        {profileTags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
+            {profileTags.map((tag) => (
               <span
                 key={tag.id}
                 className="rounded-full border border-border bg-primary-light-bg px-3 py-0.5 text-caption text-primary"

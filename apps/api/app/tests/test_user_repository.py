@@ -276,7 +276,7 @@ class TestUserLogs:
 class TestSimilarUsers:
     async def test_similar_users(self, repo, test_user, other_user, db_session):
         """Should return users with common tags, sorted by count."""
-        tag = Tag(name="Python", category="skill")
+        tag = Tag(name="SaaS", category="industry")
         db_session.add(tag)
         await db_session.commit()
         await db_session.refresh(tag)
@@ -292,7 +292,7 @@ class TestSimilarUsers:
 
     async def test_similar_users_excludes_self(self, repo, test_user, db_session):
         """Should not include the user themselves."""
-        tag = Tag(name="Go", category="skill")
+        tag = Tag(name="法人営業", category="occupation")
         db_session.add(tag)
         await db_session.commit()
         await db_session.refresh(tag)
@@ -305,7 +305,7 @@ class TestSimilarUsers:
 
     async def test_similar_users_excludes_followed(self, repo, test_user, other_user, db_session):
         """With exclude_user_ids, followed users should be excluded."""
-        tag = Tag(name="Rust", category="skill")
+        tag = Tag(name="コンサル", category="industry")
         db_session.add(tag)
         await db_session.commit()
         await db_session.refresh(tag)
@@ -318,3 +318,56 @@ class TestSimilarUsers:
             test_user.id, exclude_user_ids=[other_user.id]
         )
         assert len(similar) == 0
+
+    async def test_similar_users_ignores_non_profile_categories(
+        self, repo, test_user, other_user, db_session,
+    ):
+        """BR-U09: similarity is computed only over industry/occupation tags."""
+        skill_tag = Tag(name="ロジカルシンキング", category="skill")
+        db_session.add(skill_tag)
+        await db_session.commit()
+        await db_session.refresh(skill_tag)
+
+        db_session.add(UserTag(user_id=test_user.id, tag_id=skill_tag.id))
+        db_session.add(UserTag(user_id=other_user.id, tag_id=skill_tag.id))
+        await db_session.commit()
+
+        similar = await repo.get_similar_users(test_user.id, exclude_user_ids=[])
+        assert similar == []
+
+    async def test_similar_users_counts_industry_and_occupation_combined(
+        self, repo, test_user, other_user, db_session,
+    ):
+        """BR-U09: shared industry AND occupation tags should both contribute."""
+        industry = Tag(name="SaaS", category="industry")
+        occupation = Tag(name="法人営業", category="occupation")
+        db_session.add_all([industry, occupation])
+        await db_session.commit()
+        for t in (industry, occupation):
+            await db_session.refresh(t)
+
+        for user in (test_user, other_user):
+            db_session.add(UserTag(user_id=user.id, tag_id=industry.id))
+            db_session.add(UserTag(user_id=user.id, tag_id=occupation.id))
+        await db_session.commit()
+
+        similar = await repo.get_similar_users(test_user.id, exclude_user_ids=[])
+        assert len(similar) == 1
+        assert similar[0]["user_id"] == other_user.id
+        assert similar[0]["common_tag_count"] == 2
+
+    async def test_similar_users_empty_when_target_has_no_profile_tags(
+        self, repo, test_user, other_user, db_session,
+    ):
+        """BR-U09: target without any industry/occupation tag yields no matches."""
+        skill_tag = Tag(name="交渉", category="skill")
+        db_session.add(skill_tag)
+        await db_session.commit()
+        await db_session.refresh(skill_tag)
+
+        db_session.add(UserTag(user_id=test_user.id, tag_id=skill_tag.id))
+        db_session.add(UserTag(user_id=other_user.id, tag_id=skill_tag.id))
+        await db_session.commit()
+
+        similar = await repo.get_similar_users(test_user.id, exclude_user_ids=[])
+        assert similar == []

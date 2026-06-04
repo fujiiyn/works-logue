@@ -116,7 +116,7 @@ works-logue/               ← monorepo
 | 220:14 | User Profile `/user/{id}` |
 | 223:16 | Admin `/admin` |
 | 270:161 | Signup `/signup` |
-| 271:161 | Profile Setup `/profile/setup` (タグ: 職種・業界・スキル、自己紹介) |
+| 271:161 | Profile Setup `/profile/setup` (タグ: 業界・職種、自己紹介) |
 
 デザインシステム（design-systemページ、nodeId: 95:34）にカラー・タイポグラフィ・スペーシング等が定義されている。
 

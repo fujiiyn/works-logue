@@ -45,6 +45,12 @@
 - deleted_at != null → 404
 - is_banned == true → 404（公開プロフィールからは非表示）
 
+### BR-U09: プロフィール用タグカテゴリ制限
+- プロフィール（`PATCH /users/me` の `tag_ids`）で許可する `tags.category` は `industry` と `occupation` のみ
+- `role` / `situation` / `skill` / `knowledge` カテゴリの `tag_id` が含まれていた場合は 400 `invalid_tags` を返す
+- Seed 投稿や検索フィルタ等、プロフィール以外の機能では引き続き全 6 カテゴリを使用する
+- 既存レコードの他カテゴリタグはマイグレーション 00013 で一括削除済み
+
 ## フォロー
 
 ### BR-F01: 自己フォロー禁止

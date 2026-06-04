@@ -38,6 +38,7 @@ export default function ProfileEditPage() {
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tagsLoaded, setTagsLoaded] = useState(false);
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -72,10 +73,22 @@ export default function ProfileEditPage() {
     apiFetch<{
       user: unknown;
       tags: TagItem[];
-    }>(`/api/v1/users/${user.id}`).then((data) => {
-      setTagIds(data.tags.map((t) => t.id));
-      setTagNames(data.tags.map((t) => t.name));
-    });
+    }>(`/api/v1/users/${user.id}`)
+      .then((data) => {
+        // BR-U09: drop tags outside industry/occupation so that legacy entries
+        // do not survive the next save.
+        const profileTags = data.tags.filter(
+          (t) => t.category === "industry" || t.category === "occupation",
+        );
+        setTagIds(profileTags.map((t) => t.id));
+        setTagNames(profileTags.map((t) => t.name));
+        setTagsLoaded(true);
+      })
+      .catch(() => {
+        // Guard against silent data loss: do not flip tagsLoaded so the save
+        // button stays disabled and the user must reload.
+        setError("プロフィール情報の読み込みに失敗しました。ページを再読み込みしてください。");
+      });
   }, [user]);
 
   // beforeunload warning (D2)
@@ -108,7 +121,7 @@ export default function ProfileEditPage() {
         tagNames={tagNames}
         userId={user.id}
         saving={saving}
-        canSave={!!displayName.trim()}
+        canSave={!!displayName.trim() && tagsLoaded}
         onSave={() => {
           // Trigger save via custom event since sidebar can't call handleSave directly
           window.dispatchEvent(new CustomEvent("profile-edit-save"));
@@ -118,7 +131,7 @@ export default function ProfileEditPage() {
     );
 
     return () => setContent(null);
-  }, [user, avatarPreview, displayName, headline, tagNames, saving, setContent, router]);
+  }, [user, avatarPreview, displayName, headline, tagNames, saving, tagsLoaded, setContent, router]);
 
   // Listen for save event from sidebar
   useEffect(() => {
@@ -386,11 +399,12 @@ export default function ProfileEditPage() {
         <div>
           <h2 className="mb-1 text-heading-m text-primary-dark">タグ設定</h2>
           <p className="mb-3 text-body-s text-text-muted">
-            プロフィールに表示するタグを選択してください。
+            プロフィールに表示する業界・職種タグを選択してください。
           </p>
           <TagAccordionSelector
             selectedTagIds={tagIds}
             onTagsChange={(ids: string[]) => { setTagIds(ids); setDirty(true); }}
+            allowedCategories={["industry", "occupation"]}
           />
         </div>
 
@@ -430,7 +444,7 @@ export default function ProfileEditPage() {
       <div className="mt-8 flex gap-3 xl:hidden">
         <button
           onClick={handleSave}
-          disabled={saving || !displayName.trim()}
+          disabled={saving || !displayName.trim() || !tagsLoaded}
           className="flex-1 rounded-lg bg-primary py-3 text-[14px] font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50"
           data-testid="profile-edit-save"
         >

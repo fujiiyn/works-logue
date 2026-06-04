@@ -105,7 +105,12 @@ async def update_me(
             if len(tags) != len(set(body.tag_ids)):
                 raise HTTPException(status_code=400, detail="invalid_tags")
             for tag in tags:
-                if not tag.is_leaf or not tag.is_active:
+                # BR-U09: profile tags are restricted to industry/occupation.
+                if (
+                    not tag.is_leaf
+                    or not tag.is_active
+                    or tag.category not in ("industry", "occupation")
+                ):
                     raise HTTPException(status_code=400, detail="invalid_tags")
         await tag_repo.replace_user_tags(current_user.id, list(set(body.tag_ids)))
 

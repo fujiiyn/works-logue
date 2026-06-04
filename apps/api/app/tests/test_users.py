@@ -32,6 +32,16 @@ async def non_leaf_tag(db_session: AsyncSession) -> Tag:
 
 
 @pytest.fixture
+async def skill_leaf_tag(db_session: AsyncSession) -> Tag:
+    """Leaf tag in a category not allowed for profile tagging (BR-U09)."""
+    t = Tag(name="ロジカルシンキング", category="skill", is_leaf=True, sort_order=1)
+    db_session.add(t)
+    await db_session.commit()
+    await db_session.refresh(t)
+    return t
+
+
+@pytest.fixture
 async def seed_type(db_session: AsyncSession) -> SeedType:
     st = SeedType(slug="query", name="疑問", description="desc", sort_order=1)
     db_session.add(st)
@@ -306,6 +316,60 @@ class TestOnboarding:
             json={"tag_ids": [str(non_leaf_tag.id)]},
         )
         assert resp.status_code == 400
+
+    async def test_tag_ids_rejects_non_profile_category(
+        self, client, skill_leaf_tag, leaf_tags,
+    ):
+        """BR-U09: profile tag_ids must be limited to industry/occupation."""
+        await _create_me(client)
+        resp = await client.patch(
+            "/api/v1/users/me", headers=AUTH_HEADERS,
+            json={"tag_ids": [str(leaf_tags[0].id), str(skill_leaf_tag.id)]},
+        )
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == "invalid_tags"
+
+    @pytest.mark.parametrize("bad_category", ["role", "situation", "skill", "knowledge"])
+    async def test_tag_ids_rejects_each_disallowed_category(
+        self, client, db_session, leaf_tags, bad_category,
+    ):
+        """BR-U09: every non-profile category should be rejected regardless of order."""
+        bad_tag = Tag(name=f"bad-{bad_category}", category=bad_category, is_leaf=True, sort_order=1)
+        db_session.add(bad_tag)
+        await db_session.commit()
+        await db_session.refresh(bad_tag)
+
+        await _create_me(client)
+        industry_id = str(leaf_tags[0].id)
+        bad_id = str(bad_tag.id)
+
+        for order in ([industry_id, bad_id], [bad_id, industry_id]):
+            resp = await client.patch(
+                "/api/v1/users/me", headers=AUTH_HEADERS,
+                json={"tag_ids": order},
+            )
+            assert resp.status_code == 400, f"failed for order={order}"
+            assert resp.json()["detail"] == "invalid_tags"
+
+    async def test_tag_ids_accepts_industry_and_occupation(
+        self, client, leaf_tags,
+    ):
+        """BR-U09: industry + occupation combination is allowed and persisted."""
+        me = await _create_me(client)
+        expected_ids = {str(t.id) for t in leaf_tags}
+        resp = await client.patch(
+            "/api/v1/users/me", headers=AUTH_HEADERS,
+            json={"tag_ids": list(expected_ids)},
+        )
+        assert resp.status_code == 200
+
+        # Confirm the tags actually persisted.
+        profile = await client.get(
+            f"/api/v1/users/{me['id']}", headers=AUTH_HEADERS,
+        )
+        assert profile.status_code == 200
+        persisted = {tag["id"] for tag in profile.json()["tags"]}
+        assert persisted == expected_ids
 
 
 class TestUserFollow:

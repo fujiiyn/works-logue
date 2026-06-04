@@ -328,8 +328,8 @@ Seed 情報のみ表示。Log 一覧・Log 投稿フォームは U3 で追加。
 [表示名 *]（text input、プリフィル、必須）
 [自己紹介]（textarea、任意）
 
-[あなたの業界・職種・スキル]（ラベル）
-[TagSelector: 全6カテゴリタブ]
+[あなたの業界・職種]（ラベル）
+[TagSelector: 業界・職種の2カテゴリのみ（allowedCategories=['industry','occupation']）]
 
 [設定を完了する]（display_name 未入力時は disabled）
 ```
@@ -400,11 +400,12 @@ useEffect(() => {
 interface TagSelectorProps {
   selectedTagIds: string[]
   onTagsChange: (tagIds: string[]) => void
-  categories?: TagCategory[]  // 追加: 表示するカテゴリを制限（デフォルト: 全6カテゴリ）
+  allowedCategories?: TagCategory[]  // 表示するカテゴリを制限（デフォルト: 全6カテゴリ）
 }
 ```
 
-- オンボーディング・Seed 投稿ともに全6カテゴリを表示（`categories` 未指定 = デフォルト全表示）
+- オンボーディング・プロフィール編集: `allowedCategories=['industry','occupation']` を指定（BR-U09）
+- Seed 投稿・Explore 検索フィルタ: `allowedCategories` 未指定で全 6 カテゴリ表示（デフォルト）
 
 ---
 

@@ -62,7 +62,7 @@ Output: UserResponse
    - display_name: 1〜100文字（必須）
    - headline: 0〜60文字
    - bio: 0〜200文字
-   - tag_ids: 存在するタグIDか検証
+   - tag_ids: 存在する leaf タグかつ `category ∈ {industry, occupation}` を検証（BR-U09）
    - location: 0〜100文字
    - social_links: { x?, linkedin?, wantedly?, website? } 各URL形式
 3. UserRepository.update(user, fields)

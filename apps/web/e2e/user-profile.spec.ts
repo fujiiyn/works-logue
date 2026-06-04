@@ -160,4 +160,24 @@ test.describe("User Profile", () => {
     await page.click('[data-testid="planter-feed-tab-following"]');
     await expect(page.getByText("ログインが必要です")).toBeVisible();
   });
+
+  test("profile edit shows only industry/occupation tag categories (BR-U09)", async ({
+    page,
+  }) => {
+    await loginViaSupabase(page);
+
+    await page.click('[data-testid="header-user-menu"]');
+    await page.click('[data-testid="header-profile-link"]');
+    await page.click('[data-testid="profile-edit-button"]');
+
+    const selector = page.locator('[data-testid="tag-accordion-selector"]');
+    await expect(selector).toBeVisible();
+
+    await expect(selector.getByText("業界", { exact: true })).toBeVisible();
+    await expect(selector.getByText("職種", { exact: true })).toBeVisible();
+    await expect(selector.getByText("役割", { exact: true })).toHaveCount(0);
+    await expect(selector.getByText("状況", { exact: true })).toHaveCount(0);
+    await expect(selector.getByText("スキル", { exact: true })).toHaveCount(0);
+    await expect(selector.getByText("ナレッジ", { exact: true })).toHaveCount(0);
+  });
 });

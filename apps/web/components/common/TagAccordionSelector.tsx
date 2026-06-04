@@ -37,10 +37,18 @@ function flattenTree(
   return result;
 }
 
-const LEFT_CATEGORIES = ["industry", "role", "skill"];
-const RIGHT_CATEGORIES = ["occupation", "situation", "knowledge"];
+export type TagCategory =
+  | "industry"
+  | "occupation"
+  | "role"
+  | "situation"
+  | "skill"
+  | "knowledge";
 
-const CATEGORY_LABELS: Record<string, string> = {
+const LEFT_CATEGORIES: TagCategory[] = ["industry", "role", "skill"];
+const RIGHT_CATEGORIES: TagCategory[] = ["occupation", "situation", "knowledge"];
+
+const CATEGORY_LABELS: Record<TagCategory, string> = {
   industry: "業界",
   occupation: "職種",
   role: "役割",
@@ -52,12 +60,36 @@ const CATEGORY_LABELS: Record<string, string> = {
 interface TagAccordionSelectorProps {
   selectedTagIds: string[];
   onTagsChange: (ids: string[]) => void;
+  /**
+   * 表示するカテゴリの許可リスト。未指定なら全 6 カテゴリ。
+   * プロフィール用途では `['industry','occupation']` を渡す（BR-U09）。
+   */
+  allowedCategories?: ReadonlyArray<TagCategory>;
 }
 
 export function TagAccordionSelector({
   selectedTagIds,
   onTagsChange,
+  allowedCategories,
 }: TagAccordionSelectorProps) {
+  const allowedSet = useMemo(
+    () => (allowedCategories ? new Set(allowedCategories) : null),
+    [allowedCategories],
+  );
+  const leftCategories = useMemo(
+    () =>
+      allowedSet
+        ? LEFT_CATEGORIES.filter((c) => allowedSet.has(c))
+        : LEFT_CATEGORIES,
+    [allowedSet],
+  );
+  const rightCategories = useMemo(
+    () =>
+      allowedSet
+        ? RIGHT_CATEGORIES.filter((c) => allowedSet.has(c))
+        : RIGHT_CATEGORIES,
+    [allowedSet],
+  );
   const [allTags, setAllTags] = useState<TagNode[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -81,6 +113,20 @@ export function TagAccordionSelector({
     for (const t of allTags) m.set(t.id, t);
     return m;
   }, [allTags]);
+
+  // Sync selectedTagIds with allowedCategories so the chips view never
+  // diverges from the state the parent will persist.
+  useEffect(() => {
+    if (!allowedSet || tagMap.size === 0) return;
+    const filtered = selectedTagIds.filter((id) => {
+      const tag = tagMap.get(id);
+      // Keep unknown ids (not yet loaded) intact; drop known disallowed tags.
+      return !tag || allowedSet.has(tag.category as TagCategory);
+    });
+    if (filtered.length !== selectedTagIds.length) {
+      onTagsChange(filtered);
+    }
+  }, [allowedSet, tagMap, selectedTagIds, onTagsChange]);
 
   const getDescendantIds = useCallback(
     (nodeId: string, category: string): string[] => {
@@ -146,9 +192,10 @@ export function TagAccordionSelector({
     onTagsChange(selectedTagIds.filter((id) => id !== tagId));
   }
 
-  const selectedTags = selectedTagIds
+  const selectedTags = (selectedTagIds
     .map((id) => tagMap.get(id))
-    .filter(Boolean) as TagNode[];
+    .filter(Boolean) as TagNode[])
+    .filter((t) => !allowedSet || allowedSet.has(t.category as TagCategory));
 
   function buildTree(category: string): TreeTagNode[] {
     const catTags = allTags.filter((t) => t.category === category);
@@ -166,7 +213,7 @@ export function TagAccordionSelector({
     return roots;
   }
 
-  function renderColumn(categories: string[]) {
+  function renderColumn(categories: TagCategory[]) {
     return (
       <div className="flex flex-1 flex-col gap-2">
         {categories.map((cat) => {
@@ -241,8 +288,8 @@ export function TagAccordionSelector({
 
       {/* Two-column accordions */}
       <div className="flex gap-2">
-        {renderColumn(LEFT_CATEGORIES)}
-        {renderColumn(RIGHT_CATEGORIES)}
+        {renderColumn(leftCategories)}
+        {renderColumn(rightCategories)}
       </div>
     </div>
   );

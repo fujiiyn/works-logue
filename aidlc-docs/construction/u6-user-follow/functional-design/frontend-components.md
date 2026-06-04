@@ -20,7 +20,7 @@ UserProfilePage (Server Component)
 │   ├── UserInfo (表示名, ヘッドライン, bio)
 │   ├── FollowButton (Client Component)
 │   ├── EditButton (自分のプロフィールのみ表示)
-│   ├── TagPills (職種・業界・スキルタグ)
+│   ├── TagPills (業界・職種タグ)
 │   └── LocationAndLinks (居住地 + SNSリンクアイコン)
 ├── StatsRow
 │   ├── StatCard (総合スコア)
@@ -166,6 +166,7 @@ ProfileEditPage (Client Component)
 ### タグ編集UI
 
 - 既存の TagAccordionSelector コンポーネントを再利用（オンボーディングで実装済み）
+- プロフィール編集では `allowedCategories={['industry','occupation']}` を渡し、業界・職種のみ表示する（BR-U09）
 - 選択済みタグは pill 形式で表示、× で削除可能
 - 「+ 追加」で アコーディオン展開
 

@@ -260,11 +260,19 @@ class UserRepository:
         exclude_user_ids: list[uuid.UUID],
         limit: int = 5,
     ) -> list[dict[str, Any]]:
-        """Get users with common tags, sorted by shared tag count (D11)."""
-        # Get tags for the target user
+        """Get users with common tags, sorted by shared tag count (D11).
+
+        BR-U09: similarity is computed only over industry/occupation tags,
+        matching what the profile UI exposes.
+        """
+        # Restrict the target user's tag set to profile-allowed categories.
         user_tags_subq = (
             select(UserTag.tag_id)
-            .where(UserTag.user_id == user_id)
+            .join(Tag, UserTag.tag_id == Tag.id)
+            .where(
+                UserTag.user_id == user_id,
+                Tag.category.in_(("industry", "occupation")),
+            )
         ).subquery()
 
         # Find other users who share these tags

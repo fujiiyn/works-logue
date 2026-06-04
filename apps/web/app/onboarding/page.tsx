@@ -139,7 +139,7 @@ function OnboardingForm() {
 
           <div className="flex flex-col gap-2">
             <p className="text-body-m font-semibold text-primary-dark">
-              あなたの業界・職種・スキル
+              あなたの業界・職種
             </p>
             <p className="text-body-s text-text-muted">
               関連するタグを選択すると、あなたに合ったSeedが見つかりやすくなります（任意）
@@ -147,6 +147,7 @@ function OnboardingForm() {
             <TagAccordionSelector
               selectedTagIds={selectedTagIds}
               onTagsChange={setSelectedTagIds}
+              allowedCategories={["industry", "occupation"]}
             />
           </div>
 
