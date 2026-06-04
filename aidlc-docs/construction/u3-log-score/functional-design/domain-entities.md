@@ -1,4 +1,4 @@
-# U3 Log & Score - Domain Entities
+﻿# U3 Log & Score - Domain Entities
 
 ## 概要
 
@@ -69,7 +69,7 @@ class LogCreateResponse:
 ```python
 class PlanterScoreResponse:
     id: UUID
-    status: str                    # seed -> sprout 遷移は同期で反映済み
+    status: str                    # seed -> seed 遷移は同期で反映済み
     log_count: int                 # 同期で更新済み
     contributor_count: int         # 同期で更新済み
     progress: float                # AI計算前の前回値
@@ -94,12 +94,12 @@ class PlanterScoreWithPendingResponse:
 ```
 
 **score_pending の判定ロジック**:
-- 最新の Log の created_at > 最新の LougeScoreSnapshot の created_at → pending=true
+- 最新の Log の created_at > 最新の LogueScoreSnapshot の created_at → pending=true
 - それ以外 → pending=false
 
 ---
 
-## LougeScoreSnapshot
+## LogueScoreSnapshot
 
 Log 投稿のたびに記録されるスコアスナップショット。閾値チューニング・分析に使用。
 
@@ -130,9 +130,9 @@ Log 投稿のたびに記録されるスコアスナップショット。閾値�
 
 ### structure_parts（条件A 詳細）
 
-LougeScoreSnapshot に保存するための拡張。`maturity_scores` と同様に JSONB カラムを追加するか、既存カラムを活用する。
+LogueScoreSnapshot に保存するための拡張。`maturity_scores` と同様に JSONB カラムを追加するか、既存カラムを活用する。
 
-**方針**: `structure_fulfillment` は float で全体の充足率のみ持つが、パーツ単位の詳細は Vertex AI のレスポンスに含まれる。これを LougeScoreSnapshot の新規 JSONB カラム `structure_parts` に保存する。
+**方針**: `structure_fulfillment` は float で全体の充足率のみ持つが、パーツ単位の詳細は Vertex AI のレスポンスに含まれる。これを LogueScoreSnapshot の新規 JSONB カラム `structure_parts` に保存する。
 
 ```json
 {
@@ -143,7 +143,7 @@ LougeScoreSnapshot に保存するための拡張。`maturity_scores` と同様�
 }
 ```
 
-**マイグレーション**: `louge_score_snapshots` に `structure_parts JSONB` カラムを追加。
+**マイグレーション**: `logue_score_snapshots` に `structure_parts JSONB` カラムを追加。
 
 ---
 
@@ -153,7 +153,7 @@ U2 では `status='seed'` で作成するのみだった。U3 で更新する対
 
 | カラム | U3 での更新内容 |
 |---|---|
-| status | `seed` -> `sprout` への遷移（Log 1件以上で） |
+| status | `seed` -> `seed` への遷移（Log 1件以上で） |
 | structure_fulfillment | 条件A の充足率（0.0〜1.0）を毎回更新 |
 | maturity_score | 条件B の総合スコア（0.0〜1.0）を更新（条件B 実行時のみ） |
 | progress | 開花までの総合進捗（0.0〜1.0）を毎回更新 |
@@ -168,7 +168,7 @@ class PlanterResponse:
     id: UUID
     title: str
     body: str
-    status: str  # "seed" | "sprout" | "louge"
+    status: str  # "seed" | "seed" | "logue"
     seed_type: SeedTypeResponse
     user: UserPublicResponse
     tags: list[TagResponse]
@@ -243,7 +243,7 @@ U1 で定義済みの通知テーブル。U3 では以下のイベントでレ�
 ## エンティティ関連図
 
 ```
-User ──< Log >── Planter ──< LougeScoreSnapshot
+User ──< Log >── Planter ──< LogueScoreSnapshot
   |                 |
   |                 |── PlanterTag >── Tag
   |                 |── PlanterFollow >── User

@@ -1,4 +1,4 @@
-# U1 Foundation — Business Rules
+﻿# U1 Foundation — Business Rules
 
 ## 概要
 
@@ -65,21 +65,21 @@ else:
 # progress は 0.0〜1.0 にクランプ
 ```
 
-### Sprout サブステートの判定
+### Seed サブステートの判定
 
 | 条件 | サブステート |
 |---|---|
-| progress < 0.5 | Sprout 1（条件A 進行中） |
-| 0.5 ≤ progress < 0.8 | Sprout 2（条件A 充足、条件B 進行中） |
-| 0.9 ≤ progress < 1.0 | Sprout 3（蕾：条件B がもう少し） |
+| progress < 0.5 | Seed 1（条件A 進行中） |
+| 0.5 ≤ progress < 0.8 | Seed 2（条件A 充足、条件B 進行中） |
+| 0.9 ≤ progress < 1.0 | Seed 3（蕾：条件B がもう少し） |
 
 ※ しきい値（0.5 / 0.8）は `ai_configs` の `bud_threshold` で調整可能
 
 ### Planter ステータス遷移
 
 ```
-seed ─→ sprout: Log が1件以上になった時点
-sprout ─→ louge: progress = 1.0（条件A AND 条件B 完全充足）
+seed ─→ seed: Log が1件以上になった時点
+seed ─→ logue: progress = 1.0（条件A AND 条件B 完全充足）
 ```
 
 ---
@@ -145,8 +145,8 @@ sprout ─→ louge: progress = 1.0（条件A AND 条件B 完全充足）
 
 - `ai_configs` テーブルで AI モデル名・プロンプト・閾値を管理
 - 管理画面から各設定を編集可能（admin ロール限定）
-- モデル切り替え: スコアリング用（軽量）、Louge 生成用（高品質）、ファシリテート用を個別指定
-- プロンプト編集: 条件A/B の判定プロンプト、Louge 生成プロンプト、ファシリテートプロンプトを管理画面から変更可能
+- モデル切り替え: スコアリング用（軽量）、Logue 生成用（高品質）、ファシリテート用を個別指定
+- プロンプト編集: 条件A/B の判定プロンプト、Logue 生成プロンプト、ファシリテートプロンプトを管理画面から変更可能
 - 閾値変更: 条件A 充足率閾値、条件B スコア閾値、最低参加者数、最低 Log 数を管理画面から調整可能
 - 変更履歴: `updated_at` / `updated_by` で最終更新者を記録
 

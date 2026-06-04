@@ -1,4 +1,4 @@
-# U6 User & Follow — Functional Design Plan
+﻿# U6 User & Follow — Functional Design Plan
 
 ## Plan Overview
 
@@ -15,7 +15,7 @@ U6 はユーザープロフィール（表示・編集・投稿履歴・イン�
   - [x] 2c: アバターアップロードロジック（Supabase Storage連携）
   - [x] 2d: フォロー/アンフォローロジック（User-User、User-Planter）
   - [x] 2e: フォロー中フィード取得ロジック
-  - [x] 2f: 投稿履歴タブ取得ロジック（Seed一覧/Log一覧/参加Louge）
+  - [x] 2f: 投稿履歴タブ取得ロジック（Seed一覧/Log一覧/参加Logue）
 - [x] **Step 3**: ビジネスルール定義
   - [x] 3a: バリデーションルール（表示名、自己紹介、アバターファイル制約）
   - [x] 3b: フォロー制約（自己フォロー禁止、重複防止）

@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 
 import pytest
 from httpx import AsyncClient
@@ -37,8 +37,8 @@ async def _setup_bloomed_planter(
         title="Bloomed Seed",
         body="Body text",
         seed_type_id=seed_type.id,
-        status="louge",
-        louge_content="# Test Article",
+        status="logue",
+        logue_content="# Test Article",
         progress=1.0,
     )
     db.add(planter)
@@ -103,7 +103,7 @@ class TestContributorsEndpoint:
     async def test_get_contributors_not_bloomed(
         self, client: AsyncClient, db_session: AsyncSession, mock_auth_user_sub
     ):
-        """GET /planters/{id}/contributors should return 404 for non-louge planters."""
+        """GET /planters/{id}/contributors should return 404 for non-logue planters."""
         seed_type = await _setup_seed_type(db_session)
         user = await _setup_user(db_session, mock_auth_user_sub)
         planter = Planter(
@@ -111,7 +111,7 @@ class TestContributorsEndpoint:
             title="Not Bloomed",
             body="Body",
             seed_type_id=seed_type.id,
-            status="sprout",
+            status="seed",
         )
         db_session.add(planter)
         await db_session.commit()

@@ -1,4 +1,4 @@
-# U5 Feed & Search — Business Rules
+﻿# U5 Feed & Search — Business Rules
 
 ## BR-01: フィードタブ切り替え
 
@@ -29,9 +29,9 @@ w_structure = 0.2
 - スコアが同点の場合は `created_at DESC` で並び替え
 
 ### 開花済みタブ (bloomed)
-- `status = 'louge'` のみ表示
-- `louge_generated_at DESC` で並び替え
-- カーソルページネーション（louge_generated_at + id）
+- `status = 'logue'` のみ表示
+- `logue_generated_at DESC` で並び替え
+- カーソルページネーション（logue_generated_at + id）
 
 ## BR-02: 検索ロジック
 
@@ -46,7 +46,7 @@ w_structure = 0.2
 - SQL: `planter_tags` を JOIN し `HAVING COUNT(DISTINCT tag_id) = len(tag_ids)` で絞り込み
 
 ### 状態フィルタ
-- `status` パラメータで `seed | sprout | louge` を指定
+- `status` パラメータで `seed | seed | logue` を指定
 - 未指定時は全状態（archived 除外）
 
 ### 複合条件

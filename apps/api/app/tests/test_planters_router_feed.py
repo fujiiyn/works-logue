@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -39,7 +39,7 @@ async def _create_planter(
     title: str = "Test",
     status: str = "seed",
     created_at: datetime | None = None,
-    louge_generated_at: datetime | None = None,
+    logue_generated_at: datetime | None = None,
     structure_fulfillment: float = 0.0,
 ) -> Planter:
     p = Planter(
@@ -52,9 +52,9 @@ async def _create_planter(
     )
     if created_at:
         p.created_at = created_at
-    if louge_generated_at:
-        p.louge_generated_at = louge_generated_at
-        p.louge_content = "# Article"
+    if logue_generated_at:
+        p.logue_generated_at = logue_generated_at
+        p.logue_content = "# Article"
     db.add(p)
     await db.commit()
     await db.refresh(p)
@@ -112,12 +112,12 @@ class TestListPlantersTabTrending:
 
 
 class TestListPlantersTabBloomed:
-    async def test_bloomed_returns_louge_only(self, client, db_session, test_user, seed_type):
+    async def test_bloomed_returns_logue_only(self, client, db_session, test_user, seed_type):
         now = datetime.now(timezone.utc)
         await _create_planter(db_session, test_user, seed_type, title="Seed", status="seed")
         await _create_planter(
             db_session, test_user, seed_type,
-            title="Bloomed", status="louge", louge_generated_at=now,
+            title="Bloomed", status="logue", logue_generated_at=now,
         )
 
         resp = await client.get("/api/v1/planters?tab=bloomed")

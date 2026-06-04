@@ -1,4 +1,4 @@
-# AI-DLC State Tracking
+﻿# AI-DLC State Tracking
 
 ## Project Information
 - **Project Type**: Greenfield
@@ -47,7 +47,7 @@
   - [ ] U3 Log & Score
     - [x] Functional Design — Completed 2026-04-14
     - [x] Code Generation — Completed 2026-04-15
-  - [ ] U4 Louge
+  - [ ] U4 Logue
     - [x] Functional Design — Completed 2026-04-15
     - [x] Code Generation — Completed 2026-04-15
   - [ ] U5 Feed & Search

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
@@ -28,8 +28,7 @@ interface SearchResponse {
 const STATUS_OPTIONS = [
   { key: "", label: "すべて" },
   { key: "seed", label: "Seed" },
-  { key: "sprout", label: "Sprout" },
-  { key: "louge", label: "Louge" },
+  { key: "logue", label: "Logue" },
 ] as const;
 
 export default function ExplorePage() {

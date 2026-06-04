@@ -1,4 +1,4 @@
-# U2 Seed — Business Rules
+﻿# U2 Seed — Business Rules
 
 ## BR-U2-01: Seed 投稿の権限
 
@@ -27,7 +27,7 @@ Seed 投稿で作成される Planter は以下の初期状態を持つ:
 | contributor_count | `0` |
 | structure_fulfillment | `0.0` |
 | maturity_score | `NULL` |
-| louge_content | `NULL` |
+| logue_content | `NULL` |
 | parent_planter_id | `NULL` |
 
 ## BR-U2-04: 投稿者の自動フォロー

@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 
 import pytest
 from httpx import AsyncClient
@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.log import Log
 from app.models.planter import Planter
-from app.models.score import LougeScoreSnapshot
+from app.models.score import LogueScoreSnapshot
 from app.models.seed_type import SeedType
 from app.models.user import User
 
@@ -90,7 +90,7 @@ class TestGetPlanterScore:
         await db_session.flush()
         await db_session.refresh(log)
 
-        snapshot = LougeScoreSnapshot(
+        snapshot = LogueScoreSnapshot(
             planter_id=planter.id,
             trigger_log_id=log.id,
             structure_fulfillment=0.5,

@@ -1,4 +1,4 @@
-# U7 Admin — Functional Design Plan
+﻿# U7 Admin — Functional Design Plan
 
 ## Plan Overview
 
@@ -44,7 +44,7 @@ Figma 参照: page `admin`（nodeId `420:159`）。主要フレーム:
 
 - [x] **Step 2**: ビジネスロジックモデル定義
   - [x] 2a: AdminMiddleware（`role=admin` のみ通過、それ以外は Q10=B により `notFound()` で 404）
-  - [x] 2b: ダッシュボード統計取得ロジック（総ユーザー数 / 総 Planter 数 / 本日の新規 Planter / 開花待ち Sprout の集計）
+  - [x] 2b: ダッシュボード統計取得ロジック（総ユーザー数 / 総 Planter 数 / 本日の新規 Planter / 開花待ち Seed の集計）
   - [x] 2c: ユーザー管理ロジック（一覧取得・検索・フィルタ、BAN／解除、自己 BAN 禁止、BAN 中ユーザーは投稿不可かつ既存投稿は表示維持）
   - [x] 2d: Planter 管理ロジック（一覧取得・状態フィルタ、アーカイブ／復元、ソフトデリート、削除はタイプ確認モーダル）
   - [x] 2e: SeedType マスタ編集（`description` 更新 + `is_active` トグルのみ。追加・並び替え・slug/name 変更は migration）
@@ -59,9 +59,9 @@ Figma 参照: page `admin`（nodeId `420:159`）。主要フレーム:
 
 - [x] **Step 4**: フロントエンドコンポーネント設計
   - [x] 4a: AdminLayout（AdminHeader + ダーク緑 AdminSidebar + RightSidebar 抑止。`apps/web/app/admin/layout.tsx` で完全独立）
-  - [x] 4b: AdminDashboard `/admin`（統計カード 4 枚: 総ユーザー数 / 総 Planter 数 / 本日の新規 Planter / 開花待ち Sprout）
+  - [x] 4b: AdminDashboard `/admin`（統計カード 4 枚: 総ユーザー数 / 総 Planter 数 / 本日の新規 Planter / 開花待ち Seed）
   - [x] 4c: UserManagementTable（一覧、検索、FilterChip すべて／正常／BAN中、BAN／BAN 解除ダイアログ、自分の行は鍵アイコン）
-  - [x] 4d: PlanterManagementTable（一覧、状態フィルタ すべて／Seed／Sprout／Louge／アーカイブ／削除済み、Archive／Restore／Delete (typed) ダイアログ）
+  - [x] 4d: PlanterManagementTable（一覧、状態フィルタ すべて／Seed／Seed／Logue／アーカイブ／削除済み、Archive／Restore／Delete (typed) ダイアログ）
   - [x] 4e: SeedTypeAdminPage（一覧 + 説明編集モーダル + `is_active` トグル。FilterChip すべて／公開中／非公開）
   - [x] 4f: AdminGuard（Server Component で `role=admin` 以外は `notFound()`。Q10=B）
 

@@ -1,4 +1,4 @@
-# Services Definition
+﻿# Services Definition
 
 サービスレイヤーの定義とオーケストレーションパターン。
 
@@ -10,7 +10,7 @@
 +--Router Layer (HTTP)--------------------------------------------+
 | PlanterRouter | LogRouter | UserRouter | SearchRouter | Follow  |
 +--Service Layer (Business Logic)--------------------------------+
-| ScoreEngine | LougeGenerator | InsightCalc | FeedRanker | AIFac |
+| ScoreEngine | LogueGenerator | InsightCalc | FeedRanker | AIFac |
 +--Repository Layer (Data Access)--------------------------------+
 | PlanterRepo | LogRepo | UserRepo | TagRepo                     |
 +--Infrastructure Layer (External Services)----------------------+
@@ -39,7 +39,7 @@ Client --> PlanterRouter.create_planter()
 ```
 Client --> LogRouter.create_log()
              |-> LogRepository.create()
-             |-> [Planter状態が seed -> sprout 遷移チェック]
+             |-> [Planter状態が seed -> seed 遷移チェック]
              |-> BackgroundTasks.add_task(score_pipeline)  ← apps/api/pipelines/score_pipeline.py
              |-> return LogResponse
 
@@ -48,7 +48,7 @@ BackgroundTasks: ScorePipeline.run(planter_id)
              |-> [条件A充足 + 最低参加ライン超過?]
              |     |-> YES: ScoreEngine.evaluate_maturity()  ← 条件B: VertexAI で成熟度4観点を採点
              |     |         |-> ScoreEngine.should_bloom()  ← 条件A AND 条件B の最終判定
-             |     |         |     |-> YES: LougeGenerator.bloom()
+             |     |         |     |-> YES: LogueGenerator.bloom()
              |     |         |     |-> NO: AIFacilitator.facilitate()
              |     |-> NO: ScoreEngine.save_snapshot()
              |-> PlanterRepository.update_status() (if needed)
@@ -58,13 +58,13 @@ BackgroundTasks: ScorePipeline.run(planter_id)
 - 条件A の軽量チェックは毎回実行。条件B の本格スコアリングは条件A 充足 + 最低参加ライン超過時のみ。
 - Log 投稿者は自動で Planter をフォロー。
 
-### パターン3: Louge 開花フロー
+### パターン3: Logue 開花フロー
 
 ```
-LougeGenerator.bloom(planter_id)
-             |-> LougeGenerator.generate()     [Vertex AI 呼び出し]
-             |-> PlanterRepository.update()     [louge_content 保存]
-             |-> PlanterRepository.update_status(louge)
+LogueGenerator.bloom(planter_id)
+             |-> LogueGenerator.generate()     [Vertex AI 呼び出し]
+             |-> PlanterRepository.update()     [logue_content 保存]
+             |-> PlanterRepository.update_status(logue)
              |-> InsightScoreCalculator.calculate()
              |-> InsightScoreCalculator.apply()
              |-> NotificationRepository.create() [開花通知イベント記録]
@@ -85,7 +85,7 @@ Client --> PlanterRouter.list_planters(tab)
              |     |-> LogRepository.get_log_velocities(planter_ids, window_hours)
              |     |-> FeedRanker.rank_trending(planters, view_counts, log_velocities, window_hours)
              |                      ↑ FeedRanker はスコア計算のみ。Repository に依存しない
-             |-> tab == "flowering": PlanterRepository.list_feed(louge_only)
+             |-> tab == "flowering": PlanterRepository.list_feed(logue_only)
              |-> return PaginatedResponse
 ```
 
@@ -112,8 +112,8 @@ Client --> SearchRouter.search_planters(keyword, tag_ids, status)
 | サービス | 責務 | 依存先 |
 |---|---|---|
 | ScoreEngine | スコア計算ロジック（条件A/B）のみ。開花トリガーは判定するが実行しない | VertexAIClient, LogRepository, PlanterRepository |
-| LougeGenerator | AI 記事生成 + 開花処理のオーケストレーション | VertexAIClient, PlanterRepository, InsightScoreCalculator |
-| InsightScoreCalculator | 貢献度スコア計算のみ。Louge 生成には関与しない | LogRepository, UserRepository |
+| LogueGenerator | AI 記事生成 + 開花処理のオーケストレーション | VertexAIClient, PlanterRepository, InsightScoreCalculator |
+| InsightScoreCalculator | 貢献度スコア計算のみ。Logue 生成には関与しない | LogRepository, UserRepository |
 | FeedRanker | ランキングスコア計算のみ。データは Router 側が各 Repository から取得して渡す。Repository に依存しない | なし |
 | AIFacilitator | ファシリテート Log 生成のみ。スコア判定には関与しない | VertexAIClient, LogRepository |
 

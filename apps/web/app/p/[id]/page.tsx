@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import { PlanterDetailClient } from "./planter-detail-client";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -23,8 +23,8 @@ interface PlanterDetail {
     name: boolean;
   } | null;
   bloom_threshold: number;
-  louge_content: string | null;
-  louge_generated_at: string | null;
+  logue_content: string | null;
+  logue_generated_at: string | null;
   bloom_pending: boolean;
   is_following: boolean;
   created_at: string;

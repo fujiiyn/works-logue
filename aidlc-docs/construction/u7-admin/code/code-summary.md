@@ -1,4 +1,4 @@
-# U7 Admin — Code Generation Summary
+﻿# U7 Admin — Code Generation Summary
 
 Code Generation Plan: `aidlc-docs/construction/plans/u7-admin-code-generation-plan.md` (Single Source of Truth)
 Functional Design: `aidlc-docs/construction/u7-admin/functional-design/`
@@ -104,7 +104,7 @@ Total Steps: 42 / 42 完了
 | Dashboard | `/admin` | `424:159` | `admin-stats-card-total_users` 他 4 種 |
 | Users | `/admin/users` | `426:159` | `admin-users-search-input`, `filter-chip-{all\|normal\|banned}`, `admin-users-row-{id}`, `admin-users-ban-button-{id}`, `admin-users-unban-button-{id}` |
 | BAN dialog | (modal) | `427:159` | `admin-ban-dialog-reason-input`, `admin-ban-dialog-confirm`, `admin-unban-dialog-confirm` |
-| Planters | `/admin/planters` | `428:159` | `admin-planters-row-{id}`, `admin-planters-archive-button-{id}`, `admin-planters-restore-button-{id}`, `admin-planters-delete-button-{id}`, `filter-chip-{all\|seed\|sprout\|louge\|archived\|deleted}` |
+| Planters | `/admin/planters` | `428:159` | `admin-planters-row-{id}`, `admin-planters-archive-button-{id}`, `admin-planters-restore-button-{id}`, `admin-planters-delete-button-{id}`, `filter-chip-{all\|seed\|seed\|logue\|archived\|deleted}` |
 | Delete planter dialog | (modal) | `432:713` | `admin-delete-planter-dialog-confirm-input`, `admin-delete-planter-dialog-confirm` |
 | SeedType マスタ | `/admin/seed-types` | `433:159` | `admin-seed-types-row-{id}`, `admin-seed-types-toggle-{id}`, `admin-seed-types-edit-{id}` |
 | Edit description dialog | (modal) | `464:2` | `admin-edit-description-dialog-textarea`, `admin-edit-description-dialog-save` |
@@ -125,7 +125,7 @@ Total Steps: 42 / 42 完了
 | A07 | admin BAN 禁止 | `routers/admin.py:ban_user` (`target.role == 'admin'` で 400) |
 | A08 | BAN 冪等 | `admin_repository.py:171-172` |
 | A09 | archive vs delete 区別 | `admin_repository.py:archive_planter / soft_delete_planter` |
-| A09b | 「すべて」= フィードに出ているもの | `admin_repository.py:200-204` (`status IN seed/sprout/louge AND deleted_at IS NULL`) |
+| A09b | 「すべて」= フィードに出ているもの | `admin_repository.py:200-204` (`status IN seed/seed/logue AND deleted_at IS NULL`) |
 | A10 | 復元時 status='seed' | `admin_repository.py:281-282` |
 | A11 | deleted 復元 UI なし | `app/admin/planters/page.tsx` で削除済み行は操作ボタン非表示 |
 | A12 | typed confirmation | `routers/admin.py:delete_planter` + `delete-planter-dialog.tsx` |

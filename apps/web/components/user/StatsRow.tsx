@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { FollowListModal } from "./FollowListModal";
@@ -7,7 +7,7 @@ interface StatsRowProps {
   userId: string;
   stats: {
     insight_score: number;
-    louge_count: number;
+    logue_count: number;
     follower_count: number;
     following_count: number;
   };
@@ -18,7 +18,7 @@ export function StatsRow({ userId, stats }: StatsRowProps) {
 
   const items = [
     { label: "総合スコア", value: `${Math.round(stats.insight_score)}pt` },
-    { label: "Louge貢献", value: `${stats.louge_count}件` },
+    { label: "Logue貢献", value: `${stats.logue_count}件` },
     {
       label: "フォロワー",
       value: `${stats.follower_count}人`,

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+﻿import { test, expect } from "@playwright/test";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321";
 const TEST_EMAIL = "tanaka@test.works-logue.com";
@@ -131,8 +131,8 @@ test.describe("User Profile", () => {
     await page.click('[data-testid="profile-tab-logs"]');
     await page.waitForTimeout(500);
 
-    // Click Louge tab
-    await page.click('[data-testid="profile-tab-louges"]');
+    // Click Logue tab
+    await page.click('[data-testid="profile-tab-logues"]');
     await page.waitForTimeout(500);
 
     // Click back to Seeds tab

@@ -1,4 +1,4 @@
-# Application Design Questions
+﻿# Application Design Questions
 
 以下の質問に回答してください。各質問の `[Answer]:` タグの後に選択肢の記号を記入してください。
 選択肢にない場合は最後の「Other」を選び、説明を追記してください。
@@ -52,7 +52,7 @@ D) Other (please describe after [Answer]: tag below)
 ---
 
 ## Question 5
-Louge 開花時の AI 記事生成・スコアリング等のバックグラウンドジョブ方式は？
+Logue 開花時の AI 記事生成・スコアリング等のバックグラウンドジョブ方式は？
 
 A) FastAPI BackgroundTasks（シンプル、プロセス内非同期）
 B) Cloud Tasks / Cloud Pub/Sub（外部キュー、スケーラブル）
@@ -82,7 +82,7 @@ E) Other (please describe after [Answer]: tag below)
 
 A) タグフィルタリングのみ（業界・職種・スキルのタグで絞り込み）
 B) タグフィルタリング + キーワード全文検索（Supabase full-text search）
-C) タグフィルタリング + キーワード検索 + Planter 状態フィルタ（Seed/Sprout/Louge）
+C) タグフィルタリング + キーワード検索 + Planter 状態フィルタ（Seed/Seed/Logue）
 D) Other (please describe after [Answer]: tag below)
 
 [Answer]: C
@@ -90,11 +90,11 @@ D) Other (please describe after [Answer]: tag below)
 ---
 
 ## Question 8
-Planter ページ（個別の Seed/Sprout/Louge 詳細画面）のURL設計について。
+Planter ページ（個別の Seed/Seed/Logue 詳細画面）のURL設計について。
 
 A) `/planter/{id}` — 状態に関係なく統一 URL
 B) `/seed/{id}` で表示し、開花後も同一 URL（"seed" は起源を表す）
-C) 状態に応じた URL（`/seed/{id}` → 開花後は `/louge/{id}` にリダイレクト）
+C) 状態に応じた URL（`/seed/{id}` → 開花後は `/logue/{id}` にリダイレクト）
 D) Other (please describe after [Answer]: tag below)
 
 [Answer]: D（/p/{id}）

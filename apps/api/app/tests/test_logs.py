@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 
 import pytest
 from httpx import AsyncClient
@@ -46,13 +46,13 @@ async def planter(db_session: AsyncSession, test_user, seed_type) -> Planter:
 
 
 @pytest.fixture
-async def louge_planter(db_session: AsyncSession, test_user, seed_type) -> Planter:
+async def logue_planter(db_session: AsyncSession, test_user, seed_type) -> Planter:
     p = Planter(
         user_id=test_user.id,
         title="Bloomed",
         body="Already bloomed",
         seed_type_id=seed_type.id,
-        status="louge",
+        status="logue",
     )
     db_session.add(p)
     await db_session.commit()
@@ -91,19 +91,19 @@ class TestCreateLog:
         assert data["planter"]["log_count"] == 1
         assert data["planter"]["contributor_count"] == 1
 
-    async def test_create_log_seed_to_sprout_transition(
+    async def test_create_log_keeps_seed_status(
         self, client: AsyncClient, planter
     ):
-        """初回Log投稿で status が seed -> sprout に遷移する"""
+        """Log投稿後も Planter は seed のまま（開花閾値到達までは状態遷移しない）"""
         assert planter.status == "seed"
         resp = await client.post(
             f"/api/v1/planters/{planter.id}/logs",
-            json={"body": "First log triggers sprout"},
+            json={"body": "First log on a planter"},
             headers={"Authorization": "Bearer test-token"},
         )
         assert resp.status_code == 201
         data = resp.json()
-        assert data["planter"]["status"] == "sprout"
+        assert data["planter"]["status"] == "seed"
 
     async def test_create_log_unauthenticated(self, client: AsyncClient, planter):
         """未認証: 401"""
@@ -125,11 +125,11 @@ class TestCreateLog:
         assert resp.json()["detail"] == "planter_not_found"
 
     async def test_create_log_planter_already_bloomed(
-        self, client: AsyncClient, louge_planter
+        self, client: AsyncClient, logue_planter
     ):
-        """status=louge のPlanterへのLog投稿: 400"""
+        """status=logue のPlanterへのLog投稿: 400"""
         resp = await client.post(
-            f"/api/v1/planters/{louge_planter.id}/logs",
+            f"/api/v1/planters/{logue_planter.id}/logs",
             json={"body": "Too late"},
             headers={"Authorization": "Bearer test-token"},
         )

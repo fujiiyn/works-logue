@@ -1,15 +1,15 @@
-# Unit of Work Dependency — Works Logue MVP
+﻿# Unit of Work Dependency — Works Logue MVP
 
 ## 依存関係マトリクス
 
 行が依存元、列が依存先。`x` は直接依存を示す。
 
-| 依存元 / 依存先 | U1 Foundation | U2 Seed | U3 Log&Score | U4 Louge | U5 Feed&Search | U6 User&Follow |
+| 依存元 / 依存先 | U1 Foundation | U2 Seed | U3 Log&Score | U4 Logue | U5 Feed&Search | U6 User&Follow |
 |---|---|---|---|---|---|---|
 | **U1 Foundation** | - | | | | | |
 | **U2 Seed** | x | - | | | | |
 | **U3 Log & Score** | x | x | - | | | |
-| **U4 Louge** | x | | x | - | | |
+| **U4 Logue** | x | | x | - | | |
 | **U5 Feed & Search** | x | x | | | - | |
 | **U6 User & Follow** | x | x | | | | - |
 
@@ -26,10 +26,10 @@
 - レイアウト（LayoutShell, Header, Sidebar）
 
 ### U3 Log & Score → U1, U2
-- U1: VertexAIClient（AI スコアリング）、DB（logs, louge_score_snapshots テーブル）
+- U1: VertexAIClient（AI スコアリング）、DB（logs, logue_score_snapshots テーブル）
 - U2: PlanterRepository（Planter 状態更新）、PlanterCard（ProgressBar 連動）
 
-### U4 Louge → U1, U3
+### U4 Logue → U1, U3
 - U1: VertexAIClient（AI 記事生成）、NotificationRepository
 - U3: ScorePipeline（開花トリガー連携）、ScoreEngine（条件判定結果の受け渡し）
 
@@ -52,7 +52,7 @@ U1 Foundation
   |       |
   |       +---> U3 Log & Score
   |       |       |
-  |       |       +---> U4 Louge
+  |       |       +---> U4 Logue
   |       |
   |       +---> U5 Feed & Search
   |       |

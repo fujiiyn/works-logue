@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import { Calendar, Flower2, Sprout, Users } from "lucide-react";
 import { getCurrentUser, serverFetch } from "@/lib/auth-server";
 import { StatCard } from "@/components/admin/stat-card";
@@ -55,10 +55,10 @@ export default async function AdminDashboardPage() {
           caption="JST 当日の集計"
         />
         <StatCard
-          testId="admin-stats-card-pending_louge_count"
+          testId="admin-stats-card-pending_logue_count"
           icon={Flower2}
-          label="開花待ち Sprout"
-          value={stats.pending_louge_count}
+          label="開花待ち Seed"
+          value={stats.pending_logue_count}
         />
       </div>
     </div>

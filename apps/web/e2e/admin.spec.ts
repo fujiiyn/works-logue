@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+﻿import { test, expect, type Page } from "@playwright/test";
 
 /**
  * U7 Step 41: Admin smoke E2E.
@@ -78,7 +78,7 @@ test.describe("Admin smoke (U7)", () => {
       page.locator('[data-testid="admin-stats-card-new_planters_today"]'),
     ).toBeVisible();
     await expect(
-      page.locator('[data-testid="admin-stats-card-pending_louge_count"]'),
+      page.locator('[data-testid="admin-stats-card-pending_logue_count"]'),
     ).toBeVisible();
   });
 

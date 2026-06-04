@@ -1,4 +1,4 @@
-# U1 Foundation — Business Logic Model
+﻿# U1 Foundation — Business Logic Model
 
 ## 概要
 
@@ -79,7 +79,7 @@ delete_avatar(path: str) -> None:
 generate_text(model_name: str, prompt: str, system_instruction: str, temperature: float = 0.7) -> str:
   1. model_name で Vertex AI Generative AI API を呼び出し
   2. レスポンスのテキスト部分を返す
-  3. タイムアウト: 60s（Louge 生成は 120s）
+  3. タイムアウト: 60s（Logue 生成は 120s）
   4. リトライ: 最大3回（exponential backoff）
   5. エラー時: VertexAIError を raise
 ```
@@ -89,7 +89,7 @@ generate_text(model_name: str, prompt: str, system_instruction: str, temperature
 | 用途 | 初期モデル | 頻度 | 理由 |
 |---|---|---|---|
 | スコアリング（条件A/B） | gemini-2.0-flash | 高（Log 投稿ごと） | コスト最優先 |
-| Louge 記事生成 | gemini-2.0-pro | 低（開花時のみ） | 品質重視 |
+| Logue 記事生成 | gemini-2.0-pro | 低（開花時のみ） | 品質重視 |
 | AI ファシリテート | gemini-2.0-flash | 中 | コスト効率 |
 
 ---

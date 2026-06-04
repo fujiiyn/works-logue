@@ -1,37 +1,37 @@
-# Works Logue — 要件定義書
+﻿# Works Logue — 要件定義書
 
 ## ドメインモデル（概念定義）
 
 ### Planter（プランター）
-Seed・Log・Louge を内包する**成長の単位**。UI上には直接「Planter」という言葉は出ないが、システムの中核概念。
+Seed・Log・Logue を内包する**成長の単位**。UI上には直接「Planter」という言葉は出ないが、システムの中核概念。
 
 ユーザーは常に**同一の Planter ページ**にアクセスし、その状態に応じた表示を見る。開花しても別ページへ遷移するのではなく、同じ Planter の状態が変化する。
 
 **Planter の状態遷移**：
 
 ```
-seed ──→ sprout ──→ louge
+seed ──→ seed ──→ logue
  (種)     (成長中)    (開花)
 ```
 
 | Planter 状態 | UI バッジ | 条件 | 内容 |
 |---|---|---|---|
 | `seed` | **Seed** | Log が 0 件 | 初期状態 |
-| `sprout` | **Sprout** | Log が 1 件以上 | 条件A/B が進行中（内部で Sprout 1〜3 を区別） |
-| `louge` | **Louge** | 条件A AND 条件B 完全充足 | AI 記事（Louge）が生成された状態 |
+| `seed` | **Seed** | Log が 1 件以上 | 条件A/B が進行中（内部で Seed 1〜3 を区別） |
+| `logue` | **Logue** | 条件A AND 条件B 完全充足 | AI 記事（Logue）が生成された状態 |
 
-**Sprout サブステート（内部区別）**:
+**Seed サブステート（内部区別）**:
 
 | サブステート | 条件 | Progress Bar | 意味 |
 |---|---|---|---|
-| Sprout 1 | Log 1件〜、条件A進行中 | 0〜50% | 芽が出始め |
-| Sprout 2 | 条件A充足、条件B進行中 | 50〜80% | 成長中 |
-| Sprout 3（蕾） | 条件B が bud_threshold（初期値80%）に到達 | 80〜99% | もう少しで開花 |
+| Seed 1 | Log 1件〜、条件A進行中 | 0〜50% | 芽が出始め |
+| Seed 2 | 条件A充足、条件B進行中 | 50〜80% | 成長中 |
+| Seed 3（蕾） | 条件B が bud_threshold（初期値80%）に到達 | 80〜99% | もう少しで開花 |
 
-### Seed / Log / Louge の関係
+### Seed / Log / Logue の関係
 - **Seed**：Planter の起点となる投稿
-- **Log**：Seed に対して蓄積される知恵・コメント。Log が増えるほど Louge スコアが上昇し Planter が成長する
-- **Louge**：flowering 状態に達した Planter が持つ AI 生成ナレッジ記事。Seed・Log とともに同一 Planter ページ上に表示される
+- **Log**：Seed に対して蓄積される知恵・コメント。Log が増えるほど Logue スコアが上昇し Planter が成長する
+- **Logue**：flowering 状態に達した Planter が持つ AI 生成ナレッジ記事。Seed・Log とともに同一 Planter ページ上に表示される
 
 ---
 
@@ -52,11 +52,11 @@ seed ──→ sprout ──→ louge
 
 - Seed 投稿（疑問・悩み・失敗など8タイプ、単一画面フォーム）
 - Log 投稿（Seedへのコメント・知恵の蓄積）
-- Louge スコアリング（Log 投稿のたびに自動計算）
-- Sprout ステータス表示（スコア閾値による段階1〜3 + 開花）
-- Louge 開花（AI による自動記事生成）
+- Logue スコアリング（Log 投稿のたびに自動計算）
+- Seed ステータス表示（スコア閾値による段階1〜3 + 開花）
+- Logue 開花（AI による自動記事生成）
 - ユーザープロフィール（自己紹介・タグ・アバター・投稿履歴）
-- インサイトスコア（Louge 開花への貢献度スコア）
+- インサイトスコア（Logue 開花への貢献度スコア）
 
 バッジシステム・Fork 機能は **フェーズ2** 以降に実装する。
 
@@ -81,7 +81,7 @@ seed ──→ sprout ──→ louge
 - アバター画像（Supabase Storage にアップロード）
 - タグ設定：業界タグ・職種タグ（`docs/tags.md` のうち industry/occupation のみ、複数選択）
   - **プロフィールで選択できるカテゴリは業界・職種のみ**。Seed 投稿等の他機能では引き続き 6 カテゴリすべてを使用する
-- 投稿した Seed 一覧・Log 一覧・参加した Louge 一覧
+- 投稿した Seed 一覧・Log 一覧・参加した Logue 一覧
 - インサイトスコア表示
 
 ### FR-03: Seed 投稿
@@ -96,11 +96,11 @@ seed ──→ sprout ──→ louge
 - Seed に紐づくスレッド形式のコメント
 - テキスト投稿・返信（ネスト1段）
 - 投稿者プロフィールへのリンク
-- **Log 投稿のたびに Louge スコアを再計算する**（FR-05 参照）
+- **Log 投稿のたびに Logue スコアを再計算する**（FR-05 参照）
 
-### FR-05: Louge スコアリング（2段階ロック解除方式）
+### FR-05: Logue スコアリング（2段階ロック解除方式）
 
-Louge（開花）の生成には **条件A（構造判定）** と **条件B（成熟度スコア）** の **両方（AND）** を満たす必要がある。
+Logue（開花）の生成には **条件A（構造判定）** と **条件B（成熟度スコア）** の **両方（AND）** を満たす必要がある。
 
 ---
 
@@ -136,7 +136,7 @@ AI が Log 全体を読み取り、ビジネスノウハウとしての「必須
 
 #### スコア不足時の AI ファシリテーション
 
-条件B の総合スコアが基準値に達しない場合、AI は Louge を生成せず、代わりに **AI からの問いかけ（ファシリテート）** を Log として投稿し、議論を誘導する。
+条件B の総合スコアが基準値に達しない場合、AI は Logue を生成せず、代わりに **AI からの問いかけ（ファシリテート）** を Log として投稿し、議論を誘導する。
 
 - 反論/例外が不足時: 「素晴らしい解決策が集まっていますが、逆にこの手法を試して『失敗した』という経験をお持ちの方はいませんか？」
 - 具体性が不足時: 「〇〇という意見に共感が集まっていますが、実際に現場で使う『フォーマット』や『ツール』の具体例はありますか？」
@@ -148,15 +148,15 @@ AI が Log 全体を読み取り、ビジネスノウハウとしての「必須
 | Planter 状態 | 条件 | UI バッジ |
 |---|---|---|
 | `seed` | Log が 0 件 | Seed |
-| `sprout` | Log が 1 件以上（条件A 充足率が上昇中） | Sprout |
-| `louge` | 条件A 充足 AND 条件B スコア基準突破 | Louge |
+| `seed` | Log が 1 件以上（条件A 充足率が上昇中） | Seed |
+| `logue` | 条件A 充足 AND 条件B スコア基準突破 | Logue |
 
-- **Sprout 内のサブステート**（Sprout 1〜3）は上記条件で区別（UI はビジュアルの細かい変化で表現）
-- UI バッジは `seed` / `sprout` / `louge` の3種のみ
+- **Seed 内のサブステート**（Seed 1〜3）は上記条件で区別（UI はビジュアルの細かい変化で表現）
+- UI バッジは `seed` / `seed` / `logue` の3種のみ
 - **Progress Bar は開花までの総合進捗を表示**（0%〜100%、100% = 開花）
   - 0〜50%: 条件A の充足率をスケール（構造パーツが揃うほど伸びる）
   - 50〜100%: 条件B の成熟度スコアをスケール（条件A 充足後に伸び始める）
-  - Sprout 3（蕾）= バーが 80% に到達した状態
+  - Seed 3（蕾）= バーが 80% に到達した状態
 
 **設計方針**:
 - 条件A・条件B の判定ロジックはポリシークラス/設定ファイルとして実装し、閾値・パーツ定義を変更しやすくする
@@ -191,7 +191,7 @@ AI が Log 全体を読み取り、ビジネスノウハウとしての「必須
 **Right Sidebar（右）**：
 - ホーム画面：About Works Logue カード
   - サービス説明テキスト
-  - Stats（Seeds / Louges / Contributors）
+  - Stats（Seeds / Logues / Contributors）
   - 「Seedを投稿する」CTAボタン（`bg-primary-light`）
 - Planter ページ（flowering）：貢献者一覧＋インサイトスコア
 
@@ -208,40 +208,40 @@ AI が Log 全体を読み取り、ビジネスノウハウとしての「必須
 ```
 
 - **Stage Badge**：
-  - `seeded` / growing → `Seed` or `Sprout`：`bg-primary-light`・`text-primary`
-  - `flowering` → `Louge`：`bg-primary`・`text-white`
+  - `seeded` / growing → `Seed` or `Seed`：`bg-primary-light`・`text-primary`
+  - `flowering` → `Logue`：`bg-primary`・`text-white`
 - **Progress Bar**（3px 高さ・120px 幅）：条件A 構造パーツ充足率を視覚化
   - Track: `bg-primary-light`
-  - Fill: `bg-primary`（`louge` は全幅）、`sprout` 中は `bg-primary/50`
+  - Fill: `bg-primary`（`logue` は全幅）、`seed` 中は `bg-primary/50`
 
 **Planter ページ（flowering 状態）のメインコンテンツ構造**：
 
 ```
 [タイトル]
 [元の Seed]（折りたたみ可能・展開で本文表示）
-[Louge 記事本文]
+[Logue 記事本文]
 [Log 一覧]
 ```
 
 右パネル：貢献者一覧とインサイトスコア
 
-### FR-06: Louge 開花（AI記事生成）
+### FR-06: Logue 開花（AI記事生成）
 - FR-05 の **条件A（構造充足）AND 条件B（成熟度スコア基準突破）** を満たした時点で、バックグラウンドジョブが起動
-- Vertex AI が Seed + Log 群を解析し、**パターンランゲージ形式**（状況→問題→解決策＋パターン名）を軸としたナレッジ記事（Louge）を生成
+- Vertex AI が Seed + Log 群を解析し、**パターンランゲージ形式**（状況→問題→解決策＋パターン名）を軸としたナレッジ記事（Logue）を生成
   - テーマ・議論の性質に応じて最適な構成を AI が判断（対立軸の整理・ステップバイステップ・チェックリスト・事例集 など）
   - 出典（元 Log）へのリンクを必ず含める
   - 反論/例外セクションを必ず含める（条件B で担保済み）
 - 開花後も **同一の Planter ページ** で表示（別ページへの遷移なし）
-  - ページ内で Louge 記事・Seed・Log が共存する
-  - Planter の状態が `sprout` → `louge` に変化することで表示が切り替わる
+  - ページ内で Logue 記事・Seed・Log が共存する
+  - Planter の状態が `seed` → `logue` に変化することで表示が切り替わる
 - 開花に貢献した Log 投稿者のインサイトスコアを更新
-- **Louge コピー機能**: Louge 記事（Markdown）をクリップボードにコピーするボタン。Seed・Log は含めず Louge 本文のみ
+- **Logue コピー機能**: Logue 記事（Markdown）をクリップボードにコピーするボタン。Seed・Log は含めず Logue 本文のみ
 
 ### FR-07: インサイトスコア
-- 各ユーザーの Louge 開花への貢献度を数値化
-- Log が Louge 生成に採用・参照された度合いに基づき加算
+- 各ユーザーの Logue 開花への貢献度を数値化
+- Log が Logue 生成に採用・参照された度合いに基づき加算
 - プロフィールページに表示
-- スコア計算は Louge 開花時に実行（非同期）
+- スコア計算は Logue 開花時に実行（非同期）
 
 ### FR-08: フォロー機能 ⚠️ 優先度：低
 - **Planter フォロー**：任意の Planter をフォローできる
@@ -252,7 +252,7 @@ AI が Log 全体を読み取り、ビジネスノウハウとしての「必須
 
 **通知**（フォロー機能と連動、優先度：低）：
 - フォロー中 Planter に新しい Log が投稿された
-- フォロー中 Planter の状態が変化した（sprout 昇格・louge 開花）
+- フォロー中 Planter の状態が変化した（seed 昇格・logue 開花）
 - フォロー中ユーザーが新しい Seed を投稿した
 
 > **設計上の注意**：通知機能は初期 MVP では実装しないが、DB スキーマ（follows テーブル）は最初から用意しておき、後から通知を追加しやすい設計にする。
@@ -287,10 +287,10 @@ AI が Log 全体を読み取り、ビジネスノウハウとしての「必須
 
 ### NFR-04: パフォーマンス
 - 初期フェーズではカバレッジ100%・最適化は不要
-- Louge 生成・スコアリング（AI処理）は非同期バックグラウンドジョブで実行
+- Logue 生成・スコアリング（AI処理）は非同期バックグラウンドジョブで実行
 
 ### NFR-05: テスト方針
-- Frontend: Vertex AI呼び出し周り・主要APIルート・核心フロー（Seed→Log→Louge）のE2E（Playwright）
+- Frontend: Vertex AI呼び出し周り・主要APIルート・核心フロー（Seed→Log→Logue）のE2E（Playwright）
 - Backend: pytest でAPIエンドポイント + AIパイプライン（スコアエンジン含む）をカバー
 - Security 拡張: **無効**（MVP フェーズ）
 - Property-Based Testing 拡張: **無効**（MVP フェーズ）
@@ -321,7 +321,7 @@ MVP 実装時点から考慮しておくべき設計方針。
 
 | 対象 | 方針 |
 |---|---|
-| `louge_score_snapshots` | Log 投稿のたびにスコアを記録するテーブル。閾値チューニング・分析に使う（スコアエンジン改良の前提） |
+| `logue_score_snapshots` | Log 投稿のたびにスコアを記録するテーブル。閾値チューニング・分析に使う（スコアエンジン改良の前提） |
 | `insight_score_events` | インサイトスコアの加算イベントを記録。スコア内訳の表示・バッジ判定（フェーズ2）の根拠になる |
 | フォローテーブルの設計 | `planter_follows` と `user_follows` を分けるか polymorphic にするかを最初に決める（タグフォロー等の拡張を考慮） |
 
@@ -330,7 +330,7 @@ MVP 実装時点から考慮しておくべき設計方針。
 ## フェーズ2以降
 
 - バッジシステム（開花貢献者バッジ）
-- Fork（Louge から派生 Seed）機能
+- Fork（Logue から派生 Seed）機能
 - AIによる知恵洗浄（プライバシー保護・機密情報除去）
 - 通知機能（FR-08 で設計済み・DB スキーマは MVP に含める）
 - インサイト予測・レコメンド通知（「あなたの経験が役立つ」通知）

@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
@@ -48,10 +48,10 @@ def _build_planter_response(
 
     # Build structure_parts from planter's stored data (if any)
     structure_parts = None
-    # structure_parts will be populated from LougeScoreSnapshot in score endpoints
+    # structure_parts will be populated from LogueScoreSnapshot in score endpoints
 
     if include_body:
-        bloom_pending = planter.status == "louge" and planter.louge_content is None
+        bloom_pending = planter.status == "logue" and planter.logue_content is None
         return PlanterResponse(
             id=planter.id,
             title=planter.title,
@@ -67,8 +67,8 @@ def _build_planter_response(
             maturity_score=planter.maturity_score,
             structure_parts=structure_parts,
             bloom_threshold=bloom_threshold,
-            louge_content=planter.louge_content,
-            louge_generated_at=planter.louge_generated_at,
+            logue_content=planter.logue_content,
+            logue_generated_at=planter.logue_generated_at,
             bloom_pending=bloom_pending,
             created_at=planter.created_at,
         )
@@ -170,7 +170,7 @@ async def list_planters(
     if tab == "bloomed":
         planters = await planter_repo.list_bloomed(
             limit=limit + 1,
-            cursor_louge_generated_at=cursor_created_at,
+            cursor_logue_generated_at=cursor_created_at,
             cursor_id=cursor_id,
         )
     else:

@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
@@ -27,17 +27,17 @@ class UserRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_louge_count(self, user_id: uuid.UUID) -> int:
-        """Count distinct louges where user has insight_score > 0 (D9)."""
+    async def get_logue_count(self, user_id: uuid.UUID) -> int:
+        """Count distinct logues where user has insight_score > 0 (D9)."""
         # Distinct planter_ids from insight_score_events
-        # where score_delta > 0 and planter status = 'louge'
+        # where score_delta > 0 and planter status = 'logue'
         subq = (
             select(distinct(InsightScoreEvent.planter_id))
             .join(Planter, InsightScoreEvent.planter_id == Planter.id)
             .where(
                 InsightScoreEvent.user_id == user_id,
                 InsightScoreEvent.score_delta > 0,
-                Planter.status == "louge",
+                Planter.status == "logue",
                 Planter.deleted_at.is_(None),
             )
         ).subquery()
@@ -61,7 +61,7 @@ class UserRepository:
             .join(Planter, InsightScoreEvent.planter_id == Planter.id)
             .where(
                 InsightScoreEvent.user_id == user_id,
-                Planter.status == "louge",
+                Planter.status == "logue",
                 Planter.deleted_at.is_(None),
             )
             .group_by(InsightScoreEvent.planter_id, Planter.title, Planter.status)
@@ -136,8 +136,8 @@ class UserRepository:
         cursor: str | None = None,
     ) -> tuple[list[Planter], str | None]:
         """Get planters for user profile tabs."""
-        if tab == "louges":
-            return await self._get_user_louge_planters(user_id, limit, cursor)
+        if tab == "logues":
+            return await self._get_user_logue_planters(user_id, limit, cursor)
 
         # tab=seeds: all planters authored by user
         query = (
@@ -164,13 +164,13 @@ class UserRepository:
 
         return planters, next_cursor
 
-    async def _get_user_louge_planters(
+    async def _get_user_logue_planters(
         self,
         user_id: uuid.UUID,
         limit: int = 20,
         cursor: str | None = None,
     ) -> tuple[list[Planter], str | None]:
-        """Get louges where user contributed with insight_score > 0 (D9)."""
+        """Get logues where user contributed with insight_score > 0 (D9)."""
         # Get planter IDs from insight_score_events
         planter_ids_subq = (
             select(distinct(InsightScoreEvent.planter_id))
@@ -178,7 +178,7 @@ class UserRepository:
             .where(
                 InsightScoreEvent.user_id == user_id,
                 InsightScoreEvent.score_delta > 0,
-                Planter.status == "louge",
+                Planter.status == "logue",
                 Planter.deleted_at.is_(None),
             )
         ).subquery()

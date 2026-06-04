@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Sparkles, Loader2 } from "lucide-react";
 
@@ -17,7 +17,7 @@ export function ScoreCard({
   progress,
   scorePending = false,
 }: ScoreCardProps) {
-  const isLouge = status === "louge";
+  const isLogue = status === "logue";
   const progressPct = Math.min(Math.round(progress * 100), 100);
   const remainingPct = Math.max(100 - progressPct, 0);
 
@@ -45,18 +45,18 @@ export function ScoreCard({
         <div className="h-[6px] w-full overflow-hidden rounded-xs bg-primary-light-bg">
           <div
             className={`h-[6px] rounded-xs transition-all ${
-              isLouge ? "bg-primary" : "bg-primary/50"
+              isLogue ? "bg-primary" : "bg-primary/50"
             }`}
-            style={{ width: `${isLouge ? 100 : progressPct}%` }}
+            style={{ width: `${isLogue ? 100 : progressPct}%` }}
           />
         </div>
         <div className="mt-1 flex items-baseline gap-1.5 text-body-s">
           <span className="font-semibold text-primary">
-            {isLouge ? "開花済み" : `${progressPct}%`}
+            {isLogue ? "開花済み" : `${progressPct}%`}
           </span>
-          {!isLouge && (
+          {!isLogue && (
             <span className="text-caption text-text-muted">
-              Louge開花まであと{remainingPct}%
+              Logue開花まであと{remainingPct}%
             </span>
           )}
         </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -28,7 +28,7 @@ interface UserProfileData {
   };
   stats: {
     insight_score: number;
-    louge_count: number;
+    logue_count: number;
     follower_count: number;
     following_count: number;
   };

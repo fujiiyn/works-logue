@@ -1,11 +1,11 @@
-interface ProgressBarProps {
+﻿interface ProgressBarProps {
   progress: number;
   status: string;
 }
 
 export function ProgressBar({ progress, status }: ProgressBarProps) {
   const clampedProgress = Math.min(Math.max(progress, 0), 1);
-  const isLouge = status === "louge";
+  const isLogue = status === "logue";
 
   return (
     <div
@@ -13,7 +13,7 @@ export function ProgressBar({ progress, status }: ProgressBarProps) {
       data-testid="progress-bar"
     >
       <div
-        className={`h-[3px] rounded-xs ${isLouge ? "bg-primary" : "bg-primary/50"}`}
+        className={`h-[3px] rounded-xs ${isLogue ? "bg-primary" : "bg-primary/50"}`}
         style={{ width: `${clampedProgress * 100}%` }}
       />
     </div>

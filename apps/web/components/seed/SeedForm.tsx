@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -90,7 +90,7 @@ export function SeedForm() {
         新しいSeedを蒔く
       </h1>
       <p className="mb-6 text-body-s text-text-secondary">
-        現場のリアルな悩みや知恵を投稿して、集合知を育てましょう。完成した記事（Louge）の開花に貢献した方にはインサイトスコアが付与されます。
+        現場のリアルな悩みや知恵を投稿して、集合知を育てましょう。完成した記事（Logue）の開花に貢献した方にはインサイトスコアが付与されます。
       </p>
 
       {/* Seed Type selection */}

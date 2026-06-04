@@ -1,4 +1,4 @@
-# U6 User & Follow — Code Generation Summary
+﻿# U6 User & Follow — Code Generation Summary
 
 ## Overview
 
@@ -19,7 +19,7 @@ U6 implements the user profile system, follow functionality, and following feed 
 - `app/schemas/user.py` — UserResponse, UserPublicResponse expanded; UserProfileResponse, ContributionGraphResponse, UserPlanterListResponse, UserLogListResponse, FollowListResponse, SimilarUserResponse, ImageUploadResponse added; SNS URL domain allowlist validators (D12)
 
 #### Repositories
-- **Created**: `app/repositories/user_repository.py` — get_by_id (BR-U08), get_louge_count (D9), get_featured_contribution, get_contribution_graph (D8), get_user_planters, get_user_logs, get_similar_users (D11)
+- **Created**: `app/repositories/user_repository.py` — get_by_id (BR-U08), get_logue_count (D9), get_featured_contribution, get_contribution_graph (D8), get_user_planters, get_user_logs, get_similar_users (D11)
 - **Modified**: `app/repositories/follow_repository.py` — follow_user, unfollow_user, is_following_user, get_follower_count, get_following_count, get_followers (D16), get_following_users (D16), get_following_planter_ids, get_following_user_ids, unfollow_planter (D5)
 - **Modified**: `app/repositories/tag_repository.py` — get_user_tags
 - **Modified**: `app/repositories/planter_repository.py` — list_following (BR-FF01)
@@ -48,10 +48,10 @@ U6 implements the user profile system, follow functionality, and following feed 
 - **Created**: `components/user/InitialAvatar.tsx` — ID-hash colored initial (D13)
 - **Created**: `components/user/FollowButton.tsx` — Follow/unfollow（静的「フォロー」/「フォロー中」、確認ダイアログなしで即時解除）
 - **Created**: `components/user/ProfileHeader.tsx` — Cover, avatar, user info, tags, location, SNS links
-- **Created**: `components/user/StatsRow.tsx` — Score, louge count, follower/following counts
+- **Created**: `components/user/StatsRow.tsx` — Score, logue count, follower/following counts
 - **Created**: `components/user/FollowListModal.tsx` — Follower/following list with cursor pagination, optimistic unfollow (D17)
 - **Created**: `components/user/ContributionGraph.tsx` — GitHub-style heatmap, Intl API tz (D8)
-- **Created**: `components/user/ProfileTabs.tsx` — Seed/Log/Louge tabs with infinite scroll
+- **Created**: `components/user/ProfileTabs.tsx` — Seed/Log/Logue tabs with infinite scroll
 - **Created**: `components/user/UserProfileSidebar.tsx` — Badges placeholder, similar users (D11)
 
 #### Modified
@@ -71,7 +71,7 @@ U6 implements the user profile system, follow functionality, and following feed 
 | D5 | Manual unfollow flag | planter_follows.is_manually_unfollowed prevents auto-refollow |
 | D7 | ~~Mobile unfollow confirm~~ → 撤回 | 2026-04-30: 確認ダイアログ廃止、楽観更新で即時解除 |
 | D8 | Timezone-aware contributions | Intl API → tz query param → server DATE() |
-| D9 | Score > 0 filter | insight_score_events.score_delta > 0 for louge count |
+| D9 | Score > 0 filter | insight_score_events.score_delta > 0 for logue count |
 | D10 | Fixed edit URL | /profile/edit (no user ID) |
 | D11 | Similar users by tags | Common tag COUNT DESC, top 5 |
 | D12 | SNS domain allowlist | Pydantic validators with domain check |
@@ -86,7 +86,7 @@ U6 implements the user profile system, follow functionality, and following feed 
 
 | 範囲 | 変更内容 |
 |---|---|
-| BR-F06 / FC-13 | `components/planter/PlanterFollowButton.tsx` を新規追加。Seed/Louge 詳細ヘッダー（時刻の直後）にアウトラインスタイルで配置 |
+| BR-F06 / FC-13 | `components/planter/PlanterFollowButton.tsx` を新規追加。Seed/Logue 詳細ヘッダー（時刻の直後）にアウトラインスタイルで配置 |
 | API | `PlanterResponse.is_following` を追加。`GET /planters/{id}` で認証ユーザーの follow 状態を返却 |
 | Repository | `FollowRepository.is_following_planter` を追加（is_manually_unfollowed=true は False 扱い） |
 | BR-N01 / FC-14 | ユーザー名を Link 化: `PlanterCard`（overlay link 技法でカード全体リンクと両立）/ `planter-detail-client` / `LogItem`（AI ログ除く）/ `ContributorsSidebar` |

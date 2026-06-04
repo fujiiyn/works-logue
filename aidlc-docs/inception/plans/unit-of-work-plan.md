@@ -1,4 +1,4 @@
-# Unit of Work Plan — Works Logue MVP
+﻿# Unit of Work Plan — Works Logue MVP
 
 ## 分解方針
 
@@ -28,7 +28,7 @@
 | U1 | **Foundation** | DB スキーマ全量・認証・レイアウト Shell・インフラ基盤 | DB-01/02, BC-01/16/17/18/19, FC-01/02/03/04/14 |
 | U2 | **Seed** | Seed 投稿 + タグ選択 + 基本フィード（新着タブのみ） | FC-05/06/08/10/11, BC-02/07/10 |
 | U3 | **Log & Score** | Log 投稿 + スコアエンジン + Planter 状態遷移 + AI ファシリテート | FC-07/09, BC-03/08/11/15/22 |
-| U4 | **Louge** | Louge 開花（AI 記事生成） + インサイトスコア | BC-12/13 |
+| U4 | **Logue** | Logue 開花（AI 記事生成） + インサイトスコア | BC-12/13 |
 | U5 | **Feed & Search** | 注目タブ・開花済みタブ + FeedRanker + 探索画面 | FC-06(タブ拡張)/13, BC-05/14 |
 | U6 | **User & Follow** | プロフィール表示・編集 + フォロー機能 | FC-12, BC-04/06/09/20/21 |
 
@@ -41,7 +41,7 @@
 ### Q1: ユニット粒度
 
 上記6ユニットの粒度は適切ですか？ 特に以下の点：
-- U3（Log & Score）と U4（Louge）は密結合だが、AI 記事生成の複雑さを考慮して分離しています
+- U3（Log & Score）と U4（Logue）は密結合だが、AI 記事生成の複雑さを考慮して分離しています
 - U5（Feed & Search）は U2 の基本フィードを拡張する形です
 - U6（User & Follow）はフォロー機能（優先度：低）を含みます
 

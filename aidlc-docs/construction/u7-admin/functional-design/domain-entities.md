@@ -1,4 +1,4 @@
-# U7 Admin — Domain Entities
+﻿# U7 Admin — Domain Entities
 
 U7 では新規テーブルは作らない。U1 マイグレーション 00001 時点で揃っているフィールドのみを使用する（Q5=B / Q4=B 確定）。
 
@@ -45,7 +45,7 @@ U7 では新規テーブルは作らない。U1 マイグレーション 00001 �
 | id | UUID PK | — |
 | user_id | UUID FK | 投稿者（一覧で表示） |
 | title | varchar(200) | 一覧表示 |
-| **status** | varchar(10) | `seed` / `sprout` / `louge` / `archived`。`archived` は admin がアーカイブ済 |
+| **status** | varchar(10) | `seed` / `seed` / `logue` / `archived`。`archived` は admin がアーカイブ済 |
 | seed_type_id | UUID FK | フィルタには使わない（参考表示） |
 | log_count | int | 一覧の "Logs" 列 |
 | contributor_count | int | 一覧の "Contributors" 列 |
@@ -57,10 +57,10 @@ U7 では新規テーブルは作らない。U1 マイグレーション 00001 �
 
 | 表示名 | 判定式 |
 |---|---|
-| すべて | `status IN ('seed','sprout','louge') AND deleted_at IS NULL`（**フィードに出ているもの**＝archived も削除済みも含まない） |
+| すべて | `status IN ('seed','seed','logue') AND deleted_at IS NULL`（**フィードに出ているもの**＝archived も削除済みも含まない） |
 | Seed | `status = 'seed' AND deleted_at IS NULL` |
-| Sprout | `status = 'sprout' AND deleted_at IS NULL` |
-| Louge | `status = 'louge' AND deleted_at IS NULL` |
+| Seed | `status = 'seed' AND deleted_at IS NULL` |
+| Logue | `status = 'logue' AND deleted_at IS NULL` |
 | アーカイブ | `status = 'archived' AND deleted_at IS NULL` |
 | 削除済み | `deleted_at IS NOT NULL` |
 

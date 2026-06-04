@@ -1,4 +1,4 @@
-# Unit of Work Story Map — Works Logue MVP
+﻿# Unit of Work Story Map — Works Logue MVP
 
 User Stories ステージはスキップしたため、機能要件（FR）をユニットにマッピングする。
 
@@ -12,10 +12,10 @@ User Stories ステージはスキップしたため、機能要件（FR）を�
 | FR-02 | ユーザープロフィール | U6 User & Follow |
 | FR-03 | Seed 投稿 | U2 Seed |
 | FR-04 | Log 投稿 | U3 Log & Score |
-| FR-05 | Louge スコアリング（条件A/B） | U3 Log & Score |
+| FR-05 | Logue スコアリング（条件A/B） | U3 Log & Score |
 | FR-05b | UI レイアウト構造 | U1 Foundation（レイアウト）+ U2 Seed（カード・フィード） |
-| FR-06 | Louge 開花（AI記事生成） | U4 Louge |
-| FR-07 | インサイトスコア | U4 Louge |
+| FR-06 | Logue 開花（AI記事生成） | U4 Logue |
+| FR-07 | インサイトスコア | U4 Logue |
 | FR-08 | フォロー機能 | U6 User & Follow |
 | FR-09 | フィード・検索・タグ | U2 Seed（新着タブ）+ U5 Feed & Search（注目/開花済み/検索） |
 
@@ -48,15 +48,15 @@ User Stories ステージはスキップしたため、機能要件（FR）を�
 |---|---|
 | FR-04 | Log 投稿（スレッド形式・ネスト1段返信）、投稿 API |
 | FR-05 | ScoreEngine（条件A 構造判定 + 条件B 成熟度スコア）、ScorePipeline、AIFacilitator |
-| FR-05b（部分） | PlanterDetail ページ（Seed/Sprout 状態の表示）、ProgressBar 連動 |
+| FR-05b（部分） | PlanterDetail ページ（Seed/Seed 状態の表示）、ProgressBar 連動 |
 
-### U4: Louge
+### U4: Logue
 
 | 機能要件 | 対象範囲 |
 |---|---|
-| FR-06 | LougeGenerator（Vertex AI 記事生成）、開花フロー、Louge コピー機能 |
+| FR-06 | LogueGenerator（Vertex AI 記事生成）、開花フロー、Logue コピー機能 |
 | FR-07 | InsightScoreCalculator（貢献度スコア算出） |
-| FR-05b（部分） | PlanterDetail ページ（Louge 状態: 記事表示 + Seed 折りたたみ + 貢献者一覧） |
+| FR-05b（部分） | PlanterDetail ページ（Logue 状態: 記事表示 + Seed 折りたたみ + 貢献者一覧） |
 
 ### U5: Feed & Search
 

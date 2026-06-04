@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Sprout } from "lucide-react";
 import { Skeleton } from "@/components/common/Skeleton";
 import { PlanterFollowButton } from "@/components/planter/PlanterFollowButton";
-import { LougeCopyButton } from "./LougeCopyButton";
+import { LogueCopyButton } from "./LogueCopyButton";
 
 interface Contributor {
   user_id: string;
@@ -19,7 +19,7 @@ interface ContributorsSidebarProps {
   contributors: Contributor[];
   logCount: number;
   contributorCount: number;
-  lougeContent: string;
+  logueContent: string;
   planterId: string;
   isFollowing: boolean;
   loading?: boolean;
@@ -42,7 +42,7 @@ export function ContributorsSidebar({
   contributors,
   logCount,
   contributorCount,
-  lougeContent,
+  logueContent,
   planterId,
   isFollowing,
   loading = false,
@@ -126,7 +126,7 @@ export function ContributorsSidebar({
 
       {/* Copy button */}
       <div className="mt-3">
-        <LougeCopyButton content={lougeContent} />
+        <LogueCopyButton content={logueContent} />
       </div>
     </div>
   );

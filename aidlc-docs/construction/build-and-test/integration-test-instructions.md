@@ -1,10 +1,10 @@
-# Integration Test Instructions
+﻿# Integration Test Instructions
 
 apps/api のテストは **httpx の AsyncClient + 実 Postgres** で動かしているため、エンドポイント単位のテストは事実上の統合テスト（Router → Repository → DB）として機能する。本章では「複数ユニットを横断する」シナリオに絞る。
 
 ## Purpose
 
-Seed → Log → Score → Louge → Admin の一連の流れが、複数ユニットの境界を越えて期待通りに連動することを保証する。
+Seed → Log → Score → Logue → Admin の一連の流れが、複数ユニットの境界を越えて期待通りに連動することを保証する。
 
 ---
 
@@ -42,26 +42,26 @@ cd apps/web && npm run dev
 
 ## Test Scenarios
 
-### Scenario 1: Seed 投稿 → Log 集積 → Sprout 状態遷移（U2 → U3）
+### Scenario 1: Seed 投稿 → Log 集積 → Seed 状態遷移（U2 → U3）
 
 - **対象 Unit**: U2 Seed, U3 Log & Score
 - **手順**:
   1. tanaka でログイン → `/seed/new` から Seed 投稿
   2. レスポンスの planter_id を控える
   3. sato でログイン → 同 planter に Log を 1 件投稿
-  4. `GET /api/v1/planters/{id}` で `status='sprout'` に遷移していることを確認
-  5. Lougeスコアが 0 → 正の値になっていることを確認
-- **期待結果**: `status` が seed → sprout、`louge_score` > 0
+  4. `GET /api/v1/planters/{id}` で `status='seed'` に遷移していることを確認
+  5. Logueスコアが 0 → 正の値になっていることを確認
+- **期待結果**: `status` が seed → seed、`logue_score` > 0
 - **クリーンアップ**: 該当 planter を archive または delete
 
-### Scenario 2: Sprout → Louge 開花（U3 → U4）
+### Scenario 2: Seed → Logue 開花（U3 → U4）
 
-- **対象 Unit**: U3 Log & Score, U4 Louge
+- **対象 Unit**: U3 Log & Score, U4 Logue
 - **手順**:
   1. Scenario 1 で生成した planter に対し、複数ユーザーから Log を継続投入
-  2. Lougeスコアが開花閾値に到達した時点で `POST /api/v1/planters/{id}/generate-louge` を発火
-  3. AI（Vertex AI）が記事を生成、`status='louge'` に遷移
-- **期待結果**: `louge_content` フィールドが埋まり、status='louge'
+  2. Logueスコアが開花閾値に到達した時点で `POST /api/v1/planters/{id}/generate-logue` を発火
+  3. AI（Vertex AI）が記事を生成、`status='logue'` に遷移
+- **期待結果**: `logue_content` フィールドが埋まり、status='logue'
 - **注意**: AI 呼び出しを伴うため、CI では mock。手動統合テスト時のみ実呼び出し
 
 ### Scenario 3: Feed → Profile → Follow（U5 → U6）
@@ -132,6 +132,6 @@ psql "$DATABASE_URL" -f ../apps/api/scripts/seed_test_data.sql
 
 ## 既知の制約
 
-- **AI 呼び出しを含むテスト**: `test_louge_generator.py` `test_ai_facilitator.py` は Vertex AI を mock。実呼び出しは手動統合テストでのみ実施
+- **AI 呼び出しを含むテスト**: `test_logue_generator.py` `test_ai_facilitator.py` は Vertex AI を mock。実呼び出しは手動統合テストでのみ実施
 - **Supabase Auth 連携**: テストアカウントの作成は `seed_test_data.sql` 側で SQL ベース。Supabase Dashboard 経由ではない
 - **タイムゾーン**: スコア集計は JST 境界で flaky になりやすいため、各テストで `now: datetime` を明示注入

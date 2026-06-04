@@ -1,4 +1,4 @@
-# Works Logue — CLAUDE.md
+﻿# Works Logue — CLAUDE.md
 
 ## AI-DLC Workflow
 
@@ -11,7 +11,7 @@
 
 ## Project Overview
 
-**Works Logue** は、ビジネスパーソンが現場の悩み・失敗・知恵を投稿（Seed）し、コメント（Log）の熱量が一定基準に達した時点でAIが集合知を記事（Louge）として開花させる、Wikipedia型のビジネスナレッジ共創プラットフォーム。貢献度をスキル通貨（Skill as a Currency）としてスコア化し、会社に依存しないポータブルなプロフェッショナル資産を可視化する。
+**Works Logue** は、ビジネスパーソンが現場の悩み・失敗・知恵を投稿（Seed）し、コメント（Log）の熱量が一定基準に達した時点でAIが集合知を記事（Logue）として開花させる、Wikipedia型のビジネスナレッジ共創プラットフォーム。貢献度をスキル通貨（Skill as a Currency）としてスコア化し、会社に依存しないポータブルなプロフェッショナル資産を可視化する。
 
 詳細: @docs/business-plan.md
 
@@ -67,7 +67,7 @@ works-logue/               ← monorepo
 | FastAPI ビジネスロジック | TDD（テスト先行） | pytest |
 | FastAPI 認証ミドルウェア | TDD（テスト先行） | pytest + JWT モック |
 | Next.js UIコンポーネント | Figma参照で実装後にE2E | Playwright |
-| 核心フロー（Seed→Log→Louge） | E2E | Playwright |
+| 核心フロー（Seed→Log→Logue） | E2E | Playwright |
 
 ### 共通
 - Cloud Run向けに**構造化JSONログ**を標準とする
@@ -108,10 +108,10 @@ works-logue/               ← monorepo
 | nodeId | 画面 |
 |---|---|
 | 12:3 | Home `/` |
-| 57:29 | Seed Detail `/p/{id}` (seed/sprout状態) |
+| 57:29 | Seed Detail `/p/{id}` (seed 状態) |
 | 78:6 | Seed投稿 `/seed/new` |
 | 212:8 | Login `/login` |
-| 213:10 | Louge Detail `/p/{id}` (louge状態) |
+| 213:10 | Logue Detail `/p/{id}` (logue状態) |
 | 217:12 | Explore `/explore` |
 | 220:14 | User Profile `/user/{id}` |
 | 223:16 | Admin `/admin` |
@@ -135,12 +135,11 @@ works-logue/               ← monorepo
 
 | 用語 | 意味 |
 |---|---|
-| Planter | Seed・Log・Lougeを内包する成長の単位（内部概念・UI非表示） |
-| Seed | Planterの起点となる問いの投下。Planter状態: `seed` |
-| Log | Seedへのコメント・知恵の蓄積。Log投稿のたびにLougeスコアを再計算 |
-| Sprout | Logが1件以上蓄積されたPlanter状態: `sprout`（内部でSprout 1〜3を区別） |
-| Louge | Lougeスコアが開花閾値に達しAIが生成したナレッジ記事。Planter状態: `louge` |
-| Fork | LougeをベースにSeedを再投稿すること（フェーズ2） |
+| Planter | Seed・Log・Logueを内包する成長の単位（内部概念・UI非表示） |
+| Seed | Planterの起点となる問いの投下（投稿アクション）兼 Planter 状態: `seed`（誕生時点からこの状態。Log を蓄積し開花閾値に達すると Logue へ） |
+| Log | Seedへのコメント・知恵の蓄積。Log投稿のたびにLogueスコアを再計算 |
+| Logue | Logueスコアが開花閾値に達しAIが生成したナレッジ記事。Planter状態: `logue` |
+| Fork | LogueをベースにSeedを再投稿すること（フェーズ2） |
 
 タグ定義: @docs/tags.md
 

@@ -1,4 +1,4 @@
-# Unit of Work — Works Logue MVP
+﻿# Unit of Work — Works Logue MVP
 
 ## 分解方針
 
@@ -17,7 +17,7 @@
 
 | レイヤー | 内容 |
 |---|---|
-| Database | 全テーブル定義（seed_types, planters, logs, users, tags, follows, notifications, planter_views, louge_score_snapshots, insight_score_events + 中間テーブル）、マイグレーション、SQLAlchemy モデル全量、seed_types 初期データ投入 |
+| Database | 全テーブル定義（seed_types, planters, logs, users, tags, follows, notifications, planter_views, logue_score_snapshots, insight_score_events + 中間テーブル）、マイグレーション、SQLAlchemy モデル全量、seed_types 初期データ投入 |
 | Backend | FastAPI アプリ初期化、AuthMiddleware（JWT検証）、Database（接続プール）、SupabaseAuthClient、SupabaseStorageClient、VertexAIClient |
 | Frontend | Next.js プロジェクト初期化、LayoutShell（3カラム）、Header、Sidebar、RightSidebar、AuthProvider |
 | Infra | Dockerfile（web/api）、環境変数設定、Supabase 接続設定 |
@@ -75,11 +75,11 @@
 | レイヤー | 内容 |
 |---|---|
 | Backend | LogRouter、LogRepository、ScoreEngine（条件A/B）、AIFacilitator、ScorePipeline（オーケストレーション） |
-| Frontend | PlanterDetail（Seed/Sprout 表示）、LogThread（スレッド表示 + 投稿フォーム） |
+| Frontend | PlanterDetail（Seed/Seed 表示）、LogThread（スレッド表示 + 投稿フォーム） |
 
 ### 含まれるコンポーネント
 
-- FC-07 PlanterDetail（Seed/Sprout 状態）, FC-09 LogThread
+- FC-07 PlanterDetail（Seed/Seed 状態）, FC-09 LogThread
 - BC-03 LogRouter, BC-08 LogRepository, BC-11 ScoreEngine, BC-15 AIFacilitator, BC-22 ScorePipeline
 
 ### 依存
@@ -91,27 +91,27 @@
 
 - Log を投稿するとスコアが再計算される
 - 条件A の充足率が ProgressBar に反映される
-- Planter の状態が seed → sprout に遷移する
+- Planter の状態が seed → seed に遷移する
 - 条件B 不足時に AI ファシリテート Log が投稿される
-- louge_score_snapshots にスコア履歴が保存される
+- logue_score_snapshots にスコア履歴が保存される
 
 ---
 
-## U4: Louge
+## U4: Logue
 
-**目的**: Louge 開花（AI 記事生成）とインサイトスコア計算を実装。集合知の結晶化。
+**目的**: Logue 開花（AI 記事生成）とインサイトスコア計算を実装。集合知の結晶化。
 
 ### スコープ
 
 | レイヤー | 内容 |
 |---|---|
-| Backend | LougeGenerator（Vertex AI 記事生成）、InsightScoreCalculator |
-| Frontend | PlanterDetail（Louge 状態: 記事表示 + Seed 折りたたみ + 貢献者一覧） |
+| Backend | LogueGenerator（Vertex AI 記事生成）、InsightScoreCalculator |
+| Frontend | PlanterDetail（Logue 状態: 記事表示 + Seed 折りたたみ + 貢献者一覧） |
 
 ### 含まれるコンポーネント
 
-- FC-07 PlanterDetail（Louge 状態の拡張）
-- BC-12 LougeGenerator, BC-13 InsightScoreCalculator
+- FC-07 PlanterDetail（Logue 状態の拡張）
+- BC-12 LogueGenerator, BC-13 InsightScoreCalculator
 
 ### 依存
 
@@ -120,9 +120,9 @@
 
 ### 完了条件
 
-- 条件A AND 条件B を突破すると Louge 記事が生成される
-- Planter の状態が sprout → louge に遷移する
-- Louge ページにパターンランゲージ形式の記事が表示される
+- 条件A AND 条件B を突破すると Logue 記事が生成される
+- Planter の状態が seed → logue に遷移する
+- Logue ページにパターンランゲージ形式の記事が表示される
 - 貢献者のインサイトスコアが更新される
 - 通知イベントが DB に記録される
 
@@ -152,7 +152,7 @@
 ### 完了条件
 
 - 注目タブが複合スコア（閲覧数 + Log 速度 + 構造充足率）でランキング表示
-- 開花済みタブが Louge のみフィルタ表示
+- 開花済みタブが Logue のみフィルタ表示
 - 探索画面でタグフィルタ + キーワード検索 + 状態フィルタが機能
 
 ---

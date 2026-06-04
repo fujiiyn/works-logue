@@ -1,4 +1,4 @@
-# U7 Admin — Business Logic Model
+﻿# U7 Admin — Business Logic Model
 
 API は `/api/v1/admin/...` 配下に集約する。すべての admin エンドポイントは **AdminMiddleware** で `role=admin` を強制する（Q10=B により非 admin には `404 Not Found` を返し、admin 画面の存在自体を秘匿する）。
 
@@ -32,7 +32,7 @@ Output: AdminStatsResponse {
   total_users: int,
   total_planters: int,
   new_planters_today: int,
-  pending_louge_count: int
+  pending_logue_count: int
 }
 
 1. AdminMiddleware を通過した admin User を取得
@@ -42,12 +42,12 @@ Output: AdminStatsResponse {
    c. new_planters_today: SELECT COUNT(*) FROM planters
                           WHERE created_at >= date_trunc('day', now() AT TIME ZONE 'Asia/Tokyo')
                             AND deleted_at IS NULL
-   d. pending_louge_count: SELECT COUNT(*) FROM planters
-                          WHERE status = 'sprout'
+   d. pending_logue_count: SELECT COUNT(*) FROM planters
+                          WHERE status = 'seed'
                             AND deleted_at IS NULL
-                            -- 「開花待ち」= sprout 状態のもの全件
-                            -- ⚠ NOTE: U4 の Louge 開花閾値（条件 A AND 条件 B）に到達済みの件数では
-                            -- ない。MVP ではダッシュボードの目安数値として「Sprout 全件」を返す。
+                            -- 「開花待ち」= seed 状態のもの全件
+                            -- ⚠ NOTE: U4 の Logue 開花閾値（条件 A AND 条件 B）に到達済みの件数では
+                            -- ない。MVP ではダッシュボードの目安数値として「Seed 全件」を返す。
                             -- 「閾値到達かつ未開花」の厳密カウントは将来拡張（U4 の maturity_score
                             -- 等を JOIN）。ハンドラ docstring にも同旨を記載する。
 3. レスポンス組み立てて返却
@@ -160,7 +160,7 @@ Output: AdminUserItem (更新後)
 ```
 Input: query params
   - q: string (optional) — title 部分一致
-  - status: 'all' | 'seed' | 'sprout' | 'louge' | 'archived' | 'deleted' (default 'all')
+  - status: 'all' | 'seed' | 'seed' | 'logue' | 'archived' | 'deleted' (default 'all')
   - page, per_page
 Output: AdminPlanterListResponse {
   items: AdminPlanterItem[], total, page, per_page
@@ -175,10 +175,10 @@ AdminPlanterItem {
 
 1. AdminMiddleware 通過
 2. ベースクエリ:
-   - status='all' → planters WHERE status IN ('seed','sprout','louge') AND deleted_at IS NULL
+   - status='all' → planters WHERE status IN ('seed','seed','logue') AND deleted_at IS NULL
                     （= フィードに出ているもの。archived は含めない）
    - status='deleted' → planters WHERE deleted_at IS NOT NULL
-   - その他 ('seed'/'sprout'/'louge'/'archived') → planters WHERE status = :status AND deleted_at IS NULL
+   - その他 ('seed'/'seed'/'logue'/'archived') → planters WHERE status = :status AND deleted_at IS NULL
 3. q フィルタ: title ILIKE :q_pattern  -- :q_pattern = f"%{q.strip()}%"
 4. ORDER BY:
    - status='deleted' → ORDER BY deleted_at DESC
@@ -203,7 +203,7 @@ Output: AdminPlanterItem (更新後)
 6. レスポンス返却
 ```
 
-**副作用**: フィード（U2/U5）は `status IN ('seed','sprout','louge')` でフィルタ済の前提。`archived` は自動的に除外される。URL 直叩き（`/p/{id}`）は閲覧可（Q2=A）。
+**副作用**: フィード（U2/U5）は `status IN ('seed','seed','logue')` でフィルタ済の前提。`archived` は自動的に除外される。URL 直叩き（`/p/{id}`）は閲覧可（Q2=A）。
 
 ### 3c. Planter 復元 (`POST /api/v1/admin/planters/{planter_id}/restore`)
 
@@ -215,7 +215,7 @@ Output: AdminPlanterItem (更新後)
 2. Planter 取得（deleted_at IS NULL） → 404 if not found
 3. status != 'archived' → 400 "アーカイブされていません"
 4. UPDATE planters SET status = 'seed', updated_at = now()
-   ※ 復元時の status 戦略は BR-A10 を参照（MVP では 'seed' 固定 + 後続 Log で自動 sprout 昇格）
+   ※ 復元時の status 戦略は BR-A10 を参照（MVP では 'seed' 固定 + 後続 Log で自動 seed 昇格）
 5. Cloud Logging:
    { "event": "admin.planter.restore", "actor_user_id": admin.id,
      "planter_id": planter_id, "ts": now }

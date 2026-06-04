@@ -1,4 +1,4 @@
-# U5 Feed & Search - Code Generation Plan
+﻿# U5 Feed & Search - Code Generation Plan
 
 ## Unit Context
 
@@ -33,7 +33,7 @@
 - [x] `supabase/migrations/00002_feed_search_indexes.sql` 新規作成
   - `CREATE EXTENSION IF NOT EXISTS pg_trgm`
   - `CREATE INDEX idx_planters_title_trgm ON planters USING gin (title gin_trgm_ops) WHERE deleted_at IS NULL`
-  - `CREATE INDEX idx_planters_louge_generated_at ON planters (louge_generated_at DESC) WHERE status = 'louge' AND deleted_at IS NULL`
+  - `CREATE INDEX idx_planters_logue_generated_at ON planters (logue_generated_at DESC) WHERE status = 'logue' AND deleted_at IS NULL`
 
 ---
 
@@ -62,7 +62,7 @@
 - [x] **Test**: `apps/api/app/tests/test_planter_repository_feed.py`
   - list_recent: 既存テストが引き続きパス（tab=recent）
   - list_trending_candidates: 直近 N 日間のアクティブ Planter を取得
-  - list_bloomed: status='louge' のみ、louge_generated_at DESC
+  - list_bloomed: status='logue' のみ、logue_generated_at DESC
   - search: キーワード ILIKE フィルタ
   - search: タグ AND フィルタ
   - search: 状態フィルタ
@@ -71,7 +71,7 @@
   - get_view_counts: planter_views から集計
 - [x] **Impl**: `apps/api/app/repositories/planter_repository.py` 更新
   - `list_trending_candidates(window_days, limit)` 追加
-  - `list_bloomed(limit, cursor_louge_generated_at, cursor_id)` 追加
+  - `list_bloomed(limit, cursor_logue_generated_at, cursor_id)` 追加
   - `search(keyword, tag_ids, status, limit, cursor_created_at, cursor_id)` 追加
   - `get_view_counts(planter_ids, since)` 追加
   - `record_view(planter_id, user_id)` 追加
@@ -93,7 +93,7 @@
 - [x] **Test**: `apps/api/app/tests/test_planters_router_feed.py`
   - GET /planters?tab=recent: 既存動作維持
   - GET /planters?tab=trending: FeedRanker 経由のランキング
-  - GET /planters?tab=bloomed: louge のみ表示
+  - GET /planters?tab=bloomed: logue のみ表示
 - [x] **Impl**: `apps/api/app/routers/planters.py` 更新
   - `list_planters` に `tab` クエリパラメータ追加（デフォルト: recent）
   - tab=trending: list_trending_candidates → get_view_counts → get_log_velocities → FeedRanker
@@ -156,7 +156,7 @@
 - [x] `apps/web/app/explore/page.tsx` 新規作成
   - SearchBar（キーワード入力、debounce 300ms）
   - TagFilter（TagAccordionSelector 再利用）
-  - StatusFilter（seed/sprout/louge チップ）
+  - StatusFilter（seed/seed/logue チップ）
   - 検索結果: PlanterCard リスト + 無限スクロール
   - API: `GET /api/v1/search`
 
@@ -181,5 +181,5 @@
 - [x] dev サーバー起動して動作確認
   - 新着タブ: 既存動作維持
   - 人気タブ: ランキング表示
-  - 開花済みタブ: louge のみ表示
+  - 開花済みタブ: logue のみ表示
   - Explore ページ: 検索・フィルタ動作

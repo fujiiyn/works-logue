@@ -1,4 +1,4 @@
-# Components Definition
+﻿# Components Definition
 
 ## Overview
 
@@ -68,7 +68,7 @@ Works Logue MVP のコンポーネント定義。Frontend（Next.js App Router�
 |---|---|
 | 名前 | PlanterDetail |
 | 種別 | Server Component（ページロード）+ Client Component（Log 投稿） |
-| 責務 | Planter 個別ページ。状態に応じた表示切替（Seed/Sprout: Seed本文+Log一覧、Louge: 記事+Seed折りたたみ+Log一覧） |
+| 責務 | Planter 個別ページ。状態に応じた表示切替（Seed/Seed: Seed本文+Log一覧、Logue: 記事+Seed折りたたみ+Log一覧） |
 | 配置 | `apps/web/app/p/[id]/page.tsx` |
 
 ### FC-08: SeedForm
@@ -234,17 +234,17 @@ Works Logue MVP のコンポーネント定義。Frontend（Next.js App Router�
 |---|---|
 | 名前 | ScoreEngine |
 | 種別 | Domain Service |
-| 責務 | Louge スコアの計算ロジック。条件A（構造充足率）の軽量チェックと条件B（成熟度4観点）の本格スコアリングを実行。ポリシークラスとして閾値を外部設定化 |
+| 責務 | Logue スコアの計算ロジック。条件A（構造充足率）の軽量チェックと条件B（成熟度4観点）の本格スコアリングを実行。ポリシークラスとして閾値を外部設定化 |
 | 配置 | `apps/api/services/score_engine.py` |
 
-### BC-12: LougeGenerator
+### BC-12: LogueGenerator
 
 | 項目 | 内容 |
 |---|---|
-| 名前 | LougeGenerator |
+| 名前 | LogueGenerator |
 | 種別 | Domain Service |
-| 責務 | Vertex AI を呼び出し、Seed + Log 群からパターンランゲージ形式の Louge 記事を生成。開花判定トリガー後に BackgroundTasks で非同期実行 |
-| 配置 | `apps/api/services/louge_generator.py` |
+| 責務 | Vertex AI を呼び出し、Seed + Log 群からパターンランゲージ形式の Logue 記事を生成。開花判定トリガー後に BackgroundTasks で非同期実行 |
+| 配置 | `apps/api/services/logue_generator.py` |
 
 ### BC-13: InsightScoreCalculator
 
@@ -252,7 +252,7 @@ Works Logue MVP のコンポーネント定義。Frontend（Next.js App Router�
 |---|---|
 | 名前 | InsightScoreCalculator |
 | 種別 | Domain Service |
-| 責務 | Louge 開花時に各 Log 投稿者の貢献度を数値化。insight_score_events への記録 |
+| 責務 | Logue 開花時に各 Log 投稿者の貢献度を数値化。insight_score_events への記録 |
 | 配置 | `apps/api/services/insight_calculator.py` |
 
 ### BC-14: FeedRanker
@@ -306,7 +306,7 @@ Works Logue MVP のコンポーネント定義。Frontend（Next.js App Router�
 |---|---|
 | 名前 | ScorePipeline |
 | 種別 | Orchestration Module（関数集） |
-| 責務 | Log 投稿後のスコア計算フローを順番に実行する関数群。BackgroundTasks から呼ばれる。ScoreEngine・LougeGenerator・AIFacilitator をオーケストレーション |
+| 責務 | Log 投稿後のスコア計算フローを順番に実行する関数群。BackgroundTasks から呼ばれる。ScoreEngine・LogueGenerator・AIFacilitator をオーケストレーション |
 | 配置 | `apps/api/pipelines/score_pipeline.py` |
 
 ### BC-17: SupabaseStorageClient
@@ -324,7 +324,7 @@ Works Logue MVP のコンポーネント定義。Frontend（Next.js App Router�
 |---|---|
 | 名前 | VertexAIClient |
 | 種別 | Infrastructure（外部サービスラッパー） |
-| 責務 | Vertex AI API との通信を抽象化。ScoreEngine・LougeGenerator・AIFacilitator が利用 |
+| 責務 | Vertex AI API との通信を抽象化。ScoreEngine・LogueGenerator・AIFacilitator が利用 |
 | 配置 | `apps/api/infra/vertex_ai.py` |
 
 ### BC-19: Database
@@ -345,7 +345,7 @@ Works Logue MVP のコンポーネント定義。Frontend（Next.js App Router�
 | 項目 | 内容 |
 |---|---|
 | 名前 | Models |
-| 責務 | ORM モデル定義（planters, logs, users, tags, follows, notifications, planter_views, louge_score_snapshots, insight_score_events） |
+| 責務 | ORM モデル定義（planters, logs, users, tags, follows, notifications, planter_views, logue_score_snapshots, insight_score_events） |
 | 配置 | `apps/api/models/` |
 
 ### DB-02: Supabase Migrations

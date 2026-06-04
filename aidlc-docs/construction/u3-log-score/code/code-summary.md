@@ -1,4 +1,4 @@
-# U3 Log & Score -- Code Generation Summary
+﻿# U3 Log & Score -- Code Generation Summary
 
 ## 作成/更新ファイル一覧
 
@@ -7,7 +7,7 @@
 | ファイル | 操作 | 概要 |
 |---|---|---|
 | `app/models/log.py` | 新規 | Log モデル (soft delete, AI generated, reply chain) |
-| `app/models/score.py` | 新規 | LougeScoreSnapshot, InsightScoreEvent モデル |
+| `app/models/score.py` | 新規 | LogueScoreSnapshot, InsightScoreEvent モデル |
 | `app/models/app_setting.py` | 新規 | AppSetting モデル (key-value 設定) |
 | `app/models/__init__.py` | 更新 | 新モデルのインポート追加 |
 | `app/schemas/log.py` | 新規 | LogCreate, LogResponse, LogWithRepliesResponse, LogCreateResponse |
@@ -40,13 +40,13 @@
 
 | ファイル | 概要 |
 |---|---|
-| `supabase/migrations/00005_u3_log_score.sql` | logs, louge_score_snapshots, insight_score_events, app_settings テーブル + planter カラム追加 |
+| `supabase/migrations/00005_u3_log_score.sql` | logs, logue_score_snapshots, insight_score_events, app_settings テーブル + planter カラム追加 |
 
 ## API エンドポイント一覧
 
 | Method | Path | 認証 | 概要 |
 |---|---|---|---|
-| POST | `/api/v1/planters/{id}/logs` | 必須 | Log 投稿 (自動フォロー, seed->sprout 遷移, バックグラウンドスコア計算) |
+| POST | `/api/v1/planters/{id}/logs` | 必須 | Log 投稿 (自動フォロー, seed->seed 遷移, バックグラウンドスコア計算) |
 | GET | `/api/v1/planters/{id}/logs` | 不要 | Log 一覧取得 (カーソルページネーション, 返信ネスト) |
 | GET | `/api/v1/planters/{id}/score` | 不要 | スコア取得 (score_pending 判定付き) |
 | GET | `/api/v1/settings/score` | 不要 | スコア設定取得 (デフォルト値フォールバック) |

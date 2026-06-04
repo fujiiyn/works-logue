@@ -1,4 +1,4 @@
-# U5 Feed & Search — Frontend Components
+﻿# U5 Feed & Search — Frontend Components
 
 ## FC-06: PlanterFeed 拡張
 
@@ -12,7 +12,7 @@
 |---|---|---|
 | 新着 | `tab=recent` | created_at DESC |
 | 人気 | `tab=trending` | trending_score DESC |
-| 開花済み | `tab=bloomed` | louge_generated_at DESC |
+| 開花済み | `tab=bloomed` | logue_generated_at DESC |
 
 ### UI 変更
 - タブの `disabled` 属性と coming soon ラベルを削除
@@ -30,7 +30,7 @@ SearchExplore
 ├── SearchBar（キーワード入力、debounce 300ms）
 ├── FilterBar
 │   ├── TagFilter（TagAccordionSelector 再利用、複数選択）
-│   └── StatusFilter（seed / sprout / louge チップ選択）
+│   └── StatusFilter（seed / seed / logue チップ選択）
 └── SearchResults（PlanterCard リスト、無限スクロール）
 ```
 

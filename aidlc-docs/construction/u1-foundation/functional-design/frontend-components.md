@@ -1,4 +1,4 @@
-# U1 Foundation — Frontend Components
+﻿# U1 Foundation — Frontend Components
 
 ## 概要
 
@@ -116,8 +116,8 @@ U1 で実装するフロントエンドコンポーネントの詳細設計。3�
 | ページ | 表示内容 |
 |---|---|
 | ホーム (`/`) | About Works Logue カード |
-| Planter 詳細 (louge 状態) | 貢献者一覧 + スコア（U4 で実装） |
-| Planter 詳細 (seed/sprout) | Planter 統計・開花進捗（U3 で実装） |
+| Planter 詳細 (logue 状態) | 貢献者一覧 + スコア（U4 で実装） |
+| Planter 詳細 (seed/seed) | Planter 統計・開花進捗（U3 で実装） |
 | その他 | About Works Logue カード（デフォルト） |
 
 ### About Works Logue カード（U1 で実装）
@@ -131,9 +131,9 @@ U1 で実装するフロントエンドコンポーネントの詳細設計。3�
 |                                      |
 | 現場のリアルな悩み（Seed）に           |
 | みんなで知恵（Log）を集め、            |
-| AIがナレッジ（Louge）を開花させます。   |
+| AIがナレッジ（Logue）を開花させます。   |
 |                                      |
-| Seeds: XX  Louges: XX               |
+| Seeds: XX  Logues: XX               |
 | Contributors: XX                     |
 |                                      |
 | [Seed を投稿する] (CTA button)       |
@@ -203,8 +203,8 @@ U1 の認証基盤として最低限のログインページを含む。
 
 | Planter 状態 | 投稿者名 | 表示例 |
 |---|---|---|
-| Seed / Sprout | 表示する | `Sprout · 悩み · HR_Tanaka · 2h` |
-| Louge | **表示しない**（AI生成のため） | `Louge · シェア · 3d` |
+| Seed / Seed | 表示する | `Seed · 悩み · HR_Tanaka · 2h` |
+| Logue | **表示しない**（AI生成のため） | `Logue · シェア · 3d` |
 
 ---
 
@@ -229,7 +229,7 @@ colors:
   text-secondary:  '#596B66'  (サブテキスト・タグテキスト)
   text-muted:      '#99998F'  (タイムスタンプ・メタ情報)
   text-sage:       '#A6B89E'  (セパレーター・プレースホルダー)
-  white:           '#FFFFFF'  (Lougeバッジテキスト・CTAテキスト)
+  white:           '#FFFFFF'  (Logueバッジテキスト・CTAテキスト)
 
 fontFamily:
   sans: ['Inter', 'Noto Sans JP', 'sans-serif']
@@ -241,7 +241,7 @@ borderRadius:
   lg: '10px'  (カード・About Card)
 
 fontSize:
-  display:    '28px / Semi Bold'  (Louge記事タイトル・大見出し)
+  display:    '28px / Semi Bold'  (Logue記事タイトル・大見出し)
   heading-xl: '24px / Semi Bold'  (ページ見出し・セクションタイトル)
   heading-l:  '18px / Medium'     (カードタイトル・投稿タイトル)
   heading-m:  '15px / Semi Bold'  (About Cardタイトル・セクション見出し)

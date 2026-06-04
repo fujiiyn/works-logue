@@ -1,4 +1,4 @@
-# U7 Admin — Frontend Components
+﻿# U7 Admin — Frontend Components
 
 Figma 参照: page `admin`（nodeId `420:159`）。実装時は **Figma を単一の真実源** として `get_design_context` で各 nodeId を取得してから書く。
 
@@ -130,7 +130,7 @@ AdminDashboard
 │   ├── StatCard 総ユーザー数
 │   ├── StatCard 総 Planter 数
 │   ├── StatCard 本日の新規 Planter
-│   └── StatCard 開花待ち Sprout
+│   └── StatCard 開花待ち Seed
 └── (将来用の余白。MVP では 4 カードのみ)
 ```
 
@@ -139,9 +139,9 @@ AdminDashboard
 | StatCard | フィールド | アイコン (Lucide) |
 |---|---|---|
 | 総ユーザー数 | total_users | Users |
-| 総 Planter 数 | total_planters | Sprout |
+| 総 Planter 数 | total_planters | Seed |
 | 本日の新規 Planter | new_planters_today | TrendingUp |
-| 開花待ち Sprout | pending_louge_count | Flower2 |
+| 開花待ち Seed | pending_logue_count | Flower2 |
 
 Server Component で取得して props として渡す（リロード時に最新化）。
 
@@ -208,16 +208,16 @@ PlanterManagementPage (Client)
 ├── PageTitle "Planter 管理"
 ├── ToolbarRow
 │   ├── SearchInput (title 部分一致)
-│   └── FilterChipGroup [ すべて | Seed | Sprout | Louge | アーカイブ | 削除済み ]
-│                       ※「すべて」= フィードに出ているもの (= seed/sprout/louge)。archived/削除済みは含まない (BR-A09b)
+│   └── FilterChipGroup [ すべて | Seed | Seed | Logue | アーカイブ | 削除済み ]
+│                       ※「すべて」= フィードに出ているもの (= seed/seed/logue)。archived/削除済みは含まない (BR-A09b)
 ├── PlanterTable
 │   ├── Column: タイトル (title + seed_type_name)
 │   ├── Column: 投稿者 (avatar + display_name)
-│   ├── Column: 状態バッジ (Seed/Sprout/Louge/アーカイブ/削除)
+│   ├── Column: 状態バッジ (Seed/Seed/Logue/アーカイブ/削除)
 │   ├── Column: Logs (log_count + contributor_count)
 │   ├── Column: 更新日
 │   └── Column: アクション
-│       ├── 通常 (seed/sprout/louge) → [アーカイブ] [削除] ボタン
+│       ├── 通常 (seed/seed/logue) → [アーカイブ] [削除] ボタン
 │       ├── archived → [復元] [削除] ボタン
 │       └── deleted → アイコン表示 ("削除済み")、操作不可
 ├── Pagination

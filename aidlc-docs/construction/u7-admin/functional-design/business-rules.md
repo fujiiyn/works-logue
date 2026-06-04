@@ -1,4 +1,4 @@
-# U7 Admin — Business Rules
+﻿# U7 Admin — Business Rules
 
 ID 規則: `BR-A##` で U7 Admin 固有のルール。Q## 確定事項を直接の根拠とする。
 
@@ -68,15 +68,15 @@ ID 規則: `BR-A##` で U7 Admin 固有のルール。Q## 確定事項を直接�
 - admin 画面では両方を別操作として提供する
 
 ### BR-A09b: Planter 一覧フィルタ「すべて」の定義
-- 「すべて」は **`status IN ('seed','sprout','louge') AND deleted_at IS NULL`**（フィードに出ている Planter のみ）
+- 「すべて」は **`status IN ('seed','seed','logue') AND deleted_at IS NULL`**（フィードに出ている Planter のみ）
 - アーカイブ / 削除済みは **デフォルトで除外**。それぞれ専用フィルタで切り替えて確認する
 - 理由: admin の通常運用は「公開中の不適切投稿の発見・対処」が主であり、archived を毎回ノイズとして表示する必要はない
 
 ### BR-A10: アーカイブ復元時の status
 - MVP では復元時に `status = 'seed'` に固定する
 - 厳密には「アーカイブ前の status に戻す」のが理想だが、その実装は U7 のスコープ外（理由: アーカイブ時点での status を保存する追加列が必要なため）
-- 結果として、Sprout や Louge をアーカイブ → 復元すると Seed に戻る。運用ドキュメントに明記する
-- **自然な再昇格について**: 復元後に最初の Log が投稿されると、`apps/api/app/routers/logs.py:111-118` の既存ロジック（`status == 'seed'` なら `sprout` に遷移）により Sprout に自動昇格する。Louge については AI 開花の閾値を再度満たすまで戻らない（U4 のスコア再計算）。これらは既存の U3/U4 の振る舞いをそのまま利用する
+- 結果として、Seed や Logue をアーカイブ → 復元すると Seed に戻る。運用ドキュメントに明記する
+- **自然な再昇格について**: 復元後に最初の Log が投稿されると、`apps/api/app/routers/logs.py:111-118` の既存ロジック（`status == 'seed'` なら `seed` に遷移）により Seed に自動昇格する。Logue については AI 開花の閾値を再度満たすまで戻らない（U4 のスコア再計算）。これらは既存の U3/U4 の振る舞いをそのまま利用する
 
 ### BR-A11: 削除済み Planter の操作制限
 - `deleted_at IS NOT NULL` の Planter は **復元 UI を表示しない**
@@ -90,7 +90,7 @@ ID 規則: `BR-A##` で U7 Admin 固有のルール。Q## 確定事項を直接�
 - フロント・API の二重検証
 
 ### BR-A13: フィード側の整合
-- 既存の `GET /planters` 系（U2/U5）は `status IN ('seed','sprout','louge') AND deleted_at IS NULL` でフィルタ済とする
+- 既存の `GET /planters` 系（U2/U5）は `status IN ('seed','seed','logue') AND deleted_at IS NULL` でフィルタ済とする
 - archived / deleted_at の Planter は U7 の作業によって自動的にフィードから消える（既存ロジックを変更しない）
 
 ## SeedType 管理

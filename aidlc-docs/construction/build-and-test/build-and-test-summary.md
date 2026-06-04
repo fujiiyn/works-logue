@@ -1,4 +1,4 @@
-# Build and Test Summary
+﻿# Build and Test Summary
 
 Works Logue MVP（U1〜U7）の Build and Test ステージ完了サマリ。
 
@@ -43,7 +43,7 @@ Works Logue MVP（U1〜U7）の Build and Test ステージ完了サマリ。
 | U1 Foundation（Auth / Health / User） | 既存 |
 | U2 Seed（Planter / SeedType） | 既存 + 1（BR-A17 契約） |
 | U3 Log & Score | 既存 |
-| U4 Louge | 既存（AI mock） |
+| U4 Logue | 既存（AI mock） |
 | U5 Feed & Search | 既存 |
 | U6 User & Follow | 既存 |
 | **U7 Admin** | **+114**（実測内訳: Repository 34 / Router 57 / Middleware 7 / RequestId middleware 4 / BAN 契約 10 / 合計 112 件は完全新規ファイル ／ 既存ファイルへの追加 = `test_seed_types.py` 4 件中 1 件が BR-A17 契約 + `test_users.py` 37 件中 1 件が UserResponse 拡張 = +2、合算 114） |
@@ -55,7 +55,7 @@ API テストスイートが Router → Repository → 実 Postgres を貫通す
 | 指標 | 値 |
 |---|---|
 | 自動化済み | 373 件（pytest 一式） |
-| 手動シナリオ | 5（Seed→Sprout、Sprout→Louge、Feed→Profile→Follow、Admin BAN、Admin Planter ライフサイクル） |
+| 手動シナリオ | 5（Seed→Seed、Seed→Logue、Feed→Profile→Follow、Admin BAN、Admin Planter ライフサイクル） |
 | Status | ✅ Pass |
 
 ### Performance Tests
@@ -129,7 +129,7 @@ OWASP Top 10 全項目の網羅監査やペネトレ・依存脆弱性スキャ�
 | U1 Foundation | ✅ 2026-04-08 | ✅ 2026-04-12 |
 | U2 Seed | ✅ 2026-04-12 | ✅ 2026-04-12 |
 | U3 Log & Score | ✅ 2026-04-14 | ✅ 2026-04-15 |
-| U4 Louge | ✅ 2026-04-15 | ✅ 2026-04-15 |
+| U4 Logue | ✅ 2026-04-15 | ✅ 2026-04-15 |
 | U5 Feed & Search | ✅ 2026-04-18 | ✅ 2026-04-18 |
 | U6 User & Follow | ✅ 2026-04-18 | ✅ 2026-04-19 |
 | U7 Admin | ✅ 2026-05-04 | ✅ 2026-05-04 |

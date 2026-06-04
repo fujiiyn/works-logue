@@ -1,4 +1,4 @@
-# U1 Foundation — Domain Entities（DB スキーマ全量）
+﻿# U1 Foundation — Domain Entities（DB スキーマ全量）
 
 ## 概要
 
@@ -68,9 +68,9 @@
 | title | VARCHAR(200) | NOT NULL | タイトル |
 | body | TEXT | NOT NULL | Seed 本文 |
 | seed_type_id | UUID | FK → seed_types.id, NOT NULL | 投稿タイプ |
-| status | VARCHAR(10) | NOT NULL, DEFAULT 'seed' | Planter 状態（seed/sprout/louge） |
-| louge_content | TEXT | NULL | Louge 記事（Markdown）。開花後に格納 |
-| louge_generated_at | TIMESTAMPTZ | NULL | Louge 生成日時 |
+| status | VARCHAR(10) | NOT NULL, DEFAULT 'seed' | Planter 状態（seed/seed/logue） |
+| logue_content | TEXT | NULL | Logue 記事（Markdown）。開花後に格納 |
+| logue_generated_at | TIMESTAMPTZ | NULL | Logue 生成日時 |
 | structure_fulfillment | FLOAT | NOT NULL, DEFAULT 0.0 | 条件A 構造パーツ充足率（0.0〜1.0） |
 | maturity_score | FLOAT | NULL | 条件B 成熟度スコア（0.0〜100.0）。条件A 充足後に値が入る |
 | progress | FLOAT | NOT NULL, DEFAULT 0.0 | UI表示用の総合進捗（0.0〜1.0）。条件A=0〜0.5、条件B=0.5〜1.0 にスケール |
@@ -89,7 +89,7 @@
 - `idx_planters_deleted_at` ON (deleted_at) WHERE deleted_at IS NULL
 
 **CHECK 制約**:
-- `chk_planters_status` CHECK (status IN ('seed','sprout','louge','archived'))
+- `chk_planters_status` CHECK (status IN ('seed','seed','logue','archived'))
 
 ---
 
@@ -197,7 +197,7 @@
 |---|---|---|---|
 | id | UUID | PK, DEFAULT gen_random_uuid() | |
 | user_id | UUID | FK → users.id, NOT NULL | 通知対象ユーザー |
-| type | VARCHAR(30) | NOT NULL | イベント型（new_log/status_changed/louge_bloomed/new_seed） |
+| type | VARCHAR(30) | NOT NULL | イベント型（new_log/status_changed/logue_bloomed/new_seed） |
 | planter_id | UUID | FK → planters.id, NULL | 関連 Planter |
 | actor_id | UUID | FK → users.id, NULL | 行為者 |
 | is_read | BOOLEAN | NOT NULL, DEFAULT FALSE | 既読フラグ |
@@ -207,7 +207,7 @@
 - `idx_notifications_user_unread` ON (user_id, created_at DESC) WHERE is_read = FALSE
 
 **CHECK 制約**:
-- `chk_notifications_type` CHECK (type IN ('new_log','status_changed','louge_bloomed','new_seed'))
+- `chk_notifications_type` CHECK (type IN ('new_log','status_changed','logue_bloomed','new_seed'))
 
 ---
 
@@ -231,7 +231,7 @@
 
 ---
 
-### louge_score_snapshots
+### logue_score_snapshots
 
 | カラム | 型 | 制約 | 説明 |
 |---|---|---|---|
@@ -284,15 +284,15 @@
 | key | value | description |
 |---|---|---|
 | scoring_model | gemini-2.0-flash | スコアリング用AIモデル（軽量・高頻度） |
-| louge_model | gemini-2.0-pro | Louge記事生成用AIモデル（高品質） |
+| logue_model | gemini-2.0-pro | Logue記事生成用AIモデル（高品質） |
 | facilitator_model | gemini-2.0-flash | AIファシリテート用モデル |
 | scoring_structure_prompt | (プロンプトテンプレート) | 条件A 構造パーツ判定プロンプト |
 | scoring_maturity_prompt | (プロンプトテンプレート) | 条件B 成熟度スコアリングプロンプト |
-| louge_generation_prompt | (プロンプトテンプレート) | Louge記事生成プロンプト |
+| logue_generation_prompt | (プロンプトテンプレート) | Logue記事生成プロンプト |
 | facilitator_prompt | (プロンプトテンプレート) | AIファシリテートLog生成プロンプト |
-| structure_threshold | 0.8 | 条件A 充足率の閾値（これ以上でSprout2へ） |
-| maturity_threshold | 100 | 条件B 完全充足スコア（これ以上でLouge開花） |
-| bud_threshold | 80 | 条件B スコアの蕾しきい値（これ以上でSprout3へ） |
+| structure_threshold | 0.8 | 条件A 充足率の閾値（これ以上でSeed2へ） |
+| maturity_threshold | 100 | 条件B 完全充足スコア（これ以上でLogue開花） |
+| bud_threshold | 80 | 条件B スコアの蕾しきい値（これ以上でSeed3へ） |
 | min_participants | 5 | 条件B 発動の最低参加者数 |
 | min_logs | 10 | 条件B 発動の最低Log数 |
 
@@ -309,7 +309,7 @@ users ─────────────┬─── planters (1:N)
   |                |       ├── planter_tags (N:M → tags)
   |                |       ├── planter_follows (N:M → users)
   |                |       ├── planter_views (1:N)
-  |                |       ├── louge_score_snapshots (1:N)
+  |                |       ├── logue_score_snapshots (1:N)
   |                |       └── insight_score_events (1:N)
   |                |
   ├── user_tags (N:M → tags)

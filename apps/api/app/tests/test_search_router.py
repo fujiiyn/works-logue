@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -73,10 +73,10 @@ class TestSearchEndpoint:
         assert items[0]["title"] == "Tagged"
 
     async def test_status_filter(self, client, db_session, test_user, seed_type):
-        await _create_planter(db_session, test_user, seed_type, title="S", status="seed")
-        await _create_planter(db_session, test_user, seed_type, title="Sp", status="sprout")
+        await _create_planter(db_session, test_user, seed_type, title="L", status="logue")
+        await _create_planter(db_session, test_user, seed_type, title="Sp", status="seed")
 
-        resp = await client.get("/api/v1/search?status=sprout")
+        resp = await client.get("/api/v1/search?status=seed")
         assert resp.status_code == 200
         items = resp.json()["items"]
         assert len(items) == 1
@@ -88,13 +88,13 @@ class TestSearchEndpoint:
         await db_session.commit()
         await db_session.refresh(tag)
 
-        p1 = await _create_planter(db_session, test_user, seed_type, title="人事の悩み", status="sprout")
-        p2 = await _create_planter(db_session, test_user, seed_type, title="人事の種", status="seed")
+        p1 = await _create_planter(db_session, test_user, seed_type, title="人事の悩み", status="seed")
+        p2 = await _create_planter(db_session, test_user, seed_type, title="人事の記事", status="logue")
         for p in [p1, p2]:
             db_session.add(PlanterTag(planter_id=p.id, tag_id=tag.id))
         await db_session.commit()
 
-        resp = await client.get(f"/api/v1/search?keyword=人事&tag_ids={tag.id}&status=sprout")
+        resp = await client.get(f"/api/v1/search?keyword=人事&tag_ids={tag.id}&status=seed")
         assert resp.status_code == 200
         items = resp.json()["items"]
         assert len(items) == 1

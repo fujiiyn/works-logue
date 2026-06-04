@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -78,12 +78,12 @@ class TestGetById:
         assert await repo.get_by_id(user.id) is None
 
 
-class TestLougeCount:
-    async def test_louge_count_seed_author(self, repo, test_user, seed_type, db_session):
-        """Count louges where user is the seed author."""
-        # Louge planter authored by test_user
+class TestLogueCount:
+    async def test_logue_count_seed_author(self, repo, test_user, seed_type, db_session):
+        """Count logues where user is the seed author."""
+        # Logue planter authored by test_user
         p = Planter(
-            user_id=test_user.id, title="Louge", body="B", seed_type_id=seed_type.id, status="louge"
+            user_id=test_user.id, title="Logue", body="B", seed_type_id=seed_type.id, status="logue"
         )
         db_session.add(p)
         await db_session.commit()
@@ -95,13 +95,13 @@ class TestLougeCount:
         db_session.add(evt)
         await db_session.commit()
 
-        count = await repo.get_louge_count(test_user.id)
+        count = await repo.get_logue_count(test_user.id)
         assert count == 1
 
-    async def test_louge_count_log_contributor(self, repo, test_user, other_user, seed_type, db_session):
-        """Count louges where user contributed via log (D9: insight_score > 0)."""
+    async def test_logue_count_log_contributor(self, repo, test_user, other_user, seed_type, db_session):
+        """Count logues where user contributed via log (D9: insight_score > 0)."""
         p = Planter(
-            user_id=other_user.id, title="Louge", body="B", seed_type_id=seed_type.id, status="louge"
+            user_id=other_user.id, title="Logue", body="B", seed_type_id=seed_type.id, status="logue"
         )
         db_session.add(p)
         await db_session.commit()
@@ -113,13 +113,13 @@ class TestLougeCount:
         db_session.add(evt)
         await db_session.commit()
 
-        count = await repo.get_louge_count(test_user.id)
+        count = await repo.get_logue_count(test_user.id)
         assert count == 1
 
-    async def test_louge_count_excludes_zero_score(self, repo, test_user, other_user, seed_type, db_session):
+    async def test_logue_count_excludes_zero_score(self, repo, test_user, other_user, seed_type, db_session):
         """D9: Zero score contributions should not count."""
         p = Planter(
-            user_id=other_user.id, title="Louge", body="B", seed_type_id=seed_type.id, status="louge"
+            user_id=other_user.id, title="Logue", body="B", seed_type_id=seed_type.id, status="logue"
         )
         db_session.add(p)
         await db_session.commit()
@@ -131,13 +131,13 @@ class TestLougeCount:
         db_session.add(evt)
         await db_session.commit()
 
-        count = await repo.get_louge_count(test_user.id)
+        count = await repo.get_logue_count(test_user.id)
         assert count == 0
 
-    async def test_louge_count_deduplicates(self, repo, test_user, seed_type, db_session):
+    async def test_logue_count_deduplicates(self, repo, test_user, seed_type, db_session):
         """Same planter as both seed author and log contributor should count once."""
         p = Planter(
-            user_id=test_user.id, title="Louge", body="B", seed_type_id=seed_type.id, status="louge"
+            user_id=test_user.id, title="Logue", body="B", seed_type_id=seed_type.id, status="logue"
         )
         db_session.add(p)
         await db_session.commit()
@@ -151,7 +151,7 @@ class TestLougeCount:
         ))
         await db_session.commit()
 
-        count = await repo.get_louge_count(test_user.id)
+        count = await repo.get_logue_count(test_user.id)
         assert count == 1
 
 
@@ -159,10 +159,10 @@ class TestFeaturedContribution:
     async def test_featured_contribution(self, repo, test_user, seed_type, db_session):
         """Should return the planter with highest total score."""
         p1 = Planter(
-            user_id=test_user.id, title="Low", body="B", seed_type_id=seed_type.id, status="louge"
+            user_id=test_user.id, title="Low", body="B", seed_type_id=seed_type.id, status="logue"
         )
         p2 = Planter(
-            user_id=test_user.id, title="High", body="B", seed_type_id=seed_type.id, status="louge"
+            user_id=test_user.id, title="High", body="B", seed_type_id=seed_type.id, status="logue"
         )
         db_session.add_all([p1, p2])
         await db_session.commit()
@@ -183,7 +183,7 @@ class TestFeaturedContribution:
         assert featured["total_score"] == 10.0
 
     async def test_featured_contribution_none(self, repo, test_user):
-        """Should return None if no louge contributions."""
+        """Should return None if no logue contributions."""
         featured = await repo.get_featured_contribution(test_user.id)
         assert featured is None
 
@@ -224,17 +224,17 @@ class TestUserPlanters:
         assert len(planters) == 1
         assert planters[0].title == "My Seed"
 
-    async def test_get_user_planters_louges(self, repo, test_user, other_user, seed_type, db_session):
-        """tab=louges should include Louges where user contributed with score > 0 (D9)."""
-        # Authored louge
+    async def test_get_user_planters_logues(self, repo, test_user, other_user, seed_type, db_session):
+        """tab=logues should include Logues where user contributed with score > 0 (D9)."""
+        # Authored logue
         p1 = Planter(
-            user_id=test_user.id, title="Authored Louge", body="B",
-            seed_type_id=seed_type.id, status="louge"
+            user_id=test_user.id, title="Authored Logue", body="B",
+            seed_type_id=seed_type.id, status="logue"
         )
-        # Other's louge, test_user contributed
+        # Other's logue, test_user contributed
         p2 = Planter(
-            user_id=other_user.id, title="Contributed Louge", body="B",
-            seed_type_id=seed_type.id, status="louge"
+            user_id=other_user.id, title="Contributed Logue", body="B",
+            seed_type_id=seed_type.id, status="logue"
         )
         db_session.add_all([p1, p2])
         await db_session.commit()
@@ -249,7 +249,7 @@ class TestUserPlanters:
         ))
         await db_session.commit()
 
-        planters, cursor = await repo.get_user_planters(test_user.id, tab="louges")
+        planters, cursor = await repo.get_user_planters(test_user.id, tab="logues")
         assert len(planters) == 2
 
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useCallback } from "react";
 import { X } from "lucide-react";
@@ -68,8 +68,8 @@ export function LogComposer({
     el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
   }, []);
 
-  // Hide for louge status (after all hooks)
-  if (planterStatus === "louge") return null;
+  // Hide for logue status (after all hooks)
+  if (planterStatus === "logue") return null;
 
   const handleSubmit = async () => {
     const trimmed = body.trim();

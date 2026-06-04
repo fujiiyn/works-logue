@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
@@ -80,7 +80,7 @@ async def create_log(
     if planter is None:
         raise HTTPException(status_code=404, detail="planter_not_found")
 
-    if planter.status == "louge":
+    if planter.status == "logue":
         raise HTTPException(status_code=400, detail="planter_already_bloomed")
 
     # Validate parent_log_id
@@ -106,17 +106,6 @@ async def create_log(
     await planter_repo.increment_log_count(planter_id)
     contributor_count = await log_repo.count_contributors(planter_id)
     await planter_repo.update_contributor_count(planter_id, contributor_count)
-
-    # Transition seed -> sprout on first log
-    if planter.status == "seed":
-        from sqlalchemy import update as sa_update
-
-        await db.execute(
-            sa_update(Planter)
-            .where(Planter.id == planter_id)
-            .values(status="sprout")
-        )
-        await db.flush()
 
     await db.commit()
 

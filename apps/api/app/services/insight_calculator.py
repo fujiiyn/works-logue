@@ -1,4 +1,4 @@
-import logging
+﻿import logging
 import uuid
 from collections import defaultdict
 
@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 INSIGHT_SYSTEM_INSTRUCTION = """\
 あなたはビジネスナレッジの貢献度評価の専門家です。
-生成された Louge 記事と、それの元となった各 Log を比較し、
-各 Log が Louge 記事にどの程度貢献したかを 0.0〜1.0 のスコアで評価してください。
+生成された Logue 記事と、それの元となった各 Log を比較し、
+各 Log が Logue 記事にどの程度貢献したかを 0.0〜1.0 のスコアで評価してください。
 
 評価基準:
 - 0.8〜1.0: 記事の核心的な解決策やインサイトを提供した
@@ -42,7 +42,7 @@ class InsightScoreCalculator:
     async def calculate(
         self,
         planter_id: uuid.UUID,
-        louge_content: str,
+        logue_content: str,
         db: AsyncSession,
     ) -> list[InsightScoreEvent]:
         planter = await self._get_planter(planter_id, db)
@@ -55,7 +55,7 @@ class InsightScoreCalculator:
         events: list[InsightScoreEvent] = []
 
         if user_logs:
-            scores = await self._evaluate_contributions(louge_content, user_logs)
+            scores = await self._evaluate_contributions(logue_content, user_logs)
             for log in user_logs:
                 score = scores.get(str(log.id), FALLBACK_SCORE)
                 events.append(
@@ -93,13 +93,13 @@ class InsightScoreCalculator:
         await self._update_user_scores(user_deltas, db)
 
     async def _evaluate_contributions(
-        self, louge_content: str, user_logs: list
+        self, logue_content: str, user_logs: list
     ) -> dict[str, float]:
         logs_text = "\n".join(
             f"- log_id={log.id}: {log.body[:200]}" for log in user_logs
         )
         prompt = (
-            f"## Louge 記事\n{louge_content}\n\n"
+            f"## Logue 記事\n{logue_content}\n\n"
             f"## 評価対象の Log 一覧\n{logs_text}"
         )
 

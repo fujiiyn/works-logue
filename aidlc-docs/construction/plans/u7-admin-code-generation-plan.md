@@ -1,9 +1,9 @@
-# U7 Admin — Code Generation Plan
+﻿# U7 Admin — Code Generation Plan
 
 ## Unit Context
 
 - **Unit**: U7 Admin
-- **依存**: U1 Foundation (User model, AuthMiddleware, get_current_user の汎用 BAN ガード), U2 Seed (planters), U3 Log & Score (logs, seed→sprout 自動昇格), U6 User & Follow (UserPublicResponse, AuthContext)
+- **依存**: U1 Foundation (User model, AuthMiddleware, get_current_user の汎用 BAN ガード), U2 Seed (planters), U3 Log & Score (logs, seed→seed 自動昇格), U6 User & Follow (UserPublicResponse, AuthContext)
 - **新規 DB マイグレーション**: **なし** (Q4=B / Q5=B 確定。`role` / `is_banned` / `banned_at` / `ban_reason` / `deleted_at` は `00001_create_tables.sql` 時点で既存)
 - **Figma 真実源**: page `admin` (nodeId `420:159`)
 - **Functional Design**: `aidlc-docs/construction/u7-admin/functional-design/` (domain-entities, business-rules, business-logic-model, frontend-components の 4 本)
@@ -29,8 +29,8 @@
 | D5 | BannedBanner は `app/layout.tsx` 直下に配置。AdminLayout には自動的に出ない (継承しないため) | BR-A02b |
 | D6 | Server Component で auth を解決するため `apps/web/lib/auth-server.ts` を新設、`@supabase/ssr` を依存に追加 | FC-A01 前提 |
 | D7 | typed confirmation はクライアント・サーバー両方で検証 (trim あり、大小文字区別あり) | BR-A12 |
-| D8 | Planter 一覧の「すべて」フィルタは `status IN ('seed','sprout','louge') AND deleted_at IS NULL` (= フィードに出ているもののみ) | BR-A09b |
-| D9 | アーカイブ復元時の status は MVP では `seed` 固定 (後続 Log で自動 sprout 昇格) | BR-A10 |
+| D8 | Planter 一覧の「すべて」フィルタは `status IN ('seed','seed','logue') AND deleted_at IS NULL` (= フィードに出ているもののみ) | BR-A09b |
+| D9 | アーカイブ復元時の status は MVP では `seed` 固定 (後続 Log で自動 seed 昇格) | BR-A10 |
 | D10 | SeedType の admin 操作は `description` 更新と `is_active` トグルのみ。`slug` / `name` / `sort_order` の編集 API は提供しない | BR-A15, Q4=B |
 | D11 | Cloud Logging に `request_id` ContextVar を導入し、`admin.access` ログと操作ログを trace 紐付け | BR-A14 |
 | D12 | `GET /users/me` のレスポンスに `is_banned` / `deleted_at` を追加 (UserResponse 拡張) | Functional Design §8、AuthContext と auth-server で必要 |
@@ -82,11 +82,11 @@
 - [x] **Step 4**: AdminRepository テスト
   - 新規: `apps/api/app/tests/test_admin_repository.py`
   - メソッド別テストケース:
-    - `get_dashboard_stats()`: 4 つの COUNT (total_users, total_planters, new_planters_today=JST 本日, pending_louge_count=sprout 全件)
+    - `get_dashboard_stats()`: 4 つの COUNT (total_users, total_planters, new_planters_today=JST 本日, pending_logue_count=seed 全件)
     - `list_users(q, status, page, per_page)`: display_name 部分一致 (ILIKE 大小無視、q_pattern は `f"%{q.strip().lower()}%"` で前後空白除去)、status フィルタ (all/normal/banned)、ソート `created_at DESC`、ページング、planter_count / log_count の集計マージ (N+1 回避を 2 本の集計クエリで)、deleted_at IS NULL のみ
     - `ban_user(user, reason)`: 同一 UPDATE で 3 列更新 (BR-A03)、冪等 (既に BAN 中ならそのまま)
     - `unban_user(user)`: 同一 UPDATE で 3 列を NULL/false に戻す、冪等
-    - `list_planters(q, status, page, per_page)`: q は `title ILIKE :q_pattern`（q_pattern は `f"%{q.strip().lower()}%"`）。status='all' は seed/sprout/louge AND deleted_at IS NULL、'deleted' は deleted_at IS NOT NULL、'archived' は status='archived'、その他は status=:status。ソートは status='deleted' のとき deleted_at DESC、それ以外 updated_at DESC。author / seed_type_name JOIN
+    - `list_planters(q, status, page, per_page)`: q は `title ILIKE :q_pattern`（q_pattern は `f"%{q.strip().lower()}%"`）。status='all' は seed/seed/logue AND deleted_at IS NULL、'deleted' は deleted_at IS NOT NULL、'archived' は status='archived'、その他は status=:status。ソートは status='deleted' のとき deleted_at DESC、それ以外 updated_at DESC。author / seed_type_name JOIN
     - `archive_planter(planter)`: status='archived'、updated_at=now()、冪等
     - `restore_planter(planter)`: status='archived' 以外なら例外、復元後は status='seed' (BR-A10)
     - `soft_delete_planter(planter)`: deleted_at=now()
@@ -105,7 +105,7 @@
 
 - [x] **Step 6**: Admin Pydantic スキーマ
   - 新規: `apps/api/app/schemas/admin.py`
-  - `AdminStatsResponse { total_users, total_planters, new_planters_today, pending_louge_count }`
+  - `AdminStatsResponse { total_users, total_planters, new_planters_today, pending_logue_count }`
   - `AdminAuthorSummary { id, display_name, avatar_url }`
   - `AdminUserItem { id, display_name, avatar_url, role, is_banned, banned_at, ban_reason, planter_count, log_count, created_at, is_self }`
   - `AdminUserListResponse { items, total, page, per_page }`
@@ -124,7 +124,7 @@
     - 非 admin → 404
     - admin → 200 + 4 フィールド
     - new_planters_today は JST 本日の planter のみカウント (テストは UTC 跨ぎを意識して fixed-time fixture)
-    - pending_louge_count は sprout 全件 (deleted_at NULL のみ)
+    - pending_logue_count は seed 全件 (deleted_at NULL のみ)
   - 実装: `apps/api/app/routers/admin.py` を新規作成、`/api/v1/admin` prefix で `APIRouter(tags=["admin"])`、`stats` エンドポイント追加
   - `apps/api/app/main.py` に `app.include_router(admin.router, prefix="/api/v1")` を追加
 
@@ -161,8 +161,8 @@
 
 - [x] **Step 11**: `GET /api/v1/admin/planters` テスト & 実装
   - テスト:
-    - status='all' フィルタ (seed/sprout/louge かつ deleted_at IS NULL のみ、archived 除外)
-    - status='archived' / 'deleted' / 'seed' / 'sprout' / 'louge'
+    - status='all' フィルタ (seed/seed/logue かつ deleted_at IS NULL のみ、archived 除外)
+    - status='archived' / 'deleted' / 'seed' / 'seed' / 'logue'
     - q (title 部分一致)
     - ソート: 'deleted' は deleted_at DESC、それ以外は updated_at DESC
     - author (display_name) / seed_type_name の JOIN 結果
@@ -300,7 +300,7 @@
   - 新規: `apps/web/components/admin/admin-sidebar.tsx`
   - `usePathname` で active 判定、active な NavItem に左 4px の teal アクセント線 (`bg-accent-teal`)
   - 項目: ダッシュボード `/admin`、ユーザー管理 `/admin/users`、Planter 管理 `/admin/planters`、SeedType 管理 `/admin/seed-types` (タグ管理は出さない、BR-A18)
-  - Lucide アイコン: LayoutDashboard / Users / Sprout / Tag (or Flower2)
+  - Lucide アイコン: LayoutDashboard / Users / Seed / Tag (or Flower2)
   - data-testid: `admin-sidebar`, `admin-sidebar-link-{key}`
 
 ### Phase 11: AdminDashboard `/admin`
@@ -309,8 +309,8 @@
   - 新規: `apps/web/app/admin/page.tsx`
   - Server Component で `getCurrentUser()` を呼び (Step 24 の AdminLayout で既に検証済だが、access_token 取得のため再度呼ぶ)、`serverFetch<AdminStatsResponse>("/api/v1/admin/stats", user.accessToken)` で stats を取得 (Step 21 のヘルパを利用)
   - Figma `424:159` 参照
-  - StatsGrid 4 カード (Lucide: Users / Sprout / TrendingUp / Flower2)
-  - data-testid: `admin-stats-card-{key}` (key=total_users, total_planters, new_planters_today, pending_louge_count)
+  - StatsGrid 4 カード (Lucide: Users / Seed / TrendingUp / Flower2)
+  - data-testid: `admin-stats-card-{key}` (key=total_users, total_planters, new_planters_today, pending_logue_count)
 
 ### Phase 12: UserManagementPage `/admin/users`
 
@@ -344,10 +344,10 @@
   - "use client"
   - state: q, status, page, items, total, loading, dialog
   - Figma `428:159` / `434:678` (empty) / `434:949` (loading) 参照
-  - ToolbarRow: SearchInput + FilterChipGroup [すべて | Seed | Sprout | Louge | アーカイブ | 削除済み]
+  - ToolbarRow: SearchInput + FilterChipGroup [すべて | Seed | Seed | Logue | アーカイブ | 削除済み]
     - 「すべて」のラベル下に小さく "= フィードに出ているもの" 補足 (BR-A09b)
   - PlanterTable: タイトル+seed_type_name / 投稿者 (avatar+display_name) / 状態バッジ / Logs (log_count + contributor_count) / 更新日 / アクション
-    - seed/sprout/louge → [アーカイブ] [削除]
+    - seed/seed/logue → [アーカイブ] [削除]
     - archived → [復元] [削除]
     - deleted → "削除済み" アイコン表示、操作ボタンなし
   - Pagination

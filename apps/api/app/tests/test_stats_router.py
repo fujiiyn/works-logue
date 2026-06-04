@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import UTC, datetime
 
 import pytest
@@ -27,13 +27,13 @@ class TestPublicStats:
     async def test_returns_zero_when_empty(self, client):
         resp = await client.get("/api/v1/stats")
         assert resp.status_code == 200
-        assert resp.json() == {"seeds": 0, "louges": 0, "contributors": 0}
+        assert resp.json() == {"seeds": 0, "logues": 0, "contributors": 0}
 
     async def test_no_authentication_required(self, client):
         resp = await client.get("/api/v1/stats")
         assert resp.status_code == 200
 
-    async def test_counts_seeds_louges_contributors(
+    async def test_counts_seeds_logues_contributors(
         self, client, db_session: AsyncSession, seed_type: SeedType
     ):
         u1 = _make_user("Alice")
@@ -44,21 +44,21 @@ class TestPublicStats:
         for u in (u1, u2, u3):
             await db_session.refresh(u)
 
-        # 3 planters total: 2 seed-status (one by u1, one by u2), 1 louge by u1
+        # 3 planters total: 2 seed-status (one by u1, one by u2), 1 logue by u1
         p_seed_1 = Planter(
             user_id=u1.id, title="s1", body="b", seed_type_id=seed_type.id, status="seed"
         )
         p_seed_2 = Planter(
-            user_id=u2.id, title="s2", body="b", seed_type_id=seed_type.id, status="sprout"
+            user_id=u2.id, title="s2", body="b", seed_type_id=seed_type.id, status="seed"
         )
-        p_louge = Planter(
+        p_logue = Planter(
             user_id=u1.id,
             title="bloomed",
             body="b",
             seed_type_id=seed_type.id,
-            status="louge",
-            louge_content="generated",
-            louge_generated_at=datetime.now(UTC),
+            status="logue",
+            logue_content="generated",
+            logue_generated_at=datetime.now(UTC),
         )
         # deleted planter must NOT count
         p_deleted = Planter(
@@ -69,9 +69,9 @@ class TestPublicStats:
             status="seed",
             deleted_at=datetime.now(UTC),
         )
-        db_session.add_all([p_seed_1, p_seed_2, p_louge, p_deleted])
+        db_session.add_all([p_seed_1, p_seed_2, p_logue, p_deleted])
         await db_session.commit()
-        for p in (p_seed_1, p_seed_2, p_louge):
+        for p in (p_seed_1, p_seed_2, p_logue):
             await db_session.refresh(p)
 
         # u3 contributes only via a Log (still counts as contributor).
@@ -111,7 +111,7 @@ class TestPublicStats:
         body = resp.json()
         # seeds = non-deleted planters
         assert body["seeds"] == 3
-        # louges = planters with status='louge'
-        assert body["louges"] == 1
+        # logues = planters with status='logue'
+        assert body["logues"] == 1
         # contributors = distinct (planter authors u1,u2) ∪ (visible-log authors u3) = 3
         assert body["contributors"] == 3

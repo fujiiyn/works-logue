@@ -1,4 +1,4 @@
-# U2 Seed — Domain Entities
+﻿# U2 Seed — Domain Entities
 
 ## 概要
 
@@ -20,8 +20,8 @@ U2 では Planter を **Seed 状態（status='seed'）** で新規作成し、�
 | body | Seed 本文。必須。1〜10000文字 |
 | seed_type_id | 投稿タイプ。FK → seed_types.id。必須 |
 | status | 初期値 `'seed'`。U2 では変更しない |
-| louge_content | NULL（U4 で使用） |
-| louge_generated_at | NULL（U4 で使用） |
+| logue_content | NULL（U4 で使用） |
+| logue_generated_at | NULL（U4 で使用） |
 | structure_fulfillment | 初期値 0.0（U3 で更新） |
 | maturity_score | NULL（U3 で更新） |
 | progress | 初期値 0.0（U3 で更新） |

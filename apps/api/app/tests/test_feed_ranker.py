@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timezone
 
 import pytest
@@ -18,7 +18,7 @@ def _make_planter(
         title="Test",
         body="Test body",
         seed_type_id=uuid.uuid4(),
-        status="sprout",
+        status="seed",
         structure_fulfillment=structure_fulfillment,
         progress=0.0,
         log_count=0,

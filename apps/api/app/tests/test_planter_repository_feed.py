@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -44,7 +44,7 @@ async def _create_planter(
     title: str = "Test",
     status: str = "seed",
     created_at: datetime | None = None,
-    louge_generated_at: datetime | None = None,
+    logue_generated_at: datetime | None = None,
     structure_fulfillment: float = 0.0,
 ) -> Planter:
     p = Planter(
@@ -57,9 +57,9 @@ async def _create_planter(
     )
     if created_at:
         p.created_at = created_at
-    if louge_generated_at:
-        p.louge_generated_at = louge_generated_at
-        p.louge_content = "# Generated Article"
+    if logue_generated_at:
+        p.logue_generated_at = logue_generated_at
+        p.logue_content = "# Generated Article"
     db.add(p)
     await db.commit()
     await db.refresh(p)
@@ -100,27 +100,27 @@ class TestListTrendingCandidates:
 
 
 class TestListBloomed:
-    async def test_returns_louge_only(self, repo, test_user, seed_type, db_session):
+    async def test_returns_logue_only(self, repo, test_user, seed_type, db_session):
         now = datetime.now(timezone.utc)
         await _create_planter(db_session, test_user, seed_type, title="Seed", status="seed")
         await _create_planter(
             db_session, test_user, seed_type,
-            title="Louge", status="louge", louge_generated_at=now,
+            title="Logue", status="logue", logue_generated_at=now,
         )
 
         results = await repo.list_bloomed(limit=10)
         assert len(results) == 1
-        assert results[0].title == "Louge"
+        assert results[0].title == "Logue"
 
-    async def test_ordered_by_louge_generated_at_desc(self, repo, test_user, seed_type, db_session):
+    async def test_ordered_by_logue_generated_at_desc(self, repo, test_user, seed_type, db_session):
         now = datetime.now(timezone.utc)
         await _create_planter(
             db_session, test_user, seed_type,
-            title="Older", status="louge", louge_generated_at=now - timedelta(days=1),
+            title="Older", status="logue", logue_generated_at=now - timedelta(days=1),
         )
         await _create_planter(
             db_session, test_user, seed_type,
-            title="Newer", status="louge", louge_generated_at=now,
+            title="Newer", status="logue", logue_generated_at=now,
         )
 
         results = await repo.list_bloomed(limit=10)
@@ -155,12 +155,12 @@ class TestSearch:
         assert results[0].title == "With tag"
 
     async def test_status_filter(self, repo, test_user, seed_type, db_session):
+        await _create_planter(db_session, test_user, seed_type, title="Logue", status="logue")
         await _create_planter(db_session, test_user, seed_type, title="Seed", status="seed")
-        await _create_planter(db_session, test_user, seed_type, title="Sprout", status="sprout")
 
-        results = await repo.search(status="sprout", limit=10)
+        results = await repo.search(status="seed", limit=10)
         assert len(results) == 1
-        assert results[0].title == "Sprout"
+        assert results[0].title == "Seed"
 
     async def test_combined_filters(self, repo, test_user, seed_type, db_session):
         tag = Tag(name="HR", category="occupation", is_leaf=True, is_active=True)
@@ -168,14 +168,14 @@ class TestSearch:
         await db_session.commit()
         await db_session.refresh(tag)
 
-        p1 = await _create_planter(db_session, test_user, seed_type, title="人事の悩み", status="sprout")
-        p2 = await _create_planter(db_session, test_user, seed_type, title="人事の種", status="seed")
+        p1 = await _create_planter(db_session, test_user, seed_type, title="人事の悩み", status="seed")
+        p2 = await _create_planter(db_session, test_user, seed_type, title="人事の記事", status="logue")
         pt1 = PlanterTag(planter_id=p1.id, tag_id=tag.id)
         pt2 = PlanterTag(planter_id=p2.id, tag_id=tag.id)
         db_session.add_all([pt1, pt2])
         await db_session.commit()
 
-        results = await repo.search(keyword="人事", tag_ids=[tag.id], status="sprout", limit=10)
+        results = await repo.search(keyword="人事", tag_ids=[tag.id], status="seed", limit=10)
         assert len(results) == 1
         assert results[0].title == "人事の悩み"
 

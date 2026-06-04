@@ -1,4 +1,4 @@
-# U1 Foundation — Functional Design Plan
+﻿# U1 Foundation — Functional Design Plan
 
 ## 計画概要
 
@@ -11,13 +11,13 @@ U1 Foundation は全ユニット共通の基盤。DB スキーマ全量・認証
 ### Phase 1: ドメインエンティティ（DB スキーマ全量）
 
 - [x] 1.1: `users` テーブル定義（カラム・型・制約・インデックス）
-- [x] 1.2: `planters` テーブル定義（状態遷移・louge_content・parent_planter_id）
+- [x] 1.2: `planters` テーブル定義（状態遷移・logue_content・parent_planter_id）
 - [x] 1.3: `logs` テーブル定義（parent_log_id・is_ai_generated）
 - [x] 1.4: `tags` テーブル + 中間テーブル定義（planter_tags・user_tags）
 - [x] 1.5: `follows` テーブル定義（planter_follows・user_follows を分離）
 - [x] 1.6: `notifications` テーブル定義（イベント型・FK）
 - [x] 1.7: `planter_views` テーブル定義（閲覧記録）
-- [x] 1.8: `louge_score_snapshots` テーブル定義（スコア履歴）
+- [x] 1.8: `logue_score_snapshots` テーブル定義（スコア履歴）
 - [x] 1.9: `insight_score_events` テーブル定義（貢献度イベント）
 - [x] 1.10: テーブル間リレーション図の作成
 
@@ -81,9 +81,9 @@ U1 Foundation は全ユニット共通の基盤。DB スキーマ全量・認証
 
 [Answer]:B
 
-### Q4: Louge 記事の保存形式
+### Q4: Logue 記事の保存形式
 
-`planters.louge_content` カラムのデータ形式は？
+`planters.logue_content` カラムのデータ形式は？
 
 - A) Markdown テキスト（シンプル、フロントで描画）
 - B) 構造化 JSON（セクション・引用元 Log ID 等をメタデータとして保持）

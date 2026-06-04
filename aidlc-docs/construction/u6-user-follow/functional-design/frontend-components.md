@@ -1,4 +1,4 @@
-# U6 User & Follow — Frontend Components
+﻿# U6 User & Follow — Frontend Components
 
 Figma 参照: 公開プロフィール v2 (351:159) / 編集ページ (356:159)
 
@@ -24,7 +24,7 @@ UserProfilePage (Server Component)
 │   └── LocationAndLinks (居住地 + SNSリンクアイコン)
 ├── StatsRow
 │   ├── StatCard (総合スコア)
-│   ├── StatCard (Louge貢献)
+│   ├── StatCard (Logue貢献)
 │   ├── StatCard (フォロワー)
 │   └── StatCard (フォロー中)
 ├── ContributionGraph (GitHub草風ヒートマップ, Client Component)
@@ -32,7 +32,7 @@ UserProfilePage (Server Component)
 ├── ProfileTabs (Client Component)
 │   ├── Tab: Seed一覧 → PlanterCard リスト
 │   ├── Tab: Log一覧 → LogHistoryItem リスト
-│   └── Tab: 参加Louge → PlanterCard リスト (Lougeのみ)
+│   └── Tab: 参加Logue → PlanterCard リスト (Logueのみ)
 └── RightSidebar
     ├── BadgeSection (バッジ一覧)
     └── SimilarUsers (似た専門性のユーザー + フォローボタン)
@@ -47,7 +47,7 @@ UserProfilePage (Server Component)
 | FeaturedContribution | 同上（featured_contribution フィールド） |
 | ProfileTabs - Seed | `GET /api/v1/users/{id}/planters?tab=seeds` |
 | ProfileTabs - Log | `GET /api/v1/users/{id}/logs` |
-| ProfileTabs - Louge | `GET /api/v1/users/{id}/planters?tab=louges` |
+| ProfileTabs - Logue | `GET /api/v1/users/{id}/planters?tab=logues` |
 
 ### FollowButton (Client Component)
 
@@ -73,7 +73,7 @@ ProfileHeader 右上のアクションスロットには **どちらか一方** 
 
 `apps/web/components/planter/PlanterFollowButton.tsx`
 
-Seed/Louge 詳細画面のヘッダーに配置する Planter フォローボタン（BR-F06）。
+Seed/Logue 詳細画面のヘッダーに配置する Planter フォローボタン（BR-F06）。
 
 ### Props
 
@@ -101,8 +101,8 @@ interface Props {
 
 ### 配置
 
-- Seed/Sprout 詳細: stats 行で `[X logs] [Y contributors] [+ フォロー]` を等間隔（gap-3）で並べる
-- Louge 詳細: 右サイドバー（ContributorsSidebar）下部の stats バーで `[X logs · Y contributors] [+ フォロー]` を等間隔（gap-3）で並べる
+- Seed/Seed 詳細: stats 行で `[X logs] [Y contributors] [+ フォロー]` を等間隔（gap-3）で並べる
+- Logue 詳細: 右サイドバー（ContributorsSidebar）下部の stats バーで `[X logs · Y contributors] [+ フォロー]` を等間隔（gap-3）で並べる
 
 ## FC-14: ユーザー名リンク化（BR-N01）
 

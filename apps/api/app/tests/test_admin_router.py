@@ -1,4 +1,4 @@
-"""U7 Phase 6: Admin router endpoint tests.
+﻿"""U7 Phase 6: Admin router endpoint tests.
 
 Each endpoint is implemented in TDD: tests live here, the router is at
 `app/routers/admin.py`. Authentication is mocked via the standard `client`
@@ -111,7 +111,7 @@ class TestGetStats:
             "total_users",
             "total_planters",
             "new_planters_today",
-            "pending_louge_count",
+            "pending_logue_count",
         }
         assert isinstance(data["total_users"], int)
 
@@ -121,9 +121,9 @@ class TestGetStats:
         # Only the admin row exists
         assert data["total_users"] == 1
         assert data["total_planters"] == 0
-        assert data["pending_louge_count"] == 0
+        assert data["pending_logue_count"] == 0
 
-    async def test_pending_louge_count_excludes_deleted(
+    async def test_pending_logue_count_excludes_deleted(
         self, client, admin_self, db_session, seed_type
     ):
         author = User(auth_id=uuid.uuid4(), display_name="Author")
@@ -136,21 +136,21 @@ class TestGetStats:
                     title="x",
                     body="b",
                     seed_type_id=seed_type.id,
-                    status="sprout",
+                    status="seed",
                 ),
                 Planter(
                     user_id=author.id,
                     title="y",
                     body="b",
                     seed_type_id=seed_type.id,
-                    status="sprout",
+                    status="seed",
                 ),
                 Planter(
                     user_id=author.id,
                     title="z",
                     body="b",
                     seed_type_id=seed_type.id,
-                    status="sprout",
+                    status="seed",
                     deleted_at=datetime.now(UTC),
                 ),
             ]
@@ -158,7 +158,7 @@ class TestGetStats:
         await db_session.commit()
         resp = await client.get("/api/v1/admin/stats", headers=AUTH_HEADERS)
         assert resp.status_code == 200
-        assert resp.json()["pending_louge_count"] == 2
+        assert resp.json()["pending_logue_count"] == 2
 
 
 # ---- GET /admin/users --------------------------------------------------------
@@ -510,8 +510,8 @@ class TestListPlanters:
         db_session.add_all(
             [
                 _new_planter(author.id, seed_type.id, title="A", status="seed"),
-                _new_planter(author.id, seed_type.id, title="B", status="sprout"),
-                _new_planter(author.id, seed_type.id, title="C", status="louge"),
+                _new_planter(author.id, seed_type.id, title="B", status="seed"),
+                _new_planter(author.id, seed_type.id, title="C", status="logue"),
                 _new_planter(
                     author.id, seed_type.id, title="D", status="archived"
                 ),

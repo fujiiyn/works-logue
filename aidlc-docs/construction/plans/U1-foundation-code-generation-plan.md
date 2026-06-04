@@ -1,11 +1,11 @@
-# U1 Foundation — Code Generation Plan
+﻿# U1 Foundation — Code Generation Plan
 
 ## Unit Context
 
 - **ユニット**: U1 Foundation
 - **目的**: 全ユニットの土台。認証基盤・DB スキーマ・3カラムレイアウト・プロジェクト構造
 - **依存**: なし（最初のユニット）
-- **後続ユニット**: U2 Seed, U3 Log & Score, U4 Louge, U5 Feed & Search, U6 User & Follow, U7 Admin
+- **後続ユニット**: U2 Seed, U3 Log & Score, U4 Logue, U5 Feed & Search, U6 User & Follow, U7 Admin
 
 ## 参照ドキュメント
 
@@ -92,7 +92,7 @@
   - user_follows
   - notifications
   - planter_views
-  - louge_score_snapshots
+  - logue_score_snapshots
   - insight_score_events
   - ai_configs
   - 全インデックス・CHECK 制約・UNIQUE 制約
@@ -118,7 +118,7 @@
 - [x] `apps/api/app/models/follow.py` — PlanterFollow, UserFollow モデル
 - [x] `apps/api/app/models/notification.py` — Notification モデル
 - [x] `apps/api/app/models/planter_view.py` — PlanterView モデル
-- [x] `apps/api/app/models/score.py` — LougeScoreSnapshot, InsightScoreEvent モデル
+- [x] `apps/api/app/models/score.py` — LogueScoreSnapshot, InsightScoreEvent モデル
 - [x] `apps/api/app/models/ai_config.py` — AiConfig モデル
 - [x] `apps/api/app/models/seed_type.py` — SeedType モデル
 - [x] 全モデルに domain-entities.md の制約を反映
@@ -224,7 +224,7 @@
 
 - [x] `apps/web/components/right-sidebar.tsx`
   - About Works Logue カード
-  - Stats（Seeds / Louges / Contributors — placeholder 値）
+  - Stats（Seeds / Logues / Contributors — placeholder 値）
   - "Seed を投稿する" CTA
   - `hidden xl:block` レスポンシブ
   - `data-testid` 付与

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Eye } from "lucide-react";
 import { ProgressBar } from "./ProgressBar";
 import { formatRelativeTime } from "@/lib/format-time";
@@ -21,12 +21,11 @@ interface PlanterCardProps {
 
 const STATUS_LABELS: Record<string, string> = {
   seed: "Seed",
-  sprout: "Sprout",
-  louge: "Louge",
+  logue: "Logue",
 };
 
 export function PlanterCard({ planter }: PlanterCardProps) {
-  const isLouge = planter.status === "louge";
+  const isLogue = planter.status === "logue";
   const visibleTags = planter.tags.slice(0, 3);
   const extraCount = planter.tags.length - 3;
 
@@ -48,7 +47,7 @@ export function PlanterCard({ planter }: PlanterCardProps) {
         <div className="mb-1.5 flex items-center gap-1.5 text-caption text-text-muted">
           <span
             className={`inline-block rounded-sm px-[6px] py-[1px] text-caption font-medium ${
-              isLouge
+              isLogue
                 ? "bg-primary text-white"
                 : "bg-primary-light-bg text-primary"
             }`}

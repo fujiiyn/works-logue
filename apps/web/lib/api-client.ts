@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+﻿import { supabase } from "./supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -97,7 +97,7 @@ export async function apiFetch<T>(
 
 export interface PublicStats {
   seeds: number;
-  louges: number;
+  logues: number;
   contributors: number;
 }
 
@@ -109,7 +109,7 @@ export interface AdminStats {
   total_users: number;
   total_planters: number;
   new_planters_today: number;
-  pending_louge_count: number;
+  pending_logue_count: number;
 }
 
 export interface AdminUserItem {
@@ -178,7 +178,7 @@ interface ListUsersParams {
 
 interface ListPlantersParams {
   q?: string;
-  status?: "all" | "seed" | "sprout" | "louge" | "archived" | "deleted";
+  status?: "all" | "seed" | "logue" | "archived" | "deleted";
   page?: number;
   per_page?: number;
 }

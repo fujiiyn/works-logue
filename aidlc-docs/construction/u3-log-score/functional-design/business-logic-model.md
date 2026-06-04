@@ -1,4 +1,4 @@
-# U3 Log & Score - Business Logic Model
+﻿# U3 Log & Score - Business Logic Model
 
 ## 概要
 
@@ -41,7 +41,7 @@ LogRouter.create_log()
   |     |-- Log INSERT (planter_id, user_id, body, parent_log_id, is_ai_generated=false)
   |     |-- Planter.log_count += 1
   |     |-- Planter.contributor_count を再計算（DISTINCT user_id from logs WHERE planter_id）
-  |     |-- status='seed' かつ log_count >= 1 → status='sprout' に遷移
+  |     |-- status='seed' かつ log_count >= 1 → status='seed' に遷移
   |     |-- PlanterFollow INSERT（Log 投稿者の自動フォロー、既存なら無視）
   |     |-- 通知イベント作成（BR-08）
   |     |-- COMMIT
@@ -62,15 +62,15 @@ LogRouter.create_log()
 | 未認証 | 401 | not_authenticated |
 | BAN ユーザー | 403 | account_banned |
 | Planter が存在しない / 削除済み / アーカイブ | 404 | planter_not_found |
-| Planter が louge 状態 | 400 | planter_already_bloomed |
+| Planter が logue 状態 | 400 | planter_already_bloomed |
 | parent_log_id が無効 | 400 | invalid_parent_log |
 | parent_log_id が既にネストされた返信 | 400 | nested_reply_not_allowed |
 | body が空 or 5000文字超 | 422 | validation_error |
 
 ### Planter 状態チェック
 
-- `status='louge'` の Planter には Log 投稿不可（開花済みは読み取り専用）
-- `status='seed'` or `status='sprout'` の場合のみ Log 投稿を許可
+- `status='logue'` の Planter には Log 投稿不可（開花済みは読み取り専用）
+- `status='seed'` or `status='seed'` の場合のみ Log 投稿を許可
 
 ---
 
@@ -213,7 +213,7 @@ ScorePipeline.execute(planter_id, trigger_log_id)  <- BackgroundTasks で実行
   |     |-- progress の後半50% を更新:
   |     |     progress = 0.5 + min(maturity_total * 0.5, 0.5)
   |
-  |-- 7. LougeScoreSnapshot INSERT
+  |-- 7. LogueScoreSnapshot INSERT
   |     |-- planter_id, trigger_log_id
   |     |-- structure_fulfillment, passed_structure
   |     |-- maturity_scores (JSONB), maturity_total, passed_maturity
@@ -222,9 +222,9 @@ ScorePipeline.execute(planter_id, trigger_log_id)  <- BackgroundTasks で実行
   |     |-- passed_structure AND passed_maturity (maturity_total >= bloom_threshold)
   |     |-- bloom_threshold: ScoreSettings から取得（デフォルト 0.85）
   |     |-- 開花条件を満たした場合:
-  |     |     Planter.status = 'louge' への遷移は U4 で実装
+  |     |     Planter.status = 'logue' への遷移は U4 で実装
   |     |     U3 では「開花準備完了」フラグのみ（passed_maturity=true をスナップショットに記録）
-  |     |     ※ 実際の Louge 生成（AI 記事生成）は U4 スコープ
+  |     |     ※ 実際の Logue 生成（AI 記事生成）は U4 スコープ
   |
   |-- 9. AI ファシリテート判定（条件B 未達時）
   |     |-- 条件B 実行済み かつ maturity_total < bloom_threshold の場合
@@ -251,7 +251,7 @@ Log 投稿
         v
       条件B 実行 ── maturity_score 更新
         |
-        |-- maturity_total >= bloom_threshold → 開花準備完了（U4 で Louge 生成）
+        |-- maturity_total >= bloom_threshold → 開花準備完了（U4 で Logue 生成）
         |
         |-- maturity_total < bloom_threshold → AI ファシリテート投稿
 ```
@@ -271,7 +271,7 @@ PlanterRouter.get_planter() の拡張
   |
   |-- U3 追加:
   |     |-- structure_parts: 条件A の構造パーツ詳細
-  |     |     最新の LougeScoreSnapshot から取得
+  |     |     最新の LogueScoreSnapshot から取得
   |     |     { context: bool, problem: bool, solution: bool, name: bool }
   |     |-- structure_fulfillment: float (0.0〜1.0)
   |     |-- maturity_score: float | null
@@ -349,7 +349,7 @@ PlanterRouter.get_planter_score()
   |
   |-- 1. Planter のスコア関連フィールドを取得
   |
-  |-- 2. 最新の LougeScoreSnapshot を取得
+  |-- 2. 最新の LogueScoreSnapshot を取得
   |     |-- structure_parts を含む
   |
   |-- 3. score_pending 判定
@@ -388,7 +388,7 @@ SettingsRouter.get_score_settings()  <- 認証不要（公開情報）
 | min_contributors | int | 3 | （旧条件B ゲート用 / 現在パイプラインから未参照。admin 設定UIで運用が将来再導入する余地のため row 自体は保持） |
 | min_logs | int | 5 | （旧条件B ゲート用 / 現在パイプラインから未参照。同上） |
 | bloom_threshold | float | 0.85 | 条件B の開花閾値（0.0〜1.0） |
-| bud_threshold | float | 0.8 | Sprout 3（蕾）の progress 閾値 |
+| bud_threshold | float | 0.8 | Seed 3（蕾）の progress 閾値 |
 
 - `app_settings` テーブル（key-value 形式）に保存
 - 管理者ページ（U7）から CRUD 可能
@@ -415,8 +415,8 @@ SettingsRouter.get_score_settings()  <- 認証不要（公開情報）
 
 | メソッド | 責務 |
 |---|---|
-| `create_snapshot(snapshot: LougeScoreSnapshot) -> LougeScoreSnapshot` | INSERT |
-| `get_latest_snapshot(planter_id) -> LougeScoreSnapshot \| None` | 最新スナップショット取得 |
+| `create_snapshot(snapshot: LogueScoreSnapshot) -> LogueScoreSnapshot` | INSERT |
+| `get_latest_snapshot(planter_id) -> LogueScoreSnapshot \| None` | 最新スナップショット取得 |
 
 ### PlanterRepository（U3 拡張）
 

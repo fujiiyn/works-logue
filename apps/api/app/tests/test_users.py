@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -247,7 +247,7 @@ class TestGetUser:
         resp = await client.get(f"/api/v1/users/{user_id}")
         data = resp.json()
         assert data["stats"]["insight_score"] == 0.0
-        assert data["stats"]["louge_count"] == 0
+        assert data["stats"]["logue_count"] == 0
         assert data["stats"]["follower_count"] == 0
         assert data["stats"]["following_count"] == 0
 
@@ -480,14 +480,14 @@ class TestUserPlanters:
         assert len(data["planters"]) == 1
         assert data["planters"][0]["title"] == "My Seed"
 
-    async def test_get_user_planters_louges(self, client, db_session, seed_type):
-        """GET /users/{id}/planters?tab=louges should return contributed louges (D9)."""
+    async def test_get_user_planters_logues(self, client, db_session, seed_type):
+        """GET /users/{id}/planters?tab=logues should return contributed logues (D9)."""
         me = await _create_me(client)
         user_id = uuid.UUID(me["id"])
 
         p = Planter(
-            user_id=user_id, title="Louge", body="B",
-            seed_type_id=seed_type.id, status="louge"
+            user_id=user_id, title="Logue", body="B",
+            seed_type_id=seed_type.id, status="logue"
         )
         db_session.add(p)
         await db_session.commit()
@@ -499,7 +499,7 @@ class TestUserPlanters:
         db_session.add(evt)
         await db_session.commit()
 
-        resp = await client.get(f"/api/v1/users/{user_id}/planters?tab=louges")
+        resp = await client.get(f"/api/v1/users/{user_id}/planters?tab=logues")
         assert resp.status_code == 200
         assert len(resp.json()["planters"]) == 1
 

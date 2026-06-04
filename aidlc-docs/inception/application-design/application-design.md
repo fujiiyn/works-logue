@@ -1,4 +1,4 @@
-# Application Design — Works Logue MVP
+﻿# Application Design — Works Logue MVP
 
 統合設計書。各設計ドキュメントの概要と設計判断の根拠をまとめる。
 
@@ -75,20 +75,20 @@
 4. BackgroundTasks でスコアパイプライン実行:
    - ScoreEngine が条件A（構造充足率）を軽量チェック
    - 条件A 充足 + 最低参加ライン超過時のみ条件B（成熟度4観点）を本格スコアリング
-   - 条件B 突破 → LougeGenerator.bloom()（開花）
+   - 条件B 突破 → LogueGenerator.bloom()（開花）
    - 条件B 不足 → AIFacilitator.facilitate()（AI ファシリテート）
 
-### 3. Louge 開花
+### 3. Logue 開花
 
-1. LougeGenerator が Vertex AI で記事生成
-2. Planter の状態を `louge` に更新、記事内容を保存
+1. LogueGenerator が Vertex AI で記事生成
+2. Planter の状態を `logue` に更新、記事内容を保存
 3. InsightScoreCalculator が各 Log 投稿者の貢献度を算出・反映
 4. 通知イベントを DB に記録
 
 ### 4. フィード表示
 
 1. Server Component が `GET /api/planters?tab=xxx` で取得
-2. 新着: 時系列順、注目: FeedRanker の複合スコア順、開花済み: Louge のみ
+2. 新着: 時系列順、注目: FeedRanker の複合スコア順、開花済み: Logue のみ
 3. PlanterCard でカード描画
 
 ---
@@ -107,7 +107,7 @@
 ## 設計上の注意事項
 
 1. **ポリシー外部化**: ScoreEngine の閾値・パーツ定義は設定ファイル/環境変数で管理。コード変更なしでチューニング可能にする
-2. **スコアスナップショット**: Log 投稿のたびにスコアを `louge_score_snapshots` に記録。分析・改善の根拠データ
+2. **スコアスナップショット**: Log 投稿のたびにスコアを `logue_score_snapshots` に記録。分析・改善の根拠データ
 3. **ソフトデリート**: planters / logs / users は物理削除しない。`deleted_at` カラムで管理
 4. **通知イベント先行記録**: 通知送信はフェーズ2だが、イベント（開花・状態変化等）は MVP から DB に記録
 5. **Figma 参照実装**: 全画面のデザインを Figma で事前作成し、Figma MCP で参照しながら実装する

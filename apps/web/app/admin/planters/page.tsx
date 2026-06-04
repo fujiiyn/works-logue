@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Trash2 } from "lucide-react";
@@ -17,8 +17,7 @@ import { DeletePlanterDialog } from "@/components/admin/delete-planter-dialog";
 type StatusFilter =
   | "all"
   | "seed"
-  | "sprout"
-  | "louge"
+  | "logue"
   | "archived"
   | "deleted";
 
@@ -26,8 +25,7 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string; suffix?: string }[] 
   [
     { value: "all", label: "すべて", suffix: "= フィードに出ているもの" },
     { value: "seed", label: "Seed" },
-    { value: "sprout", label: "Sprout" },
-    { value: "louge", label: "Louge" },
+    { value: "logue", label: "Logue" },
     { value: "archived", label: "アーカイブ" },
     { value: "deleted", label: "削除済み" },
   ];
@@ -49,8 +47,7 @@ function formatDate(iso: string): string {
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   seed: { label: "Seed", cls: "bg-primary-light-bg text-primary" },
-  sprout: { label: "Sprout", cls: "bg-primary-light-bg text-primary" },
-  louge: { label: "Louge", cls: "bg-primary-dark/10 text-primary-dark" },
+  logue: { label: "Logue", cls: "bg-primary-dark/10 text-primary-dark" },
   archived: { label: "アーカイブ", cls: "bg-bg text-text-secondary" },
   deleted: { label: "削除済み", cls: "bg-[#fcebea] text-[#a6322c]" },
 };

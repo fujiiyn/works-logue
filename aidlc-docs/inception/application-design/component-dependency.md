@@ -1,4 +1,4 @@
-# Component Dependency
+﻿# Component Dependency
 
 コンポーネント間の依存関係と通信パターン。
 
@@ -8,7 +8,7 @@
 
 行が依存元、列が依存先。`x` は直接依存を示す。
 
-| 依存元 / 依存先 | PlanterRepo | LogRepo | UserRepo | TagRepo | FollowRepo | NotifRepo | ScoreEngine | LougeGen | InsightCalc | FeedRanker | AIFacil | VertexAI | SupaAuth | SupaStorage | Database |
+| 依存元 / 依存先 | PlanterRepo | LogRepo | UserRepo | TagRepo | FollowRepo | NotifRepo | ScoreEngine | LogueGen | InsightCalc | FeedRanker | AIFacil | VertexAI | SupaAuth | SupaStorage | Database |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | **PlanterRouter** | x | x | | x | x | | | | | x | | | | | |
 | **LogRouter** | | x | | | x | | x | x | | | x | | | | |
@@ -17,7 +17,7 @@
 | **FollowRouter** | x | | x | | x | | | | | | | | | | |
 | **AuthMiddleware** | | | | | | | | | | | | | x | | |
 | **ScoreEngine** | x | x | | | | | | | | | | x | | | |
-| **LougeGenerator** | x | x | | | | x | | | x | | | x | | | |
+| **LogueGenerator** | x | x | | | | x | | | x | | | x | | | |
 | **InsightCalc** | | x | x | | | | | | | | | | | | |
 | **FeedRanker** | | | | | | | | | | | | | | | |
 | **AIFacilitator** | | x | | | | | | | | | | x | | | |
@@ -79,7 +79,7 @@ score_pipeline(planter_id)
   |-> ScoreEngine.evaluate_structure()
   |-> [条件分岐]
   |     |-> ScoreEngine.evaluate_maturity()
-  |     |-> LougeGenerator.bloom()
+  |     |-> LogueGenerator.bloom()
   |           |-> InsightScoreCalculator.calculate()
   |           |-> InsightScoreCalculator.apply()
 ```
@@ -88,7 +88,7 @@ score_pipeline(planter_id)
 
 ## データフロー
 
-### Seed 投稿 → Louge 開花の全体フロー
+### Seed 投稿 → Logue 開花の全体フロー
 
 ```
 [User] --POST /api/planters--> [PlanterRouter]
@@ -125,7 +125,7 @@ score_pipeline(planter_id)
                                           (条件B不足)               (条件B突破)
                                                 |                         |
                                                 v                         v
-                                        [AIFacilitator]          [LougeGenerator]
+                                        [AIFacilitator]          [LogueGenerator]
                                         facilitate()              bloom()
                                           |                         |
                                           v                         +-> generate()
@@ -141,7 +141,7 @@ score_pipeline(planter_id)
 以下の原則で循環依存を防止する:
 
 1. **Router → Service → Repository → Infrastructure**: 一方向のみ
-2. **Service 間**: LougeGenerator → InsightScoreCalculator は許可（開花フロー内）。逆方向は禁止
+2. **Service 間**: LogueGenerator → InsightScoreCalculator は許可（開花フロー内）。逆方向は禁止
 3. **Repository 間**: 依存なし。各 Repository は自テーブルのみ操作
 4. **Infrastructure 間**: 依存なし
 

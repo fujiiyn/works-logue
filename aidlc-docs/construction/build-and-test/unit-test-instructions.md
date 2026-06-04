@@ -1,4 +1,4 @@
-# Unit Test Instructions
+﻿# Unit Test Instructions
 
 apps/api（pytest）の単体テスト実行手順。Web 側の単体テストは持たず、UI は Playwright E2E で検証する方針。
 
@@ -38,9 +38,9 @@ pytest app/tests/test_admin_router.py app/tests/test_admin_repository.py \
 # 認証関連
 pytest app/tests/test_auth_middleware.py app/tests/test_supabase_auth.py -v
 
-# スコア / Louge 関連
+# スコア / Logue 関連
 pytest app/tests/test_score_engine.py app/tests/test_score_pipeline.py \
-       app/tests/test_louge_generator.py -v
+       app/tests/test_logue_generator.py -v
 ```
 
 ### 3. カバレッジ取得（任意）
@@ -61,8 +61,8 @@ pytest --cov=app --cov-report=term-missing --cov-report=html
 | User | `test_users.py`, `test_user_repository.py` | プロフィール CRUD、is_banned/deleted_at 拡張 |
 | Planter / Seed | `test_planters.py`, `test_planter_repository.py`, `test_planter_repository_feed.py`, `test_planters_router_feed.py` | Seed 投稿・取得・フィード |
 | Log | `test_logs.py`, `test_log_repository.py`, `test_log_repository_velocity.py` | Log 投稿・取得・velocity |
-| Score | `test_scores.py`, `test_score_engine.py`, `test_score_pipeline.py`, `test_score_repository.py` | Lougeスコア計算 |
-| Louge | `test_louge_generator.py` | AI 生成パイプライン |
+| Score | `test_scores.py`, `test_score_engine.py`, `test_score_pipeline.py`, `test_score_repository.py` | Logueスコア計算 |
+| Logue | `test_logue_generator.py` | AI 生成パイプライン |
 | AI Facilitator | `test_ai_facilitator.py` | AI による議論誘導 |
 | Insight | `test_insight_calculator.py`, `test_insight_repository.py` | インサイトスコア |
 | Contributor | `test_contributors.py` | 貢献度集計 |

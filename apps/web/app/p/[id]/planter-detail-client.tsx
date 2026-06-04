@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -15,8 +15,8 @@ import {
 import { LogComposer } from "@/components/log/LogComposer";
 import { ScoreCard } from "@/components/planter/ScoreCard";
 import { PlanterFollowButton } from "@/components/planter/PlanterFollowButton";
-import { LougeArticle } from "@/components/louge/LougeArticle";
-import { ContributorsSidebar } from "@/components/louge/ContributorsSidebar";
+import { LogueArticle } from "@/components/logue/LogueArticle";
+import { ContributorsSidebar } from "@/components/logue/ContributorsSidebar";
 
 interface RealtimePlanterRow {
   id: string;
@@ -26,8 +26,8 @@ interface RealtimePlanterRow {
   progress: number;
   structure_fulfillment: number;
   maturity_score: number | null;
-  louge_content: string | null;
-  louge_generated_at: string | null;
+  logue_content: string | null;
+  logue_generated_at: string | null;
 }
 
 interface StructureParts {
@@ -52,8 +52,8 @@ interface PlanterDetail {
   maturity_score: number | null;
   structure_parts: StructureParts | null;
   bloom_threshold: number;
-  louge_content: string | null;
-  louge_generated_at: string | null;
+  logue_content: string | null;
+  logue_generated_at: string | null;
   bloom_pending: boolean;
   is_following: boolean;
   created_at: string;
@@ -85,8 +85,7 @@ interface Contributor {
 
 const STATUS_LABELS: Record<string, string> = {
   seed: "Seed",
-  sprout: "Sprout",
-  louge: "Louge",
+  logue: "Logue",
 };
 
 const POLL_INTERVALS = [3000, 5000, 10000];
@@ -115,12 +114,12 @@ export function PlanterDetailClient({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const logThreadRef = useRef<LogThreadHandle>(null);
   // Re-entry guard for pollBloom. Without it, a second trigger (e.g. another
-  // pollScore landing on "louge", or the mount-time effect overlapping with a
+  // pollScore landing on "logue", or the mount-time effect overlapping with a
   // user-posted log's pollScore) starts a parallel chain with its own
   // BLOOM_TIMEOUT_MS — multiplying the request rate against /api/v1/planters.
   const bloomPollingRef = useRef(false);
   const { setContent } = useRightSidebar();
-  const isLouge = planter.status === "louge";
+  const isLogue = planter.status === "logue";
 
   // Record view (fire-and-forget)
   useEffect(() => {
@@ -156,7 +155,7 @@ export function PlanterDetailClient({
         }));
 
         // Check if bloomed
-        if (s.status === "louge") {
+        if (s.status === "logue") {
           setScorePending(false);
           setBloomPending(true);
           pollBloom(0);
@@ -175,7 +174,7 @@ export function PlanterDetailClient({
     [planter.id],
   );
 
-  // Bloom polling (check for louge_content)
+  // Bloom polling (check for logue_content)
   const pollBloom = useCallback(
     async (attempt: number = 0) => {
       if (bloomPollingRef.current) return;
@@ -198,11 +197,11 @@ export function PlanterDetailClient({
             `/api/v1/planters/${planter.id}`,
           );
 
-          if (data.louge_content) {
+          if (data.logue_content) {
             setPlanter((prev) => ({
               ...prev,
-              louge_content: data.louge_content,
-              louge_generated_at: data.louge_generated_at,
+              logue_content: data.logue_content,
+              logue_generated_at: data.logue_generated_at,
               bloom_pending: false,
             }));
             setBloomPending(false);
@@ -215,7 +214,7 @@ export function PlanterDetailClient({
         } catch {
           // Transient fetch error mid-bloom (Cloud Run cold start, network
           // blip, Vertex AI latency). Clearing bloomPending here would drop
-          // the user back to the Sprout UI while bloom is still in flight.
+          // the user back to the Seed UI while bloom is still in flight.
           // Retry until the outer BLOOM_TIMEOUT_MS guard.
           poll(idx + 1);
         }
@@ -226,7 +225,7 @@ export function PlanterDetailClient({
     [planter.id],
   );
 
-  // Fetch contributors for louge state
+  // Fetch contributors for logue state
   const fetchContributors = useCallback(async () => {
     setContributorsLoading(true);
     try {
@@ -249,7 +248,7 @@ export function PlanterDetailClient({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Supabase Realtime: subscribe to planters UPDATE to reflect score changes,
-  // status transitions and Louge bloom across browsers without polling. The
+  // status transitions and Logue bloom across browsers without polling. The
   // user's own posts still drive pollScore for snappier local feedback; for
   // OTHER users' / AI posts this is the only sync path.
   useEffect(() => {
@@ -270,9 +269,9 @@ export function PlanterDetailClient({
           if (typeof row?.status !== "string") return;
 
           // structure_parts is not a column on planters; pull it from /score
-          // (which reads the latest LougeScoreSnapshot). The same response
+          // (which reads the latest LogueScoreSnapshot). The same response
           // tells us whether the score is still pending — log_count++ /
-          // contributor_count / seed→sprout UPDATEs precede the pipeline
+          // contributor_count / seed→seed UPDATEs precede the pipeline
           // commit, so a planter UPDATE alone doesn't mean the score has
           // landed.
           let structureParts: StructureParts | null = null;
@@ -296,9 +295,9 @@ export function PlanterDetailClient({
             structure_fulfillment: row.structure_fulfillment,
             maturity_score: row.maturity_score,
             structure_parts: structureParts ?? prev.structure_parts,
-            louge_content: row.louge_content ?? prev.louge_content,
-            louge_generated_at:
-              row.louge_generated_at ?? prev.louge_generated_at,
+            logue_content: row.logue_content ?? prev.logue_content,
+            logue_generated_at:
+              row.logue_generated_at ?? prev.logue_generated_at,
           }));
 
           // Defer to /score's score_pending — true while the pipeline still
@@ -308,9 +307,9 @@ export function PlanterDetailClient({
           }
 
           // Bloom transition handling
-          if (row.status === "louge" && !row.louge_content) {
+          if (row.status === "logue" && !row.logue_content) {
             setBloomPending(true);
-          } else if (row.louge_content) {
+          } else if (row.logue_content) {
             setBloomPending(false);
             void fetchContributors();
           }
@@ -323,39 +322,39 @@ export function PlanterDetailClient({
     };
   }, [initialPlanter.id, fetchContributors]);
 
-  // Scroll to top when Louge bloom completes mid-page so the user sees
+  // Scroll to top when Logue bloom completes mid-page so the user sees
   // the article from its title, not from wherever they were scrolled in
-  // the Sprout view. Compares against the initial state via ref so that
+  // the Seed view. Compares against the initial state via ref so that
   // navigating directly to an already-bloomed planter does NOT auto-scroll
   // (the browser handles initial scroll position).
-  const initialLougeContentRef = useRef<string | null>(initialPlanter.louge_content);
+  const initialLogueContentRef = useRef<string | null>(initialPlanter.logue_content);
   useEffect(() => {
     if (
-      planter.louge_content &&
-      !initialLougeContentRef.current &&
+      planter.logue_content &&
+      !initialLogueContentRef.current &&
       typeof window !== "undefined"
     ) {
       window.scrollTo({ top: 0, behavior: "smooth" });
-      initialLougeContentRef.current = planter.louge_content;
+      initialLogueContentRef.current = planter.logue_content;
     }
-  }, [planter.louge_content]);
+  }, [planter.logue_content]);
 
   // Fetch contributors on initial load if already bloomed
   useEffect(() => {
-    if (isLouge && planter.louge_content) {
+    if (isLogue && planter.logue_content) {
       fetchContributors();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update right sidebar
   useEffect(() => {
-    if (isLouge && planter.louge_content) {
+    if (isLogue && planter.logue_content) {
       setContent(
         <ContributorsSidebar
           contributors={contributors}
           logCount={planter.log_count}
           contributorCount={planter.contributor_count}
-          lougeContent={planter.louge_content}
+          logueContent={planter.logue_content}
           planterId={planter.id}
           isFollowing={planter.is_following}
           loading={contributorsLoading}
@@ -382,12 +381,12 @@ export function PlanterDetailClient({
     planter.log_count,
     planter.contributor_count,
     planter.progress,
-    planter.louge_content,
+    planter.logue_content,
     scorePending,
     bloomPending,
     contributors,
     contributorsLoading,
-    isLouge,
+    isLogue,
     setContent,
   ]);
 
@@ -477,7 +476,7 @@ export function PlanterDetailClient({
         <div className="mb-3 flex items-center gap-1.5 text-caption text-text-muted">
           <span
             className={`inline-block rounded-sm px-[6px] py-[1px] text-caption font-medium ${
-              isLouge
+              isLogue
                 ? "bg-primary text-white"
                 : "bg-primary-light-bg text-primary"
             }`}
@@ -515,8 +514,8 @@ export function PlanterDetailClient({
           {planter.title}
         </h1>
 
-        {/* Louge state: Article view */}
-        {isLouge && !bloomPending && planter.louge_content ? (
+        {/* Logue state: Article view */}
+        {isLogue && !bloomPending && planter.logue_content ? (
           <>
             {/* Tags */}
             {planter.tags.length > 0 && (
@@ -535,10 +534,10 @@ export function PlanterDetailClient({
             {/* Divider */}
             <div className="mb-5 h-px bg-border" />
 
-            {/* Louge article */}
-            <LougeArticle
-              content={planter.louge_content}
-              generatedAt={planter.louge_generated_at!}
+            {/* Logue article */}
+            <LogueArticle
+              content={planter.logue_content}
+              generatedAt={planter.logue_generated_at!}
             />
 
             {/* Collapsible original Seed */}
@@ -585,7 +584,7 @@ export function PlanterDetailClient({
               onAtBottomChange={handleAtBottomChange}
             />
           </>
-        ) : isLouge && bloomPending ? (
+        ) : isLogue && bloomPending ? (
           /* Bloom pending state */
           <div
             className="flex flex-col items-center justify-center py-20"
@@ -607,7 +606,7 @@ export function PlanterDetailClient({
             )}
           </div>
         ) : (
-          /* Seed/Sprout state (existing) */
+          /* Seed state (existing) */
           <>
             {/* Body */}
             <div className="mb-5 max-w-[700px]">
@@ -662,7 +661,7 @@ export function PlanterDetailClient({
         )}
       </div>
 
-      {/* Bottom sticky input bar (hidden for louge status) */}
+      {/* Bottom sticky input bar (hidden for logue status) */}
       <LogComposer
         planterId={planter.id}
         planterStatus={planter.status}

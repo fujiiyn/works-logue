@@ -1,4 +1,4 @@
-# AI-DLC Audit Log
+﻿# AI-DLC Audit Log
 
 ## Operations: Domain Mapping ステージ開始
 **Timestamp**: 2026-05-04T00:00:00Z
@@ -366,10 +366,10 @@
 
 ---
 
-## Requirements Analysis — UI構造・Planter状態・Lougeレイアウト更新
+## Requirements Analysis — UI構造・Planter状態・Logueレイアウト更新
 **Timestamp**: 2026-04-05T00:20:00Z
 **User Input**: "planterよりより英単語だったりあるかな？" → Bed/Plot候補提示。続いて: "PlanterステータスのseededはLogueスコアと関係なく、Seed（Planterの起点となる最初の投稿）しかない状態（Logがひとつもない状態）をさす。2. 開花したLogueだけど、上にタイトル、そんで元のSeed（展開できる）、その下にLogueが続いて、最後にLog。ページの右側には、貢献者とスコアも掲載。3. あとヘッダーとサイドバー、右側メニューがない。ヘッダーには、Logoと通知ベル、ログインボタンとSeed投稿ボタンがある。サイドバーには、ホーム、フォロー中、注目、探索ボタンがある。あと右側の欄には、ひとまずホーム画面でＡｂｏｕｔ Ｗｏｒｋｓ Ｌｏｇｕｅというこのサービスに関する説明が乗る。"
-**AI Response**: seeded条件をLog=0件に修正。Lougeページレイアウト（タイトル→Seed折りたたみ→Louge→Log、右に貢献者）追加。UI 3カラム構造（Header/Sidebar/RightPanel）を要件に追加。Figmaアクセス失敗（node-id未指定）。
+**AI Response**: seeded条件をLog=0件に修正。Logueページレイアウト（タイトル→Seed折りたたみ→Logue→Log、右に貢献者）追加。UI 3カラム構造（Header/Sidebar/RightPanel）を要件に追加。Figmaアクセス失敗（node-id未指定）。
 **Context**: FR-05b（UIレイアウト）新設、ドメインモデル seeded 条件修正
 
 ---
@@ -384,9 +384,9 @@
 
 ## Requirements Analysis — 要件修正
 **Timestamp**: 2026-04-05T00:10:00Z
-**User Input**: "1. ユーザープロフィールについては、自己紹介やタグ（docs/tags.mdを参照）、アバター画像をつけられたりする。2. インサイトスコアはやっぱりつける方針としたい。3. ステップ型UIというよりは、一度の画面で、Seedの必要な項目（投稿タイプ、タグ、タイトル、本文）を入力できる。4. Sproutステータスについては、Logueスコアみたいなのを定義して、その閾値によって決める。5. 右は認識違いがないか確認してほしい。SproutのときのLogの投稿の度に、Logueにするかどうかの判定が点数で行われて、その値によってSprout1, 2, 3が決まったり、Logueとして開花させるかを判断する。その点数は議論の余地がある。今後改良がしやすいような工夫が必要。6. 生成記事のフォーマットについては、Wikipedia型である必要は決してない。ナレッジとして最適な型の模索が必要である。"
+**User Input**: "1. ユーザープロフィールについては、自己紹介やタグ（docs/tags.mdを参照）、アバター画像をつけられたりする。2. インサイトスコアはやっぱりつける方針としたい。3. ステップ型UIというよりは、一度の画面で、Seedの必要な項目（投稿タイプ、タグ、タイトル、本文）を入力できる。4. Seedステータスについては、Logueスコアみたいなのを定義して、その閾値によって決める。5. 右は認識違いがないか確認してほしい。SeedのときのLogの投稿の度に、Logueにするかどうかの判定が点数で行われて、その値によってSeed1, 2, 3が決まったり、Logueとして開花させるかを判断する。その点数は議論の余地がある。今後改良がしやすいような工夫が必要。6. 生成記事のフォーマットについては、Wikipedia型である必要は決してない。ナレッジとして最適な型の模索が必要である。"
 **AI Response**: 認識確認後、requirements.md を6点に基づき更新。
-**Context**: プロフィール拡充・インサイトスコアMVP追加・Seed単一画面・Lougeスコアエンジン設計・開花フォーマット柔軟化
+**Context**: プロフィール拡充・インサイトスコアMVP追加・Seed単一画面・Logueスコアエンジン設計・開花フォーマット柔軟化
 
 ---
 
@@ -473,8 +473,8 @@
 ## U1 Foundation — Functional Design 回答受領
 **Timestamp**: 2026-04-06T13:30:00Z
 **User Input**: "Done, あと機能追加になっちゃうんだけど、Logueのコピー機能を付けたい。。機能としては、SeedとかLogとかは不要で、Markdown形式のLogueをクリップボードにコピーできる機能。"
-**AI Response**: 回答確認（Q1=A, Q2=C, Q3=B, Q4=A）。曖昧さなし。Louge コピー機能を FR-06 に追記、U4 にマッピング。Part 2 Generation に進行。
-**Context**: CONSTRUCTION - U1 Foundation - Functional Design 回答完了 + 機能追加（Louge ���ピー）
+**AI Response**: 回答確認（Q1=A, Q2=C, Q3=B, Q4=A）。曖昧さなし。Logue コピー機能を FR-06 に追記、U4 にマッピング。Part 2 Generation に進行。
+**Context**: CONSTRUCTION - U1 Foundation - Functional Design 回答完了 + 機能追加（Logue ���ピー）
 
 ---
 
@@ -496,72 +496,72 @@
 ## U1 Foundation — Functional Design 仕様確認
 **Timestamp**: 2026-04-06T14:30:00Z
 **User Input**: "5. A。ただし管理者はLog単位で非表示とかができるよ。6.スコアリングには費用的に最軽量のものを使用する。Logue生成のときはもう少し良いモデルを使おう。さらにモデルの切り替えは管理者のところから指定できるようにしよう。あと指標とかに使用するプロンプトは管理者のところからいじれたほうがいいかも。7. 非表示にしようか。8. 分けようか。tags.mdも更新しといて。"
-**AI Response**: 8件の確認事項を反映。(1-4) 現状設計で承認。(5) BAN時コンテンツ維持+Log単位非表示機能追加（is_hidden/hidden_at/hidden_by）。(6) AI モデル使い分け（scoring=flash, louge=pro）、ai_configsテーブル新設（モデル・プロンプト・閾値を管理画面から編集可能）。(7) 通知ベルMVP非表示。(8) tags.md 役割/状況を分離、カテゴリ role+situation に分割。
+**AI Response**: 8件の確認事項を反映。(1-4) 現状設計で承認。(5) BAN時コンテンツ維持+Log単位非表示機能追加（is_hidden/hidden_at/hidden_by）。(6) AI モデル使い分け（scoring=flash, logue=pro）、ai_configsテーブル新設（モデル・プロンプト・閾値を管理画面から編集可能）。(7) 通知ベルMVP非表示。(8) tags.md 役割/状況を分離、カテゴリ role+situation に分割。
 **Context**: Functional Design 仕様確認完了・全修正反映
 
 ---
 
-## U4 Louge - Code Generation 完了
+## U4 Logue - Code Generation 完了
 **Timestamp**: 2026-04-15T12:00:00Z
 **User Input**: N/A（プラン承認後に連続実行）
-**AI Response**: U4 Louge の Code Generation を完了。Backend: LougeGenerator, InsightScoreCalculator, ScorePipeline拡張, ContributorsRouter 実装。テスト143/143 passed。Frontend: LougeArticle, ContributorsSidebar, LougeCopyButton, PlanterDetail Louge状態拡張。TypeScript コンパイル成功。
-**Context**: CONSTRUCTION - U4 Louge - Code Generation Complete
+**AI Response**: U4 Logue の Code Generation を完了。Backend: LogueGenerator, InsightScoreCalculator, ScorePipeline拡張, ContributorsRouter 実装。テスト143/143 passed。Frontend: LogueArticle, ContributorsSidebar, LogueCopyButton, PlanterDetail Logue状態拡張。TypeScript コンパイル成功。
+**Context**: CONSTRUCTION - U4 Logue - Code Generation Complete
 
 ---
 
-## U4 Louge - Code Generation Plan 承認
+## U4 Logue - Code Generation Plan 承認
 **Timestamp**: 2026-04-15T11:15:00Z
 **User Input**: "ｏｋ大丈夫そう"
 **AI Response**: Code Generation Plan 承認。Part 2 (Generation) を開始する。
-**Context**: CONSTRUCTION - U4 Louge - Code Generation Plan Approved
+**Context**: CONSTRUCTION - U4 Logue - Code Generation Plan Approved
 
 ---
 
-## U4 Louge - Code Generation Plan 作成
+## U4 Logue - Code Generation Plan 作成
 **Timestamp**: 2026-04-15T11:00:00Z
 **User Input**: "ok"（Functional Design 承認 → Code Generation に進行）
-**AI Response**: U4 Louge の Code Generation Plan を作成。14ステップ、5フェーズ構成。DB マイグレーション不要。LougeGenerator, InsightScoreCalculator, ScorePipeline拡張, ContributorsRouter, フロントエンド Louge 状態対応を含む。
-**Context**: CONSTRUCTION - U4 Louge - Code Generation Plan (Part 1)
+**AI Response**: U4 Logue の Code Generation Plan を作成。14ステップ、5フェーズ構成。DB マイグレーション不要。LogueGenerator, InsightScoreCalculator, ScorePipeline拡張, ContributorsRouter, フロントエンド Logue 状態対応を含む。
+**Context**: CONSTRUCTION - U4 Logue - Code Generation Plan (Part 1)
 
 ---
 
-## U4 Louge - Functional Design 承認
+## U4 Logue - Functional Design 承認
 **Timestamp**: 2026-04-15T10:45:00Z
 **User Input**: "ok"
 **AI Response**: Functional Design を承認。Code Generation フェーズに進む。
-**Context**: CONSTRUCTION - U4 Louge - Functional Design Approved
+**Context**: CONSTRUCTION - U4 Logue - Functional Design Approved
 
 ---
 
-## U4 Louge - Functional Design アーティファクト生成
+## U4 Logue - Functional Design アーティファクト生成
 **Timestamp**: 2026-04-15T10:30:00Z
 **User Input**: Q1:A, Q2:A, Q3:A, Q4:B, Q5:B, Q6:C, Q7:A
-**AI Response**: 全7問の回答を反映し、4つの Functional Design アーティファクトを生成: business-logic-model.md, business-rules.md, domain-entities.md, frontend-components.md。新規テーブル・マイグレーション不要。既存スキーマのカラム（louge_content, louge_generated_at, insight_score_events）を活用。
-**Context**: CONSTRUCTION - U4 Louge - Functional Design Artifacts Generation
+**AI Response**: 全7問の回答を反映し、4つの Functional Design アーティファクトを生成: business-logic-model.md, business-rules.md, domain-entities.md, frontend-components.md。新規テーブル・マイグレーション不要。既存スキーマのカラム（logue_content, logue_generated_at, insight_score_events）を活用。
+**Context**: CONSTRUCTION - U4 Logue - Functional Design Artifacts Generation
 
 ---
 
-## U4 Louge - Functional Design 質問回答
+## U4 Logue - Functional Design 質問回答
 **Timestamp**: 2026-04-15T10:15:00Z
 **User Input**: "q5はどれがおすすめ？" → B推奨を選択。"ｑ６のそれぞれの実装イメージは？" → C（脚注方式）を選択。"done"（全回答完了: Q1:A, Q2:A, Q3:A, Q4:B, Q5:B, Q6:C, Q7:A）
 **AI Response**: Q5はB（ポーリング型）を推奨（U3の既存仕組み流用・開花の瞬間を見逃さない）。Q6は3方式の実装イメージを説明し、B（引用ブロック）を推奨したがユーザーはC（脚注方式）を選択。
-**Context**: CONSTRUCTION - U4 Louge - Functional Design 質問回答
+**Context**: CONSTRUCTION - U4 Logue - Functional Design 質問回答
 
 ---
 
-## U4 Louge - Functional Design 開始
+## U4 Logue - Functional Design 開始
 **Timestamp**: 2026-04-15T10:00:00Z
 **User Input**: "y"
-**AI Response**: U4 Louge の Functional Design を開始。設計判断の質問を7問作成し、u4-louge-functional-design-plan.md に保存。ユニット仕様・要件・U3実装状況を分析した上でプランを策定。
-**Context**: CONSTRUCTION - U4 Louge - Functional Design Plan 作成
+**AI Response**: U4 Logue の Functional Design を開始。設計判断の質問を7問作成し、u4-logue-functional-design-plan.md に保存。ユニット仕様・要件・U3実装状況を分析した上でプランを策定。
+**Context**: CONSTRUCTION - U4 Logue - Functional Design Plan 作成
 
 ---
 
-## U1 Foundation — Progress Bar / Sprout設計修正
+## U1 Foundation — Progress Bar / Seed設計修正
 **Timestamp**: 2026-04-06T15:00:00Z
 **User Input**: "そうかんがえると、つぼみになるの早いか。60からだとね。" / "条件Bの惜しいところ、あと少しみたいなのをつぼみにしたいね。" / "OK"
-**AI Response**: Sprout/Progress Bar 設計を再定義。Progress=0〜50%が条件A、50〜100%が条件B。Sprout3（蕾）= progress≥80%（条件Bがもう少し）。plantersにmaturity_score/progressカラム追加。ai_configsにbud_threshold追加。requirements.md/business-rules.mdを更新。
-**Context**: Functional Design — Sprout状態遷移・Progress Bar 設計確定
+**AI Response**: Seed/Progress Bar 設計を再定義。Progress=0〜50%が条件A、50〜100%が条件B。Seed3（蕾）= progress≥80%（条件Bがもう少し）。plantersにmaturity_score/progressカラム追加。ai_configsにbud_threshold追加。requirements.md/business-rules.mdを更新。
+**Context**: Functional Design — Seed状態遷移・Progress Bar 設計確定
 
 ---
 ## U7 Admin — Plan/Requirements を Figma に整合
@@ -595,8 +595,8 @@
 重大 (1) email 検索を display_name のみに縮小 — users テーブルに email 列なし、Supabase Auth 側のみ存在のため。AdminUserItem から email 削除、business-logic-model.md §2a / business-rules.md BR-A04 / frontend-components.md UserManagementPage を更新。
 重大 (2/3) BAN ガードの二重実装回避 — apps/api/app/dependencies.py:87-89 の get_current_user に「非 GET = 403」が既に実装済みであることを確認。business-logic-model.md §7 を「追加実装不要、契約として固定するテストのみ U7 で書く」に書き換え。
 中-A BR-A02b (BAN ユーザー向けバナー) を新設。BannedBanner コンポーネント / AuthContext.AppUser に is_banned/deleted_at 追加 / GET /users/me レスポンス拡張を frontend-components.md の差分テーブルに追加。
-中-B BR-A09b (Planter 一覧「すべて」= フィードに出ているもの = seed/sprout/louge、archived は専用フィルタ) を新設。domain-entities.md / business-logic-model.md §3a / frontend-components.md FC-A05 を更新。
-中-C BR-A10 補足: 復元後最初の Log で apps/api/app/routers/logs.py:111-118 の既存 seed→sprout 遷移ロジックにより自動昇格する旨を明記。
+中-B BR-A09b (Planter 一覧「すべて」= フィードに出ているもの = seed/seed/logue、archived は専用フィルタ) を新設。domain-entities.md / business-logic-model.md §3a / frontend-components.md FC-A05 を更新。
+中-C BR-A10 補足: 復元後最初の Log で apps/api/app/routers/logs.py:111-118 の既存 seed→seed 遷移ロジックにより自動昇格する旨を明記。
 中-D BR-A21 を「昇格・降格・緊急時無効化」運用に拡張。Admin UI に降格機能を持たせず DB 直叩きで対処する方針を明記。
 中-E FC-A01 AdminGuard の前提として、apps/web には Server 用 getCurrentUser が未実装であることを確認。U7 で apps/web/lib/auth-server.ts (新規、@supabase/ssr 利用) を作成する仕様を確定。差分テーブルに追加。
 軽微: BR-A14 に request_id 補足 (access ログと操作ログの紐付け)、BR-A12 に「trim あり・大小区別あり」明記、BR-A10 三重記載を BR-A10 に集約し domain-entities.md / business-logic-model.md §3c から相互参照に変更。
@@ -615,7 +615,7 @@
 (新規・軽) BR-A14 と §0 AdminMiddleware ログ例に request_id を追加し、ContextVar 経由で操作ログと trace 紐付けする実装方針を明記。
 (新規・軽) domain-entities.md §1 冒頭に「supabase/migrations/00001_create_tables.sql で確認済」の注記を追加 (v1 で email を見落としたのと同根の防止策)。
 (補足1) frontend-components.md 差分テーブルに `docs/operations.md` 新規作成を追加 (BR-A21 の admin 昇格・降格 SQL の保存先)。
-(補足2) §1a の pending_louge_count に「Sprout 全件 ≠ U4 開花閾値到達済」の NOTE を追加し、ハンドラ docstring にも同旨を残す方針を明記。
+(補足2) §1a の pending_logue_count に「Seed 全件 ≠ U4 開花閾値到達済」の NOTE を追加し、ハンドラ docstring にも同旨を残す方針を明記。
 (補足3) FC-A04 に「is_self は API 側で付与する責務分担」を明示。Server→Client への admin user 引き渡しが不要な理由を説明。
 **Context**: CONSTRUCTION - U7 Admin - Functional Design 改訂 v2
 

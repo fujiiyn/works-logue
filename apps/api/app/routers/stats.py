@@ -1,6 +1,6 @@
-"""Public platform stats for the right-sidebar About card.
+﻿"""Public platform stats for the right-sidebar About card.
 
-Exposes aggregate counts of seeds (planters), louges (bloomed planters),
+Exposes aggregate counts of seeds (planters), logues (bloomed planters),
 and contributors (distinct users who have authored at least one planter
 or non-hidden log). No authentication required.
 """
@@ -23,7 +23,7 @@ router = APIRouter(tags=["stats"])
 
 class PublicStatsResponse(BaseModel):
     seeds: int
-    louges: int
+    logues: int
     contributors: int
 
 
@@ -36,10 +36,10 @@ async def get_public_stats(
         .select_from(Planter)
         .where(Planter.deleted_at.is_(None))
     )
-    louges_q = (
+    logues_q = (
         select(func.count())
         .select_from(Planter)
-        .where(Planter.deleted_at.is_(None), Planter.status == "louge")
+        .where(Planter.deleted_at.is_(None), Planter.status == "logue")
     )
 
     planter_authors = select(Planter.user_id).where(Planter.deleted_at.is_(None))
@@ -52,11 +52,11 @@ async def get_public_stats(
     contributors_q = select(func.count()).select_from(contributors_subq)
 
     seeds = (await db.execute(seeds_q)).scalar_one()
-    louges = (await db.execute(louges_q)).scalar_one()
+    logues = (await db.execute(logues_q)).scalar_one()
     contributors = (await db.execute(contributors_q)).scalar_one()
 
     return PublicStatsResponse(
         seeds=int(seeds),
-        louges=int(louges),
+        logues=int(logues),
         contributors=int(contributors),
     )

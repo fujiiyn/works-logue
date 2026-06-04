@@ -1,4 +1,4 @@
-# U6 User & Follow — Business Logic Model
+﻿# U6 User & Follow — Business Logic Model
 
 ## 1. プロフィール表示
 
@@ -11,14 +11,14 @@ Output: UserProfileResponse
 1. UserRepository.get_by_id(user_id) で User 取得
 2. User が存在しない or deleted_at != null or is_banned → 404
 3. 集計クエリで stats を算出:
-   - louge_count: planters WHERE (author_id = user_id AND status = 'louge')
-                  UNION logs WHERE (author_id = user_id AND planter.status = 'louge') の重複排除件数
+   - logue_count: planters WHERE (author_id = user_id AND status = 'logue')
+                  UNION logs WHERE (author_id = user_id AND planter.status = 'logue') の重複排除件数
    - follower_count: user_follows WHERE followee_id = user_id の COUNT
    - following_count: user_follows WHERE follower_id = user_id の COUNT
 4. TagRepository.get_tags_for_user(user_id) でタグ取得
 5. FeaturedContribution を取得:
    - insight_score_events WHERE user_id = user_id を planter ごとに集計
-   - status = 'louge' の Planter のみ対象
+   - status = 'logue' の Planter のみ対象
    - 最高スコアの1件を返す
 6. 閲覧者が認証済みの場合:
    - UserFollow で is_following を判定
@@ -42,10 +42,10 @@ logs WHERE author_id = user_id ORDER BY created_at DESC
 各 Log に紐づく Planter のタイトル・状態も返す
 ```
 
-**参加Louge** (`GET /users/{user_id}/planters?tab=louges`)
+**参加Logue** (`GET /users/{user_id}/planters?tab=logues`)
 ```
-Seed投稿者として: planters WHERE author_id = user_id AND status = 'louge'
-Log貢献者として: planters WHERE id IN (SELECT planter_id FROM logs WHERE author_id = user_id) AND status = 'louge'
+Seed投稿者として: planters WHERE author_id = user_id AND status = 'logue'
+Log貢献者として: planters WHERE id IN (SELECT planter_id FROM logs WHERE author_id = user_id) AND status = 'logue'
 UNION → 重複排除 → ORDER BY bloomed_at DESC
 ```
 

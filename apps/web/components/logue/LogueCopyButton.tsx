@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback } from "react";
 import { Copy, Check } from "lucide-react";
 
-interface LougeCopyButtonProps {
+interface LogueCopyButtonProps {
   content: string;
 }
 
-export function LougeCopyButton({ content }: LougeCopyButtonProps) {
+export function LogueCopyButton({ content }: LogueCopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -24,7 +24,7 @@ export function LougeCopyButton({ content }: LougeCopyButtonProps) {
     <button
       onClick={handleCopy}
       className="flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-[12px] font-medium text-primary-dark transition-colors hover:bg-bg"
-      data-testid="louge-copy-button"
+      data-testid="logue-copy-button"
     >
       {copied ? (
         <>
@@ -34,7 +34,7 @@ export function LougeCopyButton({ content }: LougeCopyButtonProps) {
       ) : (
         <>
           <Copy size={14} strokeWidth={1.5} />
-          Louge をコピー
+          Logue をコピー
         </>
       )}
     </button>

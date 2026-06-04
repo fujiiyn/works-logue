@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime
 
 from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, func
@@ -11,7 +11,7 @@ class Notification(Base):
     __tablename__ = "notifications"
     __table_args__ = (
         CheckConstraint(
-            "type IN ('new_log', 'status_changed', 'louge_bloomed', 'new_seed')",
+            "type IN ('new_log', 'status_changed', 'logue_bloomed', 'new_seed')",
             name="chk_notifications_type",
         ),
     )

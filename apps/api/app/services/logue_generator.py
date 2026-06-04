@@ -1,4 +1,4 @@
-import logging
+﻿import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -16,7 +16,7 @@ from app.services.insight_calculator import InsightScoreCalculator
 
 logger = logging.getLogger(__name__)
 
-LOUGE_SYSTEM_INSTRUCTION = """\
+LOGUE_SYSTEM_INSTRUCTION = """\
 あなたはビジネスナレッジの編纂者です。
 Seed（問い）とLog（コメント群）から、パターンランゲージ形式のナレッジ記事を生成してください。
 
@@ -42,7 +42,7 @@ Seed（問い）とLog（コメント群）から、パターンランゲージ�
 6. 全て日本語で記述してください"""
 
 
-class LougeGenerator:
+class LogueGenerator:
     def __init__(self) -> None:
         self.client = VertexAIClient(model_name=MODEL_STANDARD)
 
@@ -60,11 +60,11 @@ class LougeGenerator:
 
         try:
             data = await self.client.generate_json(
-                prompt, system_instruction=LOUGE_SYSTEM_INSTRUCTION
+                prompt, system_instruction=LOGUE_SYSTEM_INSTRUCTION
             )
             return self._build_markdown(data)
         except Exception:
-            logger.error("Louge generation failed", exc_info=True)
+            logger.error("Logue generation failed", exc_info=True)
             return None
 
     async def bloom(self, planter_id: uuid.UUID, db: AsyncSession) -> None:
@@ -76,10 +76,10 @@ class LougeGenerator:
 
         content = await self.generate(planter, logs, users_map)
         if content is None:
-            logger.warning("Louge generation failed for planter=%s, louge_content remains None", planter_id)
+            logger.warning("Logue generation failed for planter=%s, logue_content remains None", planter_id)
             return
 
-        await self._update_louge_content(planter_id, content, db)
+        await self._update_logue_content(planter_id, content, db)
 
         calculator = InsightScoreCalculator()
         events = await calculator.calculate(planter_id, content, db)
@@ -152,11 +152,11 @@ class LougeGenerator:
 
         return logs, users_map
 
-    async def _update_louge_content(
+    async def _update_logue_content(
         self, planter_id: uuid.UUID, content: str, db: AsyncSession
     ) -> None:
         repo = PlanterRepository(db)
-        await repo.update_louge_content(
+        await repo.update_logue_content(
             planter_id, content, datetime.now(timezone.utc)
         )
 
@@ -175,7 +175,7 @@ class LougeGenerator:
         for user_id in contributor_ids:
             notification = Notification(
                 user_id=user_id,
-                type="louge_bloomed",
+                type="logue_bloomed",
                 planter_id=planter_id,
                 actor_id=None,
             )

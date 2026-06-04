@@ -1,4 +1,4 @@
-# Component Methods
+﻿# Component Methods
 
 メソッドシグネチャと I/O 型定義。詳細なビジネスルールは CONSTRUCTION フェーズの Functional Design で定義する。
 
@@ -45,7 +45,7 @@
 | エンドポイント | メソッド | 入力 | 出力 | 概要 |
 |---|---|---|---|---|
 | `POST /api/planters` | `create_planter` | `CreatePlanterRequest { type, title, body, tag_ids[] }` | `PlanterResponse` | Seed 投稿（Planter 作成） |
-| `GET /api/planters/{id}` | `get_planter` | `planter_id: UUID` | `PlanterDetailResponse` | Planter 詳細取得（状態に応じた Seed/Louge 情報含む） |
+| `GET /api/planters/{id}` | `get_planter` | `planter_id: UUID` | `PlanterDetailResponse` | Planter 詳細取得（状態に応じた Seed/Logue 情報含む） |
 | `GET /api/planters` | `list_planters` | `tab: str, cursor?: str, limit?: int` | `PaginatedResponse[PlanterSummary]` | フィード取得（新着/注目/開花済み） |
 | `DELETE /api/planters/{id}` | `delete_planter` | `planter_id: UUID` | `None` | ソフトデリート |
 
@@ -145,7 +145,7 @@
 
 | メソッド | 入力 | 出力 | 概要 |
 |---|---|---|---|
-| `create_event(type, planter_id, actor_id?)` | `str, UUID, UUID?` | `Notification` | 通知イベントを記録。`type` 例: `"louge_bloomed"`, `"status_changed"`, `"new_seed"` |
+| `create_event(type, planter_id, actor_id?)` | `str, UUID, UUID?` | `Notification` | 通知イベントを記録。`type` 例: `"logue_bloomed"`, `"status_changed"`, `"new_seed"` |
 
 ---
 
@@ -158,20 +158,20 @@
 | `evaluate_structure(planter_id)` | `UUID` | `StructureResult { fulfillment_rate: float, parts: dict }` | 条件A: VertexAI で構造パーツ充足率をチェック。Log 投稿のたびに毎回実行（MVP はシンプルさ優先）。条件A/B 両方で VertexAI を使用 |
 | `evaluate_maturity(planter_id)` | `UUID` | `MaturityResult { scores: dict, total: float, passed: bool }` | 条件B: 成熟度4観点スコアリング（条件A 充足 + 最低参加ライン超過時のみ実行） |
 | `should_bloom(planter_id)` | `UUID` | `bool` | 条件A AND 条件B の判定結果を返す |
-| `save_snapshot(planter_id, result)` | `UUID, ScoreResult` | `None` | louge_score_snapshots にスコア記録 |
+| `save_snapshot(planter_id, result)` | `UUID, ScoreResult` | `None` | logue_score_snapshots にスコア記録 |
 
-### BC-12: LougeGenerator
+### BC-12: LogueGenerator
 
 | メソッド | 入力 | 出力 | 概要 |
 |---|---|---|---|
-| `generate(planter_id)` | `UUID` | `LougeContent` | Vertex AI で Louge 記事を生成。Seed + Log 群を入力とし、パターンランゲージ形式で出力 |
+| `generate(planter_id)` | `UUID` | `LogueContent` | Vertex AI で Logue 記事を生成。Seed + Log 群を入力とし、パターンランゲージ形式で出力 |
 | `bloom(planter_id)` | `UUID` | `None` | 開花処理の全体オーケストレーション（記事生成 → Planter 状態更新 → インサイトスコア計算） |
 
 ### BC-13: InsightScoreCalculator
 
 | メソッド | 入力 | 出力 | 概要 |
 |---|---|---|---|
-| `calculate(planter_id)` | `UUID` | `list[InsightScoreEvent]` | Louge 開花時に各 Log 投稿者の貢献度を算出 |
+| `calculate(planter_id)` | `UUID` | `list[InsightScoreEvent]` | Logue 開花時に各 Log 投稿者の貢献度を算出 |
 | `apply(events)` | `list[InsightScoreEvent]` | `None` | スコア加算を各ユーザーに反映し、イベントを DB に記録 |
 
 ### BC-14: FeedRanker

@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, func
@@ -8,8 +8,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base
 
 
-class LougeScoreSnapshot(Base):
-    __tablename__ = "louge_score_snapshots"
+class LogueScoreSnapshot(Base):
+    __tablename__ = "logue_score_snapshots"
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True, default=uuid.uuid4

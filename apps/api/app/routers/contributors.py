@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from collections import defaultdict
 from typing import Annotated
 
@@ -36,7 +36,7 @@ async def get_contributors(
     planter = result.scalar_one_or_none()
     if planter is None:
         raise HTTPException(status_code=404, detail="planter_not_found")
-    if planter.status != "louge":
+    if planter.status != "logue":
         raise HTTPException(status_code=404, detail="planter_not_bloomed")
 
     # Get insight score events for this planter

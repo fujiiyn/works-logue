@@ -1,4 +1,4 @@
-# U2 Seed — Frontend Components
+﻿# U2 Seed — Frontend Components
 
 ## 概要
 
@@ -257,7 +257,7 @@ interface PlanterFeedState {
 ```typescript
 interface ProgressBarProps {
   progress: number   // 0.0 〜 1.0
-  status: string     // "seed" | "sprout" | "louge"
+  status: string     // "seed" | "seed" | "logue"
 }
 ```
 
@@ -267,8 +267,8 @@ interface ProgressBarProps {
 - 幅: 120px（カード内右寄せ）
 - Track: `bg-brand-light`
 - Fill:
-  - `status='seed'` or `status='sprout'`: `bg-brand-primary/50`（半透明）
-  - `status='louge'`: `bg-brand-primary`（100% 幅）
+  - `status='seed'` or `status='seed'`: `bg-brand-primary/50`（半透明）
+  - `status='logue'`: `bg-brand-primary`（100% 幅）
 - Fill 幅: `progress * 100%`
 - U2 時点では progress=0 なので fill なし
 

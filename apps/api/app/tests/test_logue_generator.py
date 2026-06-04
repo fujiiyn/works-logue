@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -11,8 +11,8 @@ def _make_planter_mock(
     user_id=None,
     title="Test Seed",
     body="Test body",
-    status="sprout",
-    louge_content=None,
+    status="seed",
+    logue_content=None,
 ):
     p = MagicMock()
     p.id = planter_id or uuid.uuid4()
@@ -20,7 +20,7 @@ def _make_planter_mock(
     p.title = title
     p.body = body
     p.status = status
-    p.louge_content = louge_content
+    p.logue_content = logue_content
     return p
 
 
@@ -40,10 +40,10 @@ def _make_user_mock(user_id=None, display_name="Test User"):
     return user
 
 
-class TestLougeGeneratorGenerate:
+class TestLogueGeneratorGenerate:
     async def test_generate_returns_markdown(self):
         """generate() should call Vertex AI and return Markdown article."""
-        from app.services.louge_generator import LougeGenerator
+        from app.services.logue_generator import LogueGenerator
 
         vertex_response = {
             "pattern_name": "0→1営業責任者の泥臭さ要件",
@@ -57,7 +57,7 @@ class TestLougeGeneratorGenerate:
             ],
         }
 
-        generator = LougeGenerator()
+        generator = LogueGenerator()
 
         with patch.object(generator, "client") as mock_client:
             mock_client.generate_json = AsyncMock(return_value=vertex_response)
@@ -80,7 +80,7 @@ class TestLougeGeneratorGenerate:
 
     async def test_generate_footnote_format(self):
         """generate() should use footnote format for references."""
-        from app.services.louge_generator import LougeGenerator
+        from app.services.logue_generator import LogueGenerator
 
         vertex_response = {
             "pattern_name": "テストパターン",
@@ -94,7 +94,7 @@ class TestLougeGeneratorGenerate:
             ],
         }
 
-        generator = LougeGenerator()
+        generator = LogueGenerator()
         with patch.object(generator, "client") as mock_client:
             mock_client.generate_json = AsyncMock(return_value=vertex_response)
 
@@ -109,9 +109,9 @@ class TestLougeGeneratorGenerate:
 
     async def test_generate_returns_none_on_vertex_error(self):
         """generate() should return None when Vertex AI fails."""
-        from app.services.louge_generator import LougeGenerator
+        from app.services.logue_generator import LogueGenerator
 
-        generator = LougeGenerator()
+        generator = LogueGenerator()
         with patch.object(generator, "client") as mock_client:
             mock_client.generate_json = AsyncMock(side_effect=Exception("Vertex AI down"))
 
@@ -124,10 +124,10 @@ class TestLougeGeneratorGenerate:
         assert result is None
 
 
-class TestLougeGeneratorBloom:
+class TestLogueGeneratorBloom:
     async def test_bloom_full_flow(self):
         """bloom() should generate article, update planter, calculate insight scores, and create notification."""
-        from app.services.louge_generator import LougeGenerator
+        from app.services.logue_generator import LogueGenerator
 
         planter_id = uuid.uuid4()
         user_id = uuid.uuid4()
@@ -138,40 +138,40 @@ class TestLougeGeneratorBloom:
 
         db = AsyncMock()
 
-        generator = LougeGenerator()
+        generator = LogueGenerator()
         generator.generate = AsyncMock(return_value="# Test Article\n\nContent here")
         generator._get_planter = AsyncMock(return_value=planter)
         generator._get_logs_with_users = AsyncMock(return_value=(logs, users_map))
-        generator._update_louge_content = AsyncMock()
+        generator._update_logue_content = AsyncMock()
         generator._create_notifications = AsyncMock()
 
         mock_calculator = AsyncMock()
         mock_calculator.calculate = AsyncMock(return_value=[])
         mock_calculator.apply = AsyncMock()
 
-        with patch("app.services.louge_generator.InsightScoreCalculator", return_value=mock_calculator):
+        with patch("app.services.logue_generator.InsightScoreCalculator", return_value=mock_calculator):
             await generator.bloom(planter_id, db)
 
         generator.generate.assert_called_once()
-        generator._update_louge_content.assert_called_once()
+        generator._update_logue_content.assert_called_once()
         mock_calculator.calculate.assert_called_once()
         mock_calculator.apply.assert_called_once()
         generator._create_notifications.assert_called_once()
 
     async def test_bloom_keeps_status_on_generate_failure(self):
-        """bloom() should not update louge_content when generate() fails."""
-        from app.services.louge_generator import LougeGenerator
+        """bloom() should not update logue_content when generate() fails."""
+        from app.services.logue_generator import LogueGenerator
 
         planter_id = uuid.uuid4()
         planter = _make_planter_mock(planter_id=planter_id)
         db = AsyncMock()
 
-        generator = LougeGenerator()
+        generator = LogueGenerator()
         generator.generate = AsyncMock(return_value=None)
         generator._get_planter = AsyncMock(return_value=planter)
         generator._get_logs_with_users = AsyncMock(return_value=([], {}))
-        generator._update_louge_content = AsyncMock()
+        generator._update_logue_content = AsyncMock()
 
         await generator.bloom(planter_id, db)
 
-        generator._update_louge_content.assert_not_called()
+        generator._update_logue_content.assert_not_called()

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -50,7 +50,7 @@ function AboutCard() {
 
       <div className="mb-4 flex gap-5">
         <Stat label="Seeds" value={fmt(stats?.seeds)} />
-        <Stat label="Louges" value={fmt(stats?.louges)} />
+        <Stat label="Logues" value={fmt(stats?.logues)} />
         <Stat label="Contributors" value={fmt(stats?.contributors)} />
       </div>
 

@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime
 
 from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Integer, String, func
@@ -11,7 +11,7 @@ class Planter(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "planters"
     __table_args__ = (
         CheckConstraint(
-            "status IN ('seed', 'sprout', 'louge', 'archived')", name="chk_planters_status"
+            "status IN ('seed', 'logue', 'archived')", name="chk_planters_status"
         ),
     )
 
@@ -22,8 +22,8 @@ class Planter(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     status: Mapped[str] = mapped_column(
         String(10), nullable=False, default="seed", server_default="'seed'"
     )
-    louge_content: Mapped[str | None] = mapped_column(nullable=True)
-    louge_generated_at: Mapped[datetime | None] = mapped_column(
+    logue_content: Mapped[str | None] = mapped_column(nullable=True)
+    logue_generated_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     structure_fulfillment: Mapped[float] = mapped_column(

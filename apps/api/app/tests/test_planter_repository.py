@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -208,41 +208,41 @@ class TestUpdateScores:
             structure_fulfillment=0.75,
             maturity_score=0.6,
             progress=0.5,
-            status="sprout",
+            status="seed",
         )
         await db_session.refresh(created)
         assert created.structure_fulfillment == 0.75
         assert created.maturity_score == 0.6
         assert created.progress == 0.5
-        assert created.status == "sprout"
+        assert created.status == "seed"
 
-    async def test_status_does_not_downgrade_from_louge(
+    async def test_status_does_not_downgrade_from_logue(
         self, repo, test_user, seed_type, db_session
     ):
-        """A stale pipeline must not be able to demote a louge planter back to sprout."""
+        """A stale pipeline must not be able to demote a logue planter back to seed."""
         planter = Planter(
             user_id=test_user.id,
             title="Bloomed",
             body="Body",
             seed_type_id=seed_type.id,
-            status="louge",
+            status="logue",
             progress=1.0,
             structure_fulfillment=1.0,
             maturity_score=0.85,
         )
         created = await repo.create(planter)
 
-        # Stale concurrent pipeline tries to overwrite with sprout-era values.
+        # Stale concurrent pipeline tries to overwrite with seed-era values.
         await repo.update_scores(
             created.id,
             structure_fulfillment=0.75,
             maturity_score=0.6,
             progress=0.5,
-            status="sprout",
+            status="seed",
         )
         await db_session.refresh(created)
 
-        assert created.status == "louge"
+        assert created.status == "logue"
         assert created.progress == 1.0
         assert created.structure_fulfillment == 1.0
         assert created.maturity_score == 0.85
@@ -259,7 +259,7 @@ class TestUpdateScores:
             progress=0.8,
             structure_fulfillment=0.75,
             maturity_score=0.6,
-            status="sprout",
+            status="seed",
         )
         created = await repo.create(planter)
 
@@ -268,7 +268,7 @@ class TestUpdateScores:
             structure_fulfillment=0.5,
             maturity_score=0.4,
             progress=0.3,
-            status="sprout",
+            status="seed",
         )
         await db_session.refresh(created)
 
@@ -288,7 +288,7 @@ class TestUpdateScores:
             progress=0.3,
             structure_fulfillment=0.5,
             maturity_score=0.4,
-            status="sprout",
+            status="seed",
         )
         created = await repo.create(planter)
 
@@ -297,14 +297,14 @@ class TestUpdateScores:
             structure_fulfillment=0.75,
             maturity_score=0.6,
             progress=0.8,
-            status="sprout",
+            status="seed",
         )
         await db_session.refresh(created)
 
         assert created.progress == 0.8
         assert created.structure_fulfillment == 0.75
         assert created.maturity_score == 0.6
-        assert created.status == "sprout"
+        assert created.status == "seed"
 
     async def test_maturity_score_handles_null_prev(
         self, repo, test_user, seed_type, db_session
@@ -327,13 +327,13 @@ class TestUpdateScores:
             structure_fulfillment=0.5,
             maturity_score=0.5,
             progress=0.25,
-            status="sprout",
+            status="seed",
         )
         await db_session.refresh(created)
 
         assert created.maturity_score == 0.5
         assert created.progress == 0.25
-        assert created.status == "sprout"
+        assert created.status == "seed"
 
     async def test_maturity_score_keeps_existing_when_new_is_lower(
         self, repo, test_user, seed_type, db_session
@@ -347,7 +347,7 @@ class TestUpdateScores:
             maturity_score=0.7,
             progress=0.6,
             structure_fulfillment=0.8,
-            status="sprout",
+            status="seed",
         )
         created = await repo.create(planter)
 
@@ -356,7 +356,7 @@ class TestUpdateScores:
             structure_fulfillment=0.8,
             maturity_score=0.4,
             progress=0.6,
-            status="sprout",
+            status="seed",
         )
         await db_session.refresh(created)
 
@@ -394,19 +394,19 @@ class TestUpdateContributorCount:
         assert created.contributor_count == 5
 
 
-class TestUpdateLougeContent:
-    async def test_update_louge_content(self, repo, test_user, seed_type, db_session):
-        """update_louge_content() should set louge_content and louge_generated_at."""
+class TestUpdateLogueContent:
+    async def test_update_logue_content(self, repo, test_user, seed_type, db_session):
+        """update_logue_content() should set logue_content and logue_generated_at."""
         planter = Planter(
-            user_id=test_user.id, title="Louge", body="Body", seed_type_id=seed_type.id,
-            status="louge",
+            user_id=test_user.id, title="Logue", body="Body", seed_type_id=seed_type.id,
+            status="logue",
         )
         created = await repo.create(planter)
-        assert created.louge_content is None
-        assert created.louge_generated_at is None
+        assert created.logue_content is None
+        assert created.logue_generated_at is None
 
         now = datetime.now(timezone.utc)
-        await repo.update_louge_content(created.id, "# Article", now)
+        await repo.update_logue_content(created.id, "# Article", now)
         await db_session.refresh(created)
-        assert created.louge_content == "# Article"
-        assert created.louge_generated_at is not None
+        assert created.logue_content == "# Article"
+        assert created.logue_generated_at is not None

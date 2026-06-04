@@ -1,16 +1,16 @@
-# U3 Log & Score - Frontend Components
+﻿# U3 Log & Score - Frontend Components
 
 ## 概要
 
 U3 で実装・拡張するフロントエンドコンポーネント:
-1. **PlanterDetail（拡張）** — Seed/Sprout 状態の詳細表示、スコア情報
+1. **PlanterDetail（拡張）** — Seed/Seed 状態の詳細表示、スコア情報
 2. **LogThread（新規）** — Log 一覧表示 + 投稿フォーム
 3. **ScoreCard（拡張）** — 構造パーツ詳細の追加
-4. **PlanterCard（拡張）** — Sprout 状態のバッジ表示対応
+4. **PlanterCard（拡張）** — Seed 状態のバッジ表示対応
 
 ---
 
-## FC-07: PlanterDetail（Seed/Sprout 状態）
+## FC-07: PlanterDetail（Seed/Seed 状態）
 
 ### 現状（U2）
 
@@ -22,7 +22,7 @@ U3 で実装・拡張するフロントエンドコンポーネント:
 
 ```
 +--Main Content Area------------------------------------------+
-| [Sprout Badge] [投稿タイプ] · [Avatar] [Username] · [時間]   |
+| [Seed Badge] [投稿タイプ] · [Avatar] [Username] · [時間]   |
 |                                                              |
 | [タイトル]                                                    |
 | [本文]                                                        |
@@ -71,7 +71,7 @@ U3 で実装・拡張するフロントエンドコンポーネント:
 // components/log/LogThread.tsx
 interface LogThreadProps {
   planterId: string
-  planterStatus: string  // "seed" | "sprout" | "louge"
+  planterStatus: string  // "seed" | "seed" | "logue"
   onLogCreated: (response: LogCreateResponse) => void
 }
 ```
@@ -110,7 +110,7 @@ interface LogItemProps {
 - **テキストエリア**: 1行表示、入力に応じて自動拡張（最大5行）
 - **送信ボタン**: テキストが空の場合は disabled
 - **認証チェック**: 未ログイン時は「ログインして参加する」ボタンに置換
-- **Planter 状態チェック**: `status='louge'` の場合は非表示
+- **Planter 状態チェック**: `status='logue'` の場合は非表示
 
 ### 無限スクロール
 
@@ -198,15 +198,15 @@ interface ScoreCardProps {
   logCount: number
   contributorCount: number
   bloomThreshold: number
-  isLouge: boolean
+  isLogue: boolean
   scorePending: boolean      // バックグラウンド計算中フラグ
 }
 ```
 
 ### 表示ロジック
 
-- **Louge 状態**: 開花済みの特別表示（「開花済み」バッジ、全パーツチェック済み）
-- **Sprout 状態**: 進捗バー + 構造パーツチェックリスト + 統計
+- **Logue 状態**: 開花済みの特別表示（「開花済み」バッジ、全パーツチェック済み）
+- **Seed 状態**: 進捗バー + 構造パーツチェックリスト + 統計
 - **Seed 状態（Log 0件）**: 「最初の Log を投稿して育てましょう」メッセージ
 - **スコア計算中** (`scorePending=true`): progress バー横に小さなスピナー + 「スコア計算中...」テキスト。計算完了で消去しアニメーション付きでスコア更新
 
@@ -216,8 +216,8 @@ interface ScoreCardProps {
 
 ### 変更点
 
-- Sprout 状態の Planter にも正しいバッジ色を適用
-- `status='sprout'` のバッジ: `bg-primary-light`・`text-primary`（Seed と同じスタイル）
+- Seed 状態の Planter にも正しいバッジ色を適用
+- `status='seed'` のバッジ: `bg-primary-light`・`text-primary`（Seed と同じスタイル）
 - progress バーの表示を Planter の実際の progress 値に連動（U2 では静的だった可能性）
 
 ---

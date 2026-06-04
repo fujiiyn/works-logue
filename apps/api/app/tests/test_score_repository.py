@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.log import Log
 from app.models.planter import Planter
-from app.models.score import LougeScoreSnapshot
+from app.models.score import LogueScoreSnapshot
 from app.models.seed_type import SeedType
 from app.models.user import User
 from app.repositories.score_repository import ScoreRepository
@@ -59,8 +59,8 @@ def repo(db_session: AsyncSession) -> ScoreRepository:
 
 class TestCreateSnapshot:
     async def test_create_snapshot(self, repo, planter, trigger_log):
-        """create_snapshot() should insert a LougeScoreSnapshot."""
-        snapshot = LougeScoreSnapshot(
+        """create_snapshot() should insert a LogueScoreSnapshot."""
+        snapshot = LogueScoreSnapshot(
             planter_id=planter.id,
             trigger_log_id=trigger_log.id,
             structure_fulfillment=0.75,
@@ -78,7 +78,7 @@ class TestCreateSnapshot:
     async def test_create_snapshot_with_structure_parts(self, repo, planter, trigger_log):
         """create_snapshot() should correctly save structure_parts JSONB."""
         parts = {"context": True, "problem": True, "solution": True, "name": True}
-        snapshot = LougeScoreSnapshot(
+        snapshot = LogueScoreSnapshot(
             planter_id=planter.id,
             trigger_log_id=trigger_log.id,
             structure_fulfillment=1.0,
@@ -98,7 +98,7 @@ class TestGetLatestSnapshot:
         now = datetime.now(timezone.utc)
         for i in range(3):
             db_session.add(
-                LougeScoreSnapshot(
+                LogueScoreSnapshot(
                     planter_id=planter.id,
                     trigger_log_id=trigger_log.id,
                     structure_fulfillment=0.25 * (i + 1),

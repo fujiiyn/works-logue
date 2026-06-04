@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import and_, case, func, or_, select, update
@@ -71,11 +71,11 @@ class PlanterRepository:
         status: str,
     ) -> None:
         # Monotonic UPDATE: protect against concurrent / stale pipeline runs
-        # that could otherwise demote a bloomed planter back to sprout or
+        # that could otherwise demote a bloomed planter back to seed or
         # push the displayed progress backwards. Per-row CASE is portable
         # across PostgreSQL and SQLite (GREATEST is Postgres-only).
         new_status = case(
-            (Planter.status == "louge", Planter.status),
+            (Planter.status == "logue", Planter.status),
             else_=status,
         )
         new_progress = case(
@@ -123,13 +123,13 @@ class PlanterRepository:
         )
         await self.db.flush()
 
-    async def update_louge_content(
+    async def update_logue_content(
         self, planter_id: uuid.UUID, content: str, generated_at: datetime
     ) -> None:
         await self.db.execute(
             update(Planter)
             .where(Planter.id == planter_id)
-            .values(louge_content=content, louge_generated_at=generated_at)
+            .values(logue_content=content, logue_generated_at=generated_at)
         )
         await self.db.flush()
 
@@ -166,26 +166,26 @@ class PlanterRepository:
     async def list_bloomed(
         self,
         limit: int = 20,
-        cursor_louge_generated_at: datetime | None = None,
+        cursor_logue_generated_at: datetime | None = None,
         cursor_id: uuid.UUID | None = None,
     ) -> list[Planter]:
         stmt = (
             select(Planter)
             .where(
                 Planter.deleted_at.is_(None),
-                Planter.status == "louge",
-                Planter.louge_generated_at.is_not(None),
+                Planter.status == "logue",
+                Planter.logue_generated_at.is_not(None),
             )
-            .order_by(Planter.louge_generated_at.desc(), Planter.id.desc())
+            .order_by(Planter.logue_generated_at.desc(), Planter.id.desc())
             .limit(limit)
         )
 
-        if cursor_louge_generated_at is not None and cursor_id is not None:
+        if cursor_logue_generated_at is not None and cursor_id is not None:
             stmt = stmt.where(
                 or_(
-                    Planter.louge_generated_at < cursor_louge_generated_at,
+                    Planter.logue_generated_at < cursor_logue_generated_at,
                     and_(
-                        Planter.louge_generated_at == cursor_louge_generated_at,
+                        Planter.logue_generated_at == cursor_logue_generated_at,
                         Planter.id < cursor_id,
                     ),
                 )

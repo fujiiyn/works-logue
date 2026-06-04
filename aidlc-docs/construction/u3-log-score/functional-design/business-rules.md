@@ -1,4 +1,4 @@
-# U3 Log & Score - Business Rules
+﻿# U3 Log & Score - Business Rules
 
 ## BR-01: Log 投稿の制約
 
@@ -6,7 +6,7 @@
 |---|---|
 | 認証必須 | ログインユーザーのみ Log 投稿可能 |
 | BAN チェック | BAN ユーザーは投稿不可（403） |
-| Planter 状態チェック | `status='louge'` の Planter には投稿不可（開花済み） |
+| Planter 状態チェック | `status='logue'` の Planter には投稿不可（開花済み） |
 | Planter 状態チェック | `status='archived'` の Planter には投稿不可 |
 | 本文制限 | 1〜5000文字 |
 | ネスト制限 | 返信は1段のみ。parent_log_id の Log が既に返信の場合は拒否 |
@@ -20,28 +20,28 @@
 ### 遷移ルール
 
 ```
-seed ──[BR-02a]--> sprout ──[BR-02b]--> louge
+seed ──[BR-02a]--> seed ──[BR-02b]--> logue
 ```
 
 | ルール ID | 条件 | 遷移 |
 |---|---|---|
-| BR-02a | log_count >= 1（初回 Log 投稿時） | seed -> sprout |
-| BR-02b | 条件A 完全充足 AND 条件B >= bloom_threshold | sprout -> louge（U4 で実装） |
+| BR-02a | log_count >= 1（初回 Log 投稿時） | seed -> seed |
+| BR-02b | 条件A 完全充足 AND 条件B >= bloom_threshold | seed -> logue（U4 で実装） |
 
 ### 不可逆ルール
 
 - 状態遷移は一方向のみ（巻き戻し不可）
-- `louge` -> `sprout` や `sprout` -> `seed` への逆遷移はシステムが許可しない
+- `logue` -> `seed` や `seed` -> `seed` への逆遷移はシステムが許可しない
 
-### Sprout サブステート
+### Seed サブステート
 
 UI のビジュアル表現のみ。DB カラムとしては保存しない（progress から算出）。
 
 | サブステート | 条件 | progress 範囲 |
 |---|---|---|
-| Sprout 1（芽） | Log あり、条件A 進行中 | 0% 〜 50% |
-| Sprout 2（成長） | 条件A 充足、条件B 進行中 | 50% 〜 80% |
-| Sprout 3（蕾） | progress >= bud_threshold (0.8) | 80% 〜 99% |
+| Seed 1（芽） | Log あり、条件A 進行中 | 0% 〜 50% |
+| Seed 2（成長） | 条件A 充足、条件B 進行中 | 50% 〜 80% |
+| Seed 3（蕾） | progress >= bud_threshold (0.8) | 80% 〜 99% |
 
 ---
 
@@ -182,10 +182,10 @@ def calculate_progress(structure_fulfillment: float, maturity_total: float | Non
 | 状態 | progress 範囲 | 例 |
 |---|---|---|
 | Seed（Log 0件） | 0.0 | structure=0.0 |
-| Sprout 1 | 0.0 〜 0.5 | structure=0.5 → progress=0.25 |
-| Sprout 2 | 0.5 〜 0.8 | structure=1.0, maturity=0.4 → progress=0.7 |
-| Sprout 3（蕾） | 0.8 〜 0.99 | structure=1.0, maturity=0.7 → progress=0.85 |
-| Louge | 1.0 | 開花完了 |
+| Seed 1 | 0.0 〜 0.5 | structure=0.5 → progress=0.25 |
+| Seed 2 | 0.5 〜 0.8 | structure=1.0, maturity=0.4 → progress=0.7 |
+| Seed 3（蕾） | 0.8 〜 0.99 | structure=1.0, maturity=0.7 → progress=0.85 |
+| Logue | 1.0 | 開花完了 |
 
 ---
 
@@ -227,7 +227,7 @@ should_facilitate = (
 | score.min_contributors | 3 | 条件B 開始の最低参加者数 |
 | score.min_logs | 5 | 条件B 開始の最低 Log 数 |
 | score.bloom_threshold | 0.7 | 開花閾値 |
-| score.bud_threshold | 0.8 | Sprout 3 の progress 閾値 |
+| score.bud_threshold | 0.8 | Seed 3 の progress 閾値 |
 
 ### 管理ルール
 
@@ -256,12 +256,12 @@ for follower in planter_followers:
 ### 状態遷移時
 
 ```python
-# seed -> sprout 遷移時
+# seed -> seed 遷移時
 for follower in planter_followers:
     Notification(
         user_id=follower.user_id,
         type='status_changed',
         planter_id=planter_id,
-        data={'old_status': 'seed', 'new_status': 'sprout'}
+        data={'old_status': 'seed', 'new_status': 'seed'}
     )
 ```

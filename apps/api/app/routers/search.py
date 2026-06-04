@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timezone
 from typing import Annotated
 
@@ -27,7 +27,7 @@ async def search_planters(
     _user: Annotated[User | None, Depends(get_optional_user)],
     keyword: str | None = Query(None),
     tag_ids: list[uuid.UUID] | None = Query(None),
-    status: str | None = Query(None, pattern="^(seed|sprout|louge)$"),
+    status: str | None = Query(None, pattern="^(seed|logue)$"),
     limit: int = Query(20, ge=1, le=50),
     cursor: str | None = Query(None),
 ) -> CursorPaginatedResponse:

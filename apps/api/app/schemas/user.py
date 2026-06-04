@@ -1,4 +1,4 @@
-import re
+﻿import re
 import uuid
 from datetime import date, datetime
 
@@ -100,7 +100,7 @@ class TagResponse(BaseModel):
 
 class UserProfileStats(BaseModel):
     insight_score: float
-    louge_count: int
+    logue_count: int
     follower_count: int
     following_count: int
 

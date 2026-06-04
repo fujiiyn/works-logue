@@ -1,20 +1,20 @@
-"use client";
+﻿"use client";
 
 import ReactMarkdown from "react-markdown";
 import { formatRelativeTime } from "@/lib/format-time";
 
-interface LougeArticleProps {
+interface LogueArticleProps {
   content: string;
   generatedAt: string;
 }
 
-export function LougeArticle({ content, generatedAt }: LougeArticleProps) {
+export function LogueArticle({ content, generatedAt }: LogueArticleProps) {
   return (
-    <div data-testid="louge-article">
+    <div data-testid="logue-article">
       {/* Article label */}
       <div className="mb-3 flex items-center gap-2">
         <h2 className="text-heading-m text-primary-dark">
-          Louge（開花記事）
+          Logue（開花記事）
         </h2>
         <span className="text-caption text-text-muted">
           {formatRelativeTime(generatedAt)}に開花
@@ -22,7 +22,7 @@ export function LougeArticle({ content, generatedAt }: LougeArticleProps) {
       </div>
 
       {/* Markdown content */}
-      <div className="prose-louge mb-6 max-w-none" data-testid="louge-article-content">
+      <div className="prose-logue mb-6 max-w-none" data-testid="logue-article-content">
         <ReactMarkdown
           components={{
             h1: ({ children }) => (

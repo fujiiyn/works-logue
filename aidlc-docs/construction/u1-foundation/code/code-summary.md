@@ -1,4 +1,4 @@
-# U1 Foundation — Code Summary
+﻿# U1 Foundation — Code Summary
 
 ## 作成ファイル一覧
 
@@ -20,7 +20,7 @@
 | `app/models/follow.py` | PlanterFollow, UserFollow モデル |
 | `app/models/notification.py` | Notification モデル |
 | `app/models/planter_view.py` | PlanterView モデル |
-| `app/models/score.py` | LougeScoreSnapshot, InsightScoreEvent モデル |
+| `app/models/score.py` | LogueScoreSnapshot, InsightScoreEvent モデル |
 | `app/models/ai_config.py` | AiConfig モデル |
 | `app/models/seed_type.py` | SeedType モデル |
 | `app/routers/health.py` | GET /health |

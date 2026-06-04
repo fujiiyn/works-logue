@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -27,7 +27,7 @@ interface LogItem {
 const TABS = [
   { key: "seeds", label: "Seed一覧" },
   { key: "logs", label: "Log一覧" },
-  { key: "louges", label: "参加Louge" },
+  { key: "logues", label: "参加Logue" },
 ] as const;
 
 interface ProfileTabsProps {
@@ -157,16 +157,12 @@ export function ProfileTabs({ userId }: ProfileTabsProps) {
                 <div className="mb-1 flex items-center gap-1.5 text-caption text-text-muted">
                   <span
                     className={`inline-block rounded-sm px-[6px] py-[1px] font-medium ${
-                      p.status === "louge"
+                      p.status === "logue"
                         ? "bg-primary text-white"
                         : "bg-primary-light-bg text-primary"
                     }`}
                   >
-                    {p.status === "louge"
-                      ? "Louge"
-                      : p.status === "sprout"
-                        ? "Sprout"
-                        : "Seed"}
+                    {p.status === "logue" ? "Logue" : "Seed"}
                   </span>
                   <span>{formatRelativeTime(p.created_at)}</span>
                 </div>
@@ -194,7 +190,7 @@ export function ProfileTabs({ userId }: ProfileTabsProps) {
                 ? "まだSeedを投稿していません"
                 : activeTab === "logs"
                   ? "まだLogを投稿していません"
-                  : "まだLougeに参加していません"}
+                  : "まだLogueに参加していません"}
             </div>
           )}
 

@@ -1,4 +1,4 @@
-import logging
+﻿import logging
 import uuid
 
 from sqlalchemy import select
@@ -6,14 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.models.log import Log
 from app.models.planter import Planter
-from app.models.score import LougeScoreSnapshot
+from app.models.score import LogueScoreSnapshot
 from app.models.user import User
 from app.repositories.log_repository import LogRepository
 from app.repositories.planter_repository import PlanterRepository
 from app.repositories.score_repository import ScoreRepository
 from app.repositories.settings_repository import SettingsRepository
 from app.services.ai_facilitator import AIFacilitator
-from app.services.louge_generator import LougeGenerator
+from app.services.logue_generator import LogueGenerator
 from app.services.score_engine import STRUCTURE_PARTS, ScoreEngine
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class ScorePipeline:
         self.session_factory = session_factory
         self.score_engine = ScoreEngine()
         self.facilitator = AIFacilitator()
-        self.louge_generator = LougeGenerator()
+        self.logue_generator = LogueGenerator()
 
     async def execute(
         self,
@@ -90,7 +90,7 @@ class ScorePipeline:
         if should_run_b:
             # _get_logs_with_users filters AI logs, so every log here has a
             # user_id. Fall back to "匿名" if the User row was deleted (e.g.
-            # GDPR deletion) — same convention as LougeGenerator.
+            # GDPR deletion) — same convention as LogueGenerator.
             logs_with_users = []
             for log in logs:
                 user = users_map.get(log.user_id)
@@ -144,13 +144,13 @@ class ScorePipeline:
         new_status = planter.status
 
         if passed_maturity:
-            new_status = "louge"
+            new_status = "logue"
             progress = 1.0
         else:
             progress = calculate_progress(structure.fulfillment, maturity_total)
 
         # Save snapshot
-        snapshot = LougeScoreSnapshot(
+        snapshot = LogueScoreSnapshot(
             planter_id=planter_id,
             trigger_log_id=trigger_log_id,
             structure_fulfillment=structure.fulfillment,
@@ -177,10 +177,10 @@ class ScorePipeline:
         # Trigger bloom (after commit so planter status is persisted)
         if passed_maturity:
             try:
-                await self.louge_generator.bloom(planter_id, db)
+                await self.logue_generator.bloom(planter_id, db)
             except Exception:
                 logger.error(
-                    "LougeGenerator.bloom failed for planter=%s", planter_id, exc_info=True
+                    "LogueGenerator.bloom failed for planter=%s", planter_id, exc_info=True
                 )
 
     async def _get_planter(
@@ -212,12 +212,12 @@ class ScorePipeline:
 
     async def _get_latest_snapshot(
         self, planter_id: uuid.UUID, db: AsyncSession
-    ) -> LougeScoreSnapshot | None:
+    ) -> LogueScoreSnapshot | None:
         repo = ScoreRepository(db)
         return await repo.get_latest_snapshot(planter_id)
 
     async def _save_snapshot(
-        self, db: AsyncSession, snapshot: LougeScoreSnapshot
+        self, db: AsyncSession, snapshot: LogueScoreSnapshot
     ) -> None:
         repo = ScoreRepository(db)
         await repo.create_snapshot(snapshot)

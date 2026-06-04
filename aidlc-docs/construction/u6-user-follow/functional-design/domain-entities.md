@@ -1,4 +1,4 @@
-# U6 User & Follow — Domain Entities
+﻿# U6 User & Follow — Domain Entities
 
 ## 既存エンティティ（U1で定義済み）
 
@@ -57,7 +57,7 @@ User N──M Tag (user_tags中間テーブル)
 | 値 | 算出方法 |
 |---|---|
 | insight_score | users.insight_score |
-| louge_count | Seed投稿 or Log投稿で開花したPlanter数 |
+| logue_count | Seed投稿 or Log投稿で開花したPlanter数 |
 | follower_count | user_follows WHERE followee_id = user_id の COUNT |
 | following_count | user_follows WHERE follower_id = user_id の COUNT |
 
@@ -72,7 +72,7 @@ User N──M Tag (user_tags中間テーブル)
 ### FeaturedContribution
 | 値 | 算出方法 |
 |---|---|
-| planter | 最高スコアの Louge 貢献 Planter |
+| planter | 最高スコアの Logue 貢献 Planter |
 | insight_score_earned | insight_score_events の合計 |
 
 ## ストレージ

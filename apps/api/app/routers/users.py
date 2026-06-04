@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from datetime import datetime, timezone
 from typing import Annotated
 
@@ -233,7 +233,7 @@ async def get_user_profile(
     follow_repo = FollowRepository(db)
     tag_repo = TagRepository(db)
 
-    louge_count = await user_repo.get_louge_count(user_id)
+    logue_count = await user_repo.get_logue_count(user_id)
     follower_count = await follow_repo.get_follower_count(user_id)
     following_count = await follow_repo.get_following_count(user_id)
     tags = await tag_repo.get_user_tags(user_id)
@@ -252,7 +252,7 @@ async def get_user_profile(
         "user": UserPublicResponse.model_validate(user),
         "stats": UserProfileStats(
             insight_score=user.insight_score,
-            louge_count=louge_count,
+            logue_count=logue_count,
             follower_count=follower_count,
             following_count=following_count,
         ),

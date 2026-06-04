@@ -1,4 +1,4 @@
-# 運用ドキュメント
+﻿# 運用ドキュメント
 
 このドキュメントは、Works Logue の admin 機能で **UI 化されていない運用判断**
 を実行するための単一の真実源です。BR-A21 に基づき、admin の払い出し・降格・
@@ -219,7 +219,7 @@ Redirect URLs に登録しておき、安定確認後に旧 URL を削除する�
 
 `logs` テーブルは Supabase Realtime の `postgres_changes` 経由でフロントエンド
 へ配信される（Planter 詳細ページの LogThread が購読）。`planters` も同様に
-スコア更新・status 遷移・Louge 開花を全画面同期するために配信される。
+スコア更新・status 遷移・Logue 開花を全画面同期するために配信される。
 マイグレーションで以下をセットアップ済み:
 
 - `logs` / `planters` を `supabase_realtime` パブリケーションに追加

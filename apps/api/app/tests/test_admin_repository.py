@@ -1,10 +1,10 @@
-"""U7 Step 4: AdminRepository tests (TDD Red).
+﻿"""U7 Step 4: AdminRepository tests (TDD Red).
 
 Covers:
   - get_dashboard_stats (4 COUNTs, JST boundary)
   - list_users (q / status / pagination / counts merge)
   - ban_user / unban_user (idempotent atomic UPDATE)
-  - list_planters (status='all'/'archived'/'deleted'/seed/sprout/louge, sort,
+  - list_planters (status='all'/'archived'/'deleted'/seed/seed/logue, sort,
     title q, author + seed_type_name JOIN)
   - archive_planter / restore_planter / soft_delete_planter
   - list_seed_types / update_seed_type_description / toggle_seed_type_active
@@ -117,7 +117,7 @@ class TestGetDashboardStats:
         assert stats["total_users"] == 1
         assert stats["total_planters"] == 1
 
-    async def test_pending_louge_count_is_sprout_only_and_excludes_deleted(
+    async def test_pending_logue_count_is_seed_only_and_excludes_deleted(
         self, db_session: AsyncSession, seed_type: SeedType
     ):
         u = _make_user("u")
@@ -127,14 +127,13 @@ class TestGetDashboardStats:
         db_session.add_all(
             [
                 _make_planter(u.id, seed_type.id, status="seed"),
-                _make_planter(u.id, seed_type.id, status="sprout"),
-                _make_planter(u.id, seed_type.id, status="sprout"),
-                _make_planter(u.id, seed_type.id, status="louge"),
+                _make_planter(u.id, seed_type.id, status="seed"),
+                _make_planter(u.id, seed_type.id, status="logue"),
                 _make_planter(u.id, seed_type.id, status="archived"),
                 _make_planter(
                     u.id,
                     seed_type.id,
-                    status="sprout",
+                    status="seed",
                     deleted_at=datetime.now(UTC),
                 ),
             ]
@@ -143,7 +142,7 @@ class TestGetDashboardStats:
 
         repo = AdminRepository(db_session)
         stats = await repo.get_dashboard_stats()
-        assert stats["pending_louge_count"] == 2
+        assert stats["pending_logue_count"] == 2
 
     async def test_new_planters_today_uses_jst_window(
         self, db_session: AsyncSession, seed_type: SeedType
@@ -418,13 +417,12 @@ class TestListPlanters:
         await db_session.commit()
 
         seed_p = _make_planter(u.id, seed_type.id, status="seed", title="A")
-        sprout_p = _make_planter(u.id, seed_type.id, status="sprout", title="B")
-        louge_p = _make_planter(u.id, seed_type.id, status="louge", title="C")
+        logue_p = _make_planter(u.id, seed_type.id, status="logue", title="C")
         archived_p = _make_planter(u.id, seed_type.id, status="archived", title="D")
         deleted_p = _make_planter(
             u.id, seed_type.id, title="E", deleted_at=datetime.now(UTC)
         )
-        db_session.add_all([seed_p, sprout_p, louge_p, archived_p, deleted_p])
+        db_session.add_all([seed_p, logue_p, archived_p, deleted_p])
         await db_session.commit()
 
         repo = AdminRepository(db_session)
@@ -433,11 +431,10 @@ class TestListPlanters:
         )
         ids = {it["id"] for it in items}
         assert seed_p.id in ids
-        assert sprout_p.id in ids
-        assert louge_p.id in ids
+        assert logue_p.id in ids
         assert archived_p.id not in ids
         assert deleted_p.id not in ids
-        assert total == 3
+        assert total == 2
 
     async def test_status_archived_returns_archived_only(
         self, db_session: AsyncSession, seed_type: SeedType
@@ -484,8 +481,8 @@ class TestListPlanters:
         db_session.add(u)
         await db_session.commit()
         s = _make_planter(u.id, seed_type.id, status="seed", title="S")
-        sp = _make_planter(u.id, seed_type.id, status="sprout", title="P")
-        db_session.add_all([s, sp])
+        lg = _make_planter(u.id, seed_type.id, status="logue", title="L")
+        db_session.add_all([s, lg])
         await db_session.commit()
 
         repo = AdminRepository(db_session)

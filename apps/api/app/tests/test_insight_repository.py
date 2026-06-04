@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,7 +36,7 @@ async def _create_planter(db: AsyncSession, user: User, seed_type: SeedType) -> 
         title="Test Seed",
         body="Test body",
         seed_type_id=seed_type.id,
-        status="louge",
+        status="logue",
     )
     db.add(planter)
     await db.flush()

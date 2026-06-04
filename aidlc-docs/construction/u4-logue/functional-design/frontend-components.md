@@ -1,30 +1,30 @@
-# U4 Louge - Frontend Components
+﻿# U4 Logue - Frontend Components
 
 ## 概要
 
 U4 で実装・拡張するフロントエンドコンポーネント:
-1. **PlanterDetail（Louge 状態拡張）** - 記事表示 + Seed 折りたたみ + 開花ポーリング
-2. **LougeArticle（新規）** - Markdown 記事のレンダリング
+1. **PlanterDetail（Logue 状態拡張）** - 記事表示 + Seed 折りたたみ + 開花ポーリング
+2. **LogueArticle（新規）** - Markdown 記事のレンダリング
 3. **ContributorsSidebar（新規）** - 右サイドバーの貢献者一覧
-4. **PlanterCard（拡張）** - Louge バッジ表示の確認
+4. **PlanterCard（拡張）** - Logue バッジ表示の確認
 
 ---
 
-## FC-07: PlanterDetail（Louge 状態の拡張）
+## FC-07: PlanterDetail（Logue 状態の拡張）
 
 ### 現状（U3）
 
-- `status == "seed"` or `"sprout"` のみ対応
+- `status == "seed"` or `"seed"` のみ対応
 - Seed 本文 + LogThread + ScoreCard（右サイドバー）を表示
 - 画面下部に Log 投稿バー（Sticky Input Bar）
 
-### U4 拡張: Louge 状態の表示
+### U4 拡張: Logue 状態の表示
 
-**Figma 参照**: nodeId `213:10`（Louge Detail）
+**Figma 参照**: nodeId `213:10`（Logue Detail）
 
 ```
 +--Main Content Area------------------------------------------+
-| [Louge Badge] [投稿タイプ] · [Avatar] [Username] · [時間]    |
+| [Logue Badge] [投稿タイプ] · [Avatar] [Username] · [時間]    |
 |                                                              |
 | [タイトル]                                                    |
 |                                                              |
@@ -34,8 +34,8 @@ U4 で実装・拡張するフロントエンドコンポーネント:
 |   [本文テキスト...]                                           |
 |   [Tag] [Tag] [Tag]                                          |
 |                                                              |
-| ---- Louge 記事 ----                                         |
-| [LougeArticle コンポーネント]                                 |
+| ---- Logue 記事 ----                                         |
+| [LogueArticle コンポーネント]                                 |
 |   # パターン名                                               |
 |   ## 状況（Context）                                          |
 |   ...                                                        |
@@ -61,14 +61,14 @@ U4 で実装・拡張するフロントエンドコンポーネント:
 
 ```typescript
 // PlanterDetail 内の表示切替
-if (planter.status === "louge") {
+if (planter.status === "logue") {
   if (planter.bloom_pending) {
     // 開花処理中: BloomPendingView を表示
   } else {
-    // 開花完了: LougeView を表示
+    // 開花完了: LogueView を表示
   }
 } else {
-  // seed / sprout: 既存の SeedSproutView を表示
+  // seed / seed: 既存の SeedSeedView を表示
 }
 ```
 
@@ -76,7 +76,7 @@ if (planter.status === "louge") {
 
 ```
 +--Main Content Area------------------------------------------+
-| [Louge Badge] [投稿タイプ] · [Avatar] [Username] · [時間]    |
+| [Logue Badge] [投稿タイプ] · [Avatar] [Username] · [時間]    |
 |                                                              |
 | [タイトル]                                                    |
 |                                                              |
@@ -96,16 +96,16 @@ if (planter.status === "louge") {
 
 ---
 
-## LougeArticle（新規コンポーネント）
+## LogueArticle（新規コンポーネント）
 
 ### 責務
 
-Markdown 形式の Louge 記事をレンダリングする。
+Markdown 形式の Logue 記事をレンダリングする。
 
 ### Props
 
 ```typescript
-interface LougeArticleProps {
+interface LogueArticleProps {
   content: string;        // Markdown テキスト
   generatedAt: string;    // ISO 8601 日時
   onCopy: () => void;     // コピーボタンのコールバック
@@ -116,7 +116,7 @@ interface LougeArticleProps {
 
 - Markdown → HTML レンダリング（react-markdown 等を使用）
 - コードブロック・テーブル・リスト等の基本的な Markdown 要素に対応
-- 「Louge をコピー」ボタン: Markdown テキストをクリップボードにコピー
+- 「Logue をコピー」ボタン: Markdown テキストをクリップボードにコピー
 - コピー成功時にトースト通知（「クリップボードにコピーしました」）
 - 生成日時の表示（「2026年4月15日に開花」）
 
@@ -158,7 +158,7 @@ nodeId `213:10` の右パネル部分。
 |          金融 / 営業                                         |
 |          2 logs                                              |
 |                                                              |
-+-- Louge をコピー [Copy icon] ---+                            |
++-- Logue をコピー [Copy icon] ---+                            |
 +--------------------------------------------------------------+
 ```
 
@@ -167,7 +167,7 @@ nodeId `213:10` の右パネル部分。
 ```typescript
 interface ContributorsSidebarProps {
   contributors: Contributor[];
-  onCopyLouge: () => void;
+  onCopyLogue: () => void;
 }
 
 interface Contributor {
@@ -184,7 +184,7 @@ interface Contributor {
 
 - `GET /api/v1/planters/{id}/contributors` から取得
 - 貢献スコア降順でソート
-- Seed 投稿者にはバッジ（🌱 アイコンではなく Lucide の `Sprout` アイコン）を付与
+- Seed 投稿者にはバッジ（🌱 アイコンではなく Lucide の `Seed` アイコン）を付与
 
 ---
 
@@ -192,12 +192,12 @@ interface Contributor {
 
 ### 変更点
 
-- `status == "louge"` の場合:
-  - バッジ: `Louge`（`bg-primary` / `text-white`）
+- `status == "logue"` の場合:
+  - バッジ: `Logue`（`bg-primary` / `text-white`）
   - Progress Bar: 100% 表示（`bg-primary` フル幅）
   - Log 投稿バー: 非表示
 
-既存の PlanterCard は `louge` バッジの表示ロジックを既に持っている（U2 で実装済み）。
+既存の PlanterCard は `logue` バッジの表示ロジックを既に持っている（U2 で実装済み）。
 Progress Bar が 100% で表示されることを確認するのみ。
 
 ---
@@ -206,9 +206,9 @@ Progress Bar が 100% で表示されることを確認するのみ。
 
 | Planter 状態 | 右サイドバーの内容 |
 |---|---|
-| `seed` / `sprout` | ScoreCard（構造パーツ + 進捗バー + 統計） |
-| `louge`（bloom_pending） | ScoreCard（progress=100%）+ 「開花中...」 |
-| `louge`（完了） | ContributorsSidebar（貢献者一覧 + コピーボタン） |
+| `seed` / `seed` | ScoreCard（構造パーツ + 進捗バー + 統計） |
+| `logue`（bloom_pending） | ScoreCard（progress=100%）+ 「開花中...」 |
+| `logue`（完了） | ContributorsSidebar（貢献者一覧 + コピーボタン） |
 
 ---
 
@@ -223,5 +223,5 @@ Progress Bar が 100% で表示されることを確認するのみ。
   - 間隔: 3秒 → 5秒 → 10秒
   - `bloom_pending=false` になったら記事表示に切替
   - 60秒タイムアウト
-- **貢献者一覧取得**: `GET /api/v1/planters/{id}/contributors`（Louge 状態時のみ）
+- **貢献者一覧取得**: `GET /api/v1/planters/{id}/contributors`（Logue 状態時のみ）
 - **Log 一覧**: 既存の LogThread（読み取り専用、投稿バー非表示）

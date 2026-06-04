@@ -1,4 +1,4 @@
-# U4 Louge - Domain Entities
+﻿# U4 Logue - Domain Entities
 
 ---
 
@@ -10,14 +10,14 @@ U4 で新規カラム追加は不要。以下の既存カラムを活用する:
 
 | カラム | 型 | U4 での用途 |
 |---|---|---|
-| `status` | VARCHAR(10) | `"louge"` に遷移 |
-| `louge_content` | TEXT (nullable) | Markdown 形式の Louge 記事を保存 |
-| `louge_generated_at` | TIMESTAMPTZ (nullable) | 記事生成完了時刻 |
+| `status` | VARCHAR(10) | `"logue"` に遷移 |
+| `logue_content` | TEXT (nullable) | Markdown 形式の Logue 記事を保存 |
+| `logue_generated_at` | TIMESTAMPTZ (nullable) | 記事生成完了時刻 |
 | `progress` | FLOAT | 開花時に 1.0 に設定 |
 
 **bloom_pending の判定**（カラム追加なし、導出値）:
 ```
-bloom_pending = (status == "louge") AND (louge_content IS NULL)
+bloom_pending = (status == "logue") AND (logue_content IS NULL)
 ```
 
 ### User（拡張なし - 既存カラムを活用）
@@ -46,11 +46,11 @@ U3 でモデル定義済み。U4 で初めてレコードが書き込まれる�
 
 ### Notification
 
-U3 で定義済み。U4 で `louge_bloomed` タイプを使用。
+U3 で定義済み。U4 で `logue_bloomed` タイプを使用。
 
 | カラム | 型 | 内容 |
 |---|---|---|
-| `type` | VARCHAR(30) | `"louge_bloomed"` |
+| `type` | VARCHAR(30) | `"logue_bloomed"` |
 | `user_id` | UUID FK(users) | 通知対象ユーザー |
 | `planter_id` | UUID FK(planters) | 開花した Planter |
 | `actor_id` | UUID FK(users) nullable | NULL（システムイベント） |
@@ -67,10 +67,10 @@ U4 で新規テーブル・モデルの追加は不要。
 
 U4 で新規マイグレーションは不要。既存のスキーマで全ての要件を満たせる:
 
-- `planters.louge_content`: 既存（U1 で作成済み）
-- `planters.louge_generated_at`: 既存（U1 で作成済み）
+- `planters.logue_content`: 既存（U1 で作成済み）
+- `planters.logue_generated_at`: 既存（U1 で作成済み）
 - `insight_score_events`: 既存テーブル（U1 で作成済み）
-- `notifications` の `louge_bloomed` タイプ: CHECK 制約で許可済み
+- `notifications` の `logue_bloomed` タイプ: CHECK 制約で許可済み
 
 ---
 
@@ -83,9 +83,9 @@ U4 で新規マイグレーションは不要。既存のスキーマで全て�
 ```python
 class PlanterDetailResponse(BaseModel):
     # ... 既存フィールド ...
-    louge_content: str | None       # Markdown 記事（null = 未生成）
-    louge_generated_at: str | None  # ISO 8601 日時
-    bloom_pending: bool             # 導出: status=="louge" and louge_content is None
+    logue_content: str | None       # Markdown 記事（null = 未生成）
+    logue_generated_at: str | None  # ISO 8601 日時
+    bloom_pending: bool             # 導出: status=="logue" and logue_content is None
 ```
 
 ### ContributorResponse（新規）

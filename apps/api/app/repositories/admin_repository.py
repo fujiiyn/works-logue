@@ -1,4 +1,4 @@
-"""U7 Step 5: AdminRepository.
+﻿"""U7 Step 5: AdminRepository.
 
 Thin wrapper over UserRepository / PlanterRepository, with admin-only
 aggregation and search. SQL is portable across PostgreSQL and the SQLite
@@ -65,13 +65,13 @@ class AdminRepository:
                 Planter.created_at >= today_start,
             )
         )
-        # MVP: pending_louge_count := all sprouts (ignoring U4 maturity threshold).
+        # MVP: pending_logue_count := all seeds (ignoring U4 maturity threshold).
         pending_q = (
             select(func.count())
             .select_from(Planter)
             .where(
                 Planter.deleted_at.is_(None),
-                Planter.status == "sprout",
+                Planter.status == "seed",
             )
         )
 
@@ -84,7 +84,7 @@ class AdminRepository:
             "total_users": int(total_users),
             "total_planters": int(total_planters),
             "new_planters_today": int(new_today),
-            "pending_louge_count": int(pending),
+            "pending_logue_count": int(pending),
         }
 
     # ---- Users --------------------------------------------------------------
@@ -200,7 +200,7 @@ class AdminRepository:
         if status == "all":
             base = base.where(
                 Planter.deleted_at.is_(None),
-                Planter.status.in_(["seed", "sprout", "louge"]),
+                Planter.status.in_(["seed", "logue"]),
             )
         elif status == "deleted":
             base = base.where(Planter.deleted_at.is_not(None))
@@ -210,7 +210,7 @@ class AdminRepository:
                 Planter.status == "archived",
             )
         else:
-            # 'seed' / 'sprout' / 'louge'
+            # 'seed' / 'logue'
             base = base.where(
                 Planter.deleted_at.is_(None),
                 Planter.status == status,
@@ -278,7 +278,7 @@ class AdminRepository:
     async def restore_planter(self, planter: Planter) -> None:
         if planter.status != "archived":
             raise ValueError("Planter is not archived")
-        # MVP: restore always lands on 'seed'; subsequent Logs auto-promote to sprout.
+        # Restore always lands back in 'seed'.
         planter.status = "seed"
         planter.updated_at = datetime.now(UTC)
         await self.db.flush()

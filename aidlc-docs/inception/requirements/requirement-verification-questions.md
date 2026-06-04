@@ -1,4 +1,4 @@
-# Works Logue — 要件確認質問
+﻿# Works Logue — 要件確認質問
 
 `docs/business-plan.md` から事業概要・ドメイン知識は把握済みです。
 技術実装の詳細を確認するため、以下の質問にお答えください。
@@ -10,7 +10,7 @@
 **MVP（最初の開発イテレーション）のスコープをどこまで設定しますか？**
 
 A) 最小限（Seed投稿 + Log投稿 + 基本的な認証のみ）
-B) 標準（A + Sproutステータス表示 + Louge開花 + ユーザープロフィール）
+B) 標準（A + Seedステータス表示 + Logue開花 + ユーザープロフィール）
 C) 広め（B + インサイトスコア + バッジ + Fork機能）
 D) Other (please describe after [Answer]: tag below)
 
@@ -42,7 +42,7 @@ D) Other (please describe after [Answer]: tag below)
 ---
 
 ## Question 4
-**Louge開花の判定ロジックについて、初期実装の方針を教えてください。**
+**Logue開花の判定ロジックについて、初期実装の方針を教えてください。**
 
 A) シンプルな閾値判定（例：Log数 >= 10 かつ 参加者数 >= 3）
 B) AI（LLM）による品質評価を含む複合スコアリング

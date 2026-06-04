@@ -1,17 +1,17 @@
-# U3 Log & Score - Code Generation Plan
+﻿# U3 Log & Score - Code Generation Plan
 
 ## Unit Context
 
 - **Unit**: U3 Log & Score
 - **Purpose**: Log 投稿、スコアエンジン（条件A/B）、Planter 状態遷移、AI ファシリテートの実装。成長サイクルのコア
 - **Dependencies (U1 Foundation, U2 Seed)**:
-  - DB schema: logs, louge_score_snapshots, insight_score_events, planters, users, planter_follows, notifications
+  - DB schema: logs, logue_score_snapshots, insight_score_events, planters, users, planter_follows, notifications
   - Auth: get_current_user, get_optional_user
-  - Models: Log, LougeScoreSnapshot, InsightScoreEvent, Planter, User, Notification
+  - Models: Log, LogueScoreSnapshot, InsightScoreEvent, Planter, User, Notification
   - Repositories: PlanterRepository, FollowRepository
   - Infra: VertexAIClient (config scaffold のみ、実装は U3)
   - Frontend: PlanterDetail page, PlanterCard, ProgressBar, RightSidebarContext
-- **After this unit**: U4 Louge
+- **After this unit**: U4 Logue
 
 ## Reference Documents
 
@@ -35,7 +35,7 @@
 
 - [x] `supabase/migrations/00005_u3_log_score.sql`
   - `app_settings` テーブル作成 (key VARCHAR(100) PK, value JSONB, updated_at)
-  - `louge_score_snapshots` に `structure_parts JSONB` カラム追加
+  - `logue_score_snapshots` に `structure_parts JSONB` カラム追加
   - `app_settings` にスコア設定の初期データ投入 (min_contributors=3, min_logs=5, bloom_threshold=0.7, bud_threshold=0.8)
 - [x] `apps/api/app/models/app_setting.py` -- AppSetting モデル追加
 - [x] `apps/api/app/models/__init__.py` 更新
@@ -80,7 +80,7 @@
 #### Step 4: ScoreRepository, SettingsRepository (TDD)
 
 - [x] **Test**: `apps/api/app/tests/test_score_repository.py`
-  - create_snapshot: LougeScoreSnapshot 作成成功
+  - create_snapshot: LogueScoreSnapshot 作成成功
   - create_snapshot: structure_parts JSONB 保存確認
   - get_latest_snapshot: 最新スナップショット取得
   - get_latest_snapshot: 存在しない場合 None
@@ -157,7 +157,7 @@
   - execute: 条件A + 条件B 実行（最低参加ライン到達）
   - execute: 条件B >= bloom_threshold で passed_maturity=true
   - execute: 条件B < bloom_threshold + ファシリテート条件で AI Log 投稿
-  - execute: LougeScoreSnapshot が正しく保存される
+  - execute: LogueScoreSnapshot が正しく保存される
   - execute: Planter の progress が正しく計算される
   - execute: エラー時に例外を吸収しログ出力（Log 投稿自体は成功済み）
 - [x] **Impl**: `apps/api/app/pipelines/score_pipeline.py`
@@ -177,12 +177,12 @@
   - POST /planters/{id}/logs: 401 未認証
   - POST /planters/{id}/logs: 403 BAN ユーザー
   - POST /planters/{id}/logs: 404 Planter not found
-  - POST /planters/{id}/logs: 400 planter_already_bloomed (status=louge)
+  - POST /planters/{id}/logs: 400 planter_already_bloomed (status=logue)
   - POST /planters/{id}/logs: 400 invalid_parent_log (存在しない)
   - POST /planters/{id}/logs: 400 nested_reply_not_allowed (ネスト2段)
   - POST /planters/{id}/logs: 422 body empty / too long
   - POST /planters/{id}/logs: log_count, contributor_count 更新確認
-  - POST /planters/{id}/logs: seed -> sprout 遷移確認
+  - POST /planters/{id}/logs: seed -> seed 遷移確認
   - POST /planters/{id}/logs: 自動フォロー確認
   - GET /planters/{id}/logs: 200 + CursorPaginatedResponse (古い順)
   - GET /planters/{id}/logs: 返信 replies のネスト確認
@@ -250,7 +250,7 @@
   - テキスト入力（自動拡張、最大5行）
   - 送信ボタン（空テキスト時 disabled）
   - 未ログイン時: 「ログインして参加する」ボタン
-  - Planter status='louge' 時: 非表示
+  - Planter status='logue' 時: 非表示
   - 返信モード: parent_log_id を保持、返信先の表示
   - POST /api/v1/planters/{id}/logs 呼び出し
   - 投稿後: onLogCreated コールバックでスコア polling 開始
@@ -261,7 +261,7 @@
 - [x] `apps/web/components/planter/ScoreCard.tsx` に抽出（現在は planter-detail-client.tsx にインライン）
   - 構造パーツチェックリスト追加 (Context/Problem/Solution/Name)
   - スコア計算中インジケーター（scorePending=true 時にスピナー + テキスト）
-  - Louge/Sprout/Seed 状態別の表示ロジック
+  - Logue/Seed/Seed 状態別の表示ロジック
   - data-testid 付与
 
 #### Step 18: PlanterDetail ページ拡張
@@ -279,7 +279,7 @@
 #### Step 19: PlanterCard 拡張
 
 - [x] `apps/web/components/planter/PlanterCard.tsx` 確認済み（変更不要）
-  - Sprout 状態のバッジ表示: 既存の STATUS_LABELS で対応済み
+  - Seed 状態のバッジ表示: 既存の STATUS_LABELS で対応済み
   - progress バーの実値連動: ProgressBar コンポーネントで対応済み
 
 ---

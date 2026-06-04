@@ -1,4 +1,4 @@
-"""U7 Step 18: BAN guard contract tests.
+﻿"""U7 Step 18: BAN guard contract tests.
 
 These tests pin Functional Design §7 as a contract: the BAN gate lives in
 `get_current_user` (`apps/api/app/dependencies.py`), so individual handlers

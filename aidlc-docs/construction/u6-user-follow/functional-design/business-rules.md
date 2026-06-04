@@ -1,4 +1,4 @@
-# U6 User & Follow — Business Rules
+﻿# U6 User & Follow — Business Rules
 
 ## プロフィール
 
@@ -74,9 +74,9 @@
 - フォローしていない状態でアンフォローしても 204（冪等）
 - 自動フォローされた Planter も手動でアンフォロー可能
 
-### BR-F06: Planter フォロー UI（Seed/Louge 詳細）
-- Seed/Sprout 詳細: stats 行で `[X logs] [Y contributors] [+ フォロー]` の順に等間隔（gap-3）で並べる
-- Louge 詳細: 右サイドバーの貢献者パネル下部の stats 行で `[X logs · Y contributors] [+ フォロー]` を等間隔（gap-3）で並べる
+### BR-F06: Planter フォロー UI（Seed/Logue 詳細）
+- Seed/Seed 詳細: stats 行で `[X logs] [Y contributors] [+ フォロー]` の順に等間隔（gap-3）で並べる
+- Logue 詳細: 右サイドバーの貢献者パネル下部の stats 行で `[X logs · Y contributors] [+ フォロー]` を等間隔（gap-3）で並べる
 - スタイル: アウトライン（teal ボーダー + teal テキスト、塗りなし）。フォロー中は薄い teal 背景でアクティブ感を示す
 - ホバー時に色や文言を切り替えない（静的に「+ フォロー」/「フォロー中」のみ）
 - アンフォローは確認ダイアログを出さず即座に解除（楽観更新）
@@ -88,7 +88,7 @@
 ## ナビゲーション
 
 ### BR-N01: ユーザー名 → プロフィール遷移
-- すべての投稿者表示（Planter カード、Seed/Louge 詳細ヘッダー、Log 一覧、貢献者サイドバー、フォロー一覧モーダル）でユーザー名はクリック可能
+- すべての投稿者表示（Planter カード、Seed/Logue 詳細ヘッダー、Log 一覧、貢献者サイドバー、フォロー一覧モーダル）でユーザー名はクリック可能
 - 遷移先: `/user/{id}`
 - ホバー時に下線でクリック可能を示す
 - AI 生成ログ（is_ai_generated=true）はリンク化しない
@@ -114,13 +114,13 @@
 
 ### BR-H01: Seed一覧
 - 対象ユーザーが author の Planter を時系列降順で表示
-- 全状態（seed/sprout/louge）を含む
+- 全状態（seed/seed/logue）を含む
 
 ### BR-H02: Log一覧
 - 対象ユーザーが投稿した Log を時系列降順で表示
 - 各 Log に紐づく Planter のタイトル・状態を付与
 
-### BR-H03: 参加Louge
+### BR-H03: 参加Logue
 - Seed投稿者として開花した Planter + Log貢献者として開花した Planter
 - 重複排除、bloomed_at 降順
-- status = 'louge' のもののみ
+- status = 'logue' のもののみ

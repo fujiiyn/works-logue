@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -23,8 +23,8 @@ def mock_ai_facilitator():
 
 
 @pytest.fixture
-def mock_louge_generator():
-    with patch("app.pipelines.score_pipeline.LougeGenerator") as mock_cls:
+def mock_logue_generator():
+    with patch("app.pipelines.score_pipeline.LogueGenerator") as mock_cls:
         mock_instance = AsyncMock()
         mock_cls.return_value = mock_instance
         yield mock_instance
@@ -54,7 +54,7 @@ def _make_planter_mock(
     planter_id=None,
     title="Test Seed",
     body="Test body",
-    status="sprout",
+    status="seed",
     log_count=5,
     contributor_count=3,
     structure_fulfillment=0.0,
@@ -282,9 +282,9 @@ class TestScorePipelineExecute:
         await pipeline.execute(uuid.uuid4(), uuid.uuid4(), mock_db_session)
 
     async def test_bloom_triggered_when_maturity_passed(
-        self, mock_score_engine, mock_ai_facilitator, mock_louge_generator, mock_session_factory, mock_db_session
+        self, mock_score_engine, mock_ai_facilitator, mock_logue_generator, mock_session_factory, mock_db_session
     ):
-        """execute() should trigger LougeGenerator.bloom() when passed_maturity=True."""
+        """execute() should trigger LogueGenerator.bloom() when passed_maturity=True."""
         from app.pipelines.score_pipeline import ScorePipeline
 
         planter = _make_planter_mock(log_count=5, contributor_count=3)
@@ -311,15 +311,15 @@ class TestScorePipelineExecute:
 
         await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
 
-        mock_louge_generator.bloom.assert_called_once_with(planter.id, mock_db_session)
+        mock_logue_generator.bloom.assert_called_once_with(planter.id, mock_db_session)
 
-        # Verify planter was updated with status="louge" and progress=1.0
+        # Verify planter was updated with status="logue" and progress=1.0
         update_call = pipeline._update_planter.call_args
-        assert update_call[1]["status"] == "louge"
+        assert update_call[1]["status"] == "logue"
         assert update_call[1]["progress"] == 1.0
 
     async def test_bloom_error_does_not_propagate(
-        self, mock_score_engine, mock_ai_facilitator, mock_louge_generator, mock_session_factory, mock_db_session
+        self, mock_score_engine, mock_ai_facilitator, mock_logue_generator, mock_session_factory, mock_db_session
     ):
         """execute() should catch bloom errors without propagating."""
         from app.pipelines.score_pipeline import ScorePipeline
@@ -335,7 +335,7 @@ class TestScorePipelineExecute:
             scores={"comprehensiveness": 0.9, "diversity": 0.9, "counterarguments": 0.9, "specificity": 0.9},
             total=0.9,
         )
-        mock_louge_generator.bloom.side_effect = Exception("Vertex AI down during bloom")
+        mock_logue_generator.bloom.side_effect = Exception("Vertex AI down during bloom")
 
         pipeline = ScorePipeline(mock_session_factory)
         pipeline._get_planter = AsyncMock(return_value=planter)
@@ -350,9 +350,9 @@ class TestScorePipelineExecute:
         # Should not raise
         await pipeline.execute(planter.id, uuid.uuid4(), mock_db_session)
 
-        # Status should still be set to louge (committed before bloom attempt)
+        # Status should still be set to logue (committed before bloom attempt)
         update_call = pipeline._update_planter.call_args
-        assert update_call[1]["status"] == "louge"
+        assert update_call[1]["status"] == "logue"
 
 
 class TestWispExclusion:

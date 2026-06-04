@@ -1,4 +1,4 @@
-# U5 Feed & Search — Domain Entities
+﻿# U5 Feed & Search — Domain Entities
 
 ## 新規エンティティ
 
@@ -11,7 +11,7 @@
 | メソッド | 概要 |
 |---|---|
 | `list_trending_candidates(window_days, limit)` | 直近 N 日間にアクティブな Planter を取得 |
-| `list_bloomed(limit, cursor)` | `status='louge'` を `louge_generated_at DESC` で取得 |
+| `list_bloomed(limit, cursor)` | `status='logue'` を `logue_generated_at DESC` で取得 |
 | `search(keyword?, tag_ids[]?, status?, limit, cursor)` | 複合検索クエリ |
 | `get_view_counts(planter_ids, since)` | planter_views から集計 |
 
@@ -36,8 +36,8 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX idx_planters_title_trgm ON planters USING gin (title gin_trgm_ops) WHERE deleted_at IS NULL;
 
--- louge_generated_at での並び替え用
-CREATE INDEX idx_planters_louge_generated_at ON planters (louge_generated_at DESC) WHERE status = 'louge' AND deleted_at IS NULL;
+-- logue_generated_at での並び替え用
+CREATE INDEX idx_planters_logue_generated_at ON planters (logue_generated_at DESC) WHERE status = 'logue' AND deleted_at IS NULL;
 ```
 
 ### planter_views テーブル

@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 from base64 import b64decode, b64encode
 from datetime import datetime
 
@@ -32,8 +32,8 @@ class PlanterResponse(BaseModel):
     maturity_score: float | None
     structure_parts: StructurePartsResponse | None
     bloom_threshold: float
-    louge_content: str | None = None
-    louge_generated_at: datetime | None = None
+    logue_content: str | None = None
+    logue_generated_at: datetime | None = None
     bloom_pending: bool = False
     is_following: bool = False
     created_at: datetime

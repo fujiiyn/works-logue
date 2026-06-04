@@ -1,4 +1,4 @@
-# End-to-End Test Instructions
+﻿# End-to-End Test Instructions
 
 apps/web/e2e/ に置かれた Playwright スペック実行手順。Next.js（Server Component 含む）と FastAPI を実通信させ、ブラウザ越しの主要フローを検証する。
 
@@ -20,7 +20,7 @@ apps/web/e2e/ に置かれた Playwright スペック実行手順。Next.js（Se
 
 合計: **13 シナリオ**
 
-> 核心フロー（Seed → Log → Louge）の E2E 自動化は MVP 範囲外。手動統合テストでカバー。
+> 核心フロー（Seed → Log → Logue）の E2E 自動化は MVP 範囲外。手動統合テストでカバー。
 
 ---
 

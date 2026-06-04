@@ -1,4 +1,4 @@
-"""U7 Phase 6: /api/v1/admin/* endpoints.
+﻿"""U7 Phase 6: /api/v1/admin/* endpoints.
 
 All endpoints in this module are gated by `require_admin`, which collapses
 authentication / authorization failures to 404 to keep the existence of
@@ -213,7 +213,7 @@ async def list_planters(
     db: Annotated[AsyncSession, Depends(get_db)],
     q: Annotated[str | None, Query(max_length=200)] = None,
     status: Annotated[
-        Literal["all", "seed", "sprout", "louge", "archived", "deleted"], Query()
+        Literal["all", "seed", "logue", "archived", "deleted"], Query()
     ] = "all",
     page: Annotated[int, Query(ge=1)] = 1,
     per_page: Annotated[int, Query(ge=1)] = 20,

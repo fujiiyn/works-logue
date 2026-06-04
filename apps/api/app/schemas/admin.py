@@ -1,4 +1,4 @@
-"""U7 Admin: Pydantic schemas for /api/v1/admin/* endpoints.
+﻿"""U7 Admin: Pydantic schemas for /api/v1/admin/* endpoints.
 
 These schemas describe the wire format of the admin API. AdminRepository
 returns plain dicts that match these models field-by-field; the router
@@ -19,7 +19,7 @@ class AdminStatsResponse(BaseModel):
     total_users: int
     total_planters: int
     new_planters_today: int
-    pending_louge_count: int
+    pending_logue_count: int
 
 
 # ---- Users ------------------------------------------------------------------
