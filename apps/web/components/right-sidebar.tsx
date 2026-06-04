@@ -13,7 +13,12 @@ export function RightSidebar() {
       className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-[300px] shrink-0 py-6 pr-6 xl:block"
       data-testid="right-sidebar"
     >
-      {content ?? <AboutCard />}
+      {content ?? (
+        <>
+          <AboutCard />
+          <SiteRulesFooter />
+        </>
+      )}
     </aside>
   );
 }
@@ -71,6 +76,41 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="flex flex-col">
       <span className="text-heading-m text-primary">{value}</span>
       <span className="text-caption text-text-muted">{label}</span>
+    </div>
+  );
+}
+
+const FOOTER_YEAR = new Date().getFullYear();
+
+function SiteRulesFooter() {
+  return (
+    <div
+      className="mt-4 px-1 text-caption leading-relaxed text-text-secondary"
+      data-testid="site-rules-footer"
+    >
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <Link
+          href="/rules/privacy-policy"
+          className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
+        >
+          プライバシーポリシー
+        </Link>
+        <span aria-hidden="true">·</span>
+        <Link
+          href="/rules/terms-of-service"
+          className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
+        >
+          利用規約
+        </Link>
+        <span aria-hidden="true">·</span>
+        <Link
+          href="/rules/contents-policy"
+          className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
+        >
+          コンテンツポリシー
+        </Link>
+      </div>
+      <div className="mt-1 text-text-muted">Works Logue © {FOOTER_YEAR}</div>
     </div>
   );
 }
