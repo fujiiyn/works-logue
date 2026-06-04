@@ -22,6 +22,7 @@ function SeedFormSkeleton() {
       </div>
 
       {/* Title input */}
+      <Skeleton className="mb-2 h-4 w-20" />
       <Skeleton className="mb-4 h-[42px] rounded-md" />
 
       {/* Body textarea */}

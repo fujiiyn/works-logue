@@ -130,6 +130,12 @@ export function SeedForm() {
 
       {/* Title */}
       <div className="mb-4">
+        <label
+          htmlFor="seed-title"
+          className="mb-2 block text-body-m font-semibold text-primary-dark"
+        >
+          タイトル *
+        </label>
         <input
           id="seed-title"
           type="text"
