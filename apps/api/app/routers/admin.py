@@ -192,6 +192,7 @@ async def _planter_to_admin_item(
     return AdminPlanterItem(
         id=planter.id,
         title=planter.title,
+        logue_title=planter.logue_title,
         status=planter.status,
         seed_type_name=st_name,
         author=AdminAuthorSummary(
@@ -286,10 +287,17 @@ async def delete_planter(
     planter = await _load_planter_or_404(db, planter_id)
 
     # BR-A12 / D7: trim both sides, then strict (case-sensitive) equality.
-    if body.confirm_title.strip() != planter.title.strip():
+    # Compare against the displayed title — Logue planters show `logue_title`
+    # in the admin UI, so the confirmation field must match what the admin sees.
+    expected_title = (
+        planter.logue_title
+        if planter.status == "logue" and planter.logue_title
+        else planter.title
+    )
+    if body.confirm_title.strip() != expected_title.strip():
         raise HTTPException(status_code=400, detail="タイトルが一致しません")
 
-    title_for_log = planter.title  # capture before soft-delete
+    title_for_log = expected_title  # capture before soft-delete
 
     repo = AdminRepository(db)
     await repo.soft_delete_planter(planter)

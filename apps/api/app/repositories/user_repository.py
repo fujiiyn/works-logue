@@ -54,7 +54,8 @@ class UserRepository:
         result = await self.db.execute(
             select(
                 InsightScoreEvent.planter_id,
-                Planter.title.label("planter_title"),
+                Planter.title.label("seed_title"),
+                Planter.logue_title.label("logue_title"),
                 Planter.status.label("planter_status"),
                 func.sum(InsightScoreEvent.score_delta).label("total_score"),
             )
@@ -64,7 +65,12 @@ class UserRepository:
                 Planter.status == "logue",
                 Planter.deleted_at.is_(None),
             )
-            .group_by(InsightScoreEvent.planter_id, Planter.title, Planter.status)
+            .group_by(
+                InsightScoreEvent.planter_id,
+                Planter.title,
+                Planter.logue_title,
+                Planter.status,
+            )
             .order_by(func.sum(InsightScoreEvent.score_delta).desc())
             .limit(1)
         )
@@ -73,7 +79,7 @@ class UserRepository:
             return None
         return {
             "planter_id": row.planter_id,
-            "planter_title": row.planter_title,
+            "planter_title": row.logue_title or row.seed_title,
             "planter_status": row.planter_status,
             "total_score": row.total_score,
         }
@@ -217,7 +223,9 @@ class UserRepository:
                 Log.body,
                 Log.created_at,
                 Log.planter_id,
-                Planter.title.label("planter_title"),
+                func.coalesce(Planter.logue_title, Planter.title).label(
+                    "planter_title"
+                ),
                 Planter.status.label("planter_status"),
             )
             .join(Planter, Log.planter_id == Planter.id)

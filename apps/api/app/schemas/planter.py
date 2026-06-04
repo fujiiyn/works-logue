@@ -32,6 +32,7 @@ class PlanterResponse(BaseModel):
     maturity_score: float | None
     structure_parts: StructurePartsResponse | None
     bloom_threshold: float
+    logue_title: str | None = None
     logue_content: str | None = None
     logue_generated_at: datetime | None = None
     bloom_pending: bool = False
@@ -52,6 +53,7 @@ class PlanterCardResponse(BaseModel):
     contributor_count: int
     progress: float
     view_count: int = 0
+    logue_title: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

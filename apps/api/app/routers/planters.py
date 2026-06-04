@@ -67,6 +67,7 @@ def _build_planter_response(
             maturity_score=planter.maturity_score,
             structure_parts=structure_parts,
             bloom_threshold=bloom_threshold,
+            logue_title=planter.logue_title,
             logue_content=planter.logue_content,
             logue_generated_at=planter.logue_generated_at,
             bloom_pending=bloom_pending,
@@ -82,6 +83,7 @@ def _build_planter_response(
         log_count=planter.log_count,
         contributor_count=planter.contributor_count,
         progress=planter.progress,
+        logue_title=planter.logue_title,
         created_at=planter.created_at,
     )
 

@@ -25,13 +25,6 @@ export function LogueArticle({ content, generatedAt }: LogueArticleProps) {
       <div className="prose-logue mb-6 max-w-none" data-testid="logue-article-content">
         <ReactMarkdown
           components={{
-            h1: ({ children }) => (
-              <div className="mb-4 rounded-md bg-primary-light-bg px-3 py-2">
-                <span className="text-[13px] font-medium text-primary">
-                  パターン名：{children}
-                </span>
-              </div>
-            ),
             h2: ({ children }) => (
               <h3 className="mb-2 mt-5 text-[14px] font-bold text-primary">
                 {children}

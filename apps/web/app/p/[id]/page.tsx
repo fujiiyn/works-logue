@@ -23,6 +23,7 @@ interface PlanterDetail {
     name: boolean;
   } | null;
   bloom_threshold: number;
+  logue_title: string | null;
   logue_content: string | null;
   logue_generated_at: string | null;
   bloom_pending: boolean;

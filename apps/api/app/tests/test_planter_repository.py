@@ -396,17 +396,24 @@ class TestUpdateContributorCount:
 
 class TestUpdateLogueContent:
     async def test_update_logue_content(self, repo, test_user, seed_type, db_session):
-        """update_logue_content() should set logue_content and logue_generated_at."""
+        """update_logue_content() should set logue_title, content, and timestamp."""
         planter = Planter(
             user_id=test_user.id, title="Logue", body="Body", seed_type_id=seed_type.id,
             status="logue",
         )
         created = await repo.create(planter)
+        assert created.logue_title is None
         assert created.logue_content is None
         assert created.logue_generated_at is None
 
         now = datetime.now(timezone.utc)
-        await repo.update_logue_content(created.id, "# Article", now)
+        await repo.update_logue_content(
+            created.id,
+            content="## 状況（Context）\nBody",
+            logue_title="開花パターン",
+            generated_at=now,
+        )
         await db_session.refresh(created)
-        assert created.logue_content == "# Article"
+        assert created.logue_title == "開花パターン"
+        assert created.logue_content == "## 状況（Context）\nBody"
         assert created.logue_generated_at is not None

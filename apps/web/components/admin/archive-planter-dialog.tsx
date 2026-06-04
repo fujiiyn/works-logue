@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Dialog } from "@/components/common/dialog";
 import { adminApi, type AdminPlanterItem } from "@/lib/api-client";
+import { getDisplayTitle } from "@/lib/planter-display";
 
 interface Props {
   planter: AdminPlanterItem | null;
@@ -64,7 +65,7 @@ export function ArchivePlanterDialog({
         </>
       }
     >
-      <p className="text-body-s text-primary-dark">「{planter.title}」</p>
+      <p className="text-body-s text-primary-dark">「{getDisplayTitle(planter)}」</p>
       {error ? (
         <p className="mt-2 text-body-s text-[#a6322c]">{error}</p>
       ) : null}

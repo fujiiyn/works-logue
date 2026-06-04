@@ -22,6 +22,7 @@ class Planter(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     status: Mapped[str] = mapped_column(
         String(10), nullable=False, default="seed", server_default="'seed'"
     )
+    logue_title: Mapped[str | None] = mapped_column(String(200), nullable=True)
     logue_content: Mapped[str | None] = mapped_column(nullable=True)
     logue_generated_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True

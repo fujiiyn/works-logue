@@ -1,5 +1,6 @@
 ﻿import logging
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from sqlalchemy import select
@@ -15,6 +16,15 @@ from app.repositories.planter_repository import PlanterRepository
 from app.services.insight_calculator import InsightScoreCalculator
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class GeneratedLogue:
+    content: str
+    pattern_name: str
+
+
+DEFAULT_PATTERN_NAME = "パターン名"
 
 LOGUE_SYSTEM_INSTRUCTION = """\
 あなたはビジネスナレッジの編纂者です。
@@ -51,7 +61,7 @@ class LogueGenerator:
         planter: Planter,
         logs: list[Log],
         users_map: dict[uuid.UUID, User],
-    ) -> str | None:
+    ) -> GeneratedLogue | None:
         logs_text = self._build_logs_text(logs, users_map)
         prompt = (
             f"## Seed\nタイトル: {planter.title}\n本文: {planter.body}\n\n"
@@ -62,7 +72,11 @@ class LogueGenerator:
             data = await self.client.generate_json(
                 prompt, system_instruction=LOGUE_SYSTEM_INSTRUCTION
             )
-            return self._build_markdown(data)
+            pattern_name = str(data.get("pattern_name") or "").strip() or DEFAULT_PATTERN_NAME
+            return GeneratedLogue(
+                content=self._build_markdown(data),
+                pattern_name=pattern_name,
+            )
         except Exception:
             logger.error("Logue generation failed", exc_info=True)
             return None
@@ -74,15 +88,17 @@ class LogueGenerator:
 
         logs, users_map = await self._get_logs_with_users(planter_id, db)
 
-        content = await self.generate(planter, logs, users_map)
-        if content is None:
+        result = await self.generate(planter, logs, users_map)
+        if result is None:
             logger.warning("Logue generation failed for planter=%s, logue_content remains None", planter_id)
             return
 
-        await self._update_logue_content(planter_id, content, db)
+        await self._update_logue_content(
+            planter_id, result.content, result.pattern_name, db
+        )
 
         calculator = InsightScoreCalculator()
-        events = await calculator.calculate(planter_id, content, db)
+        events = await calculator.calculate(planter_id, result.content, db)
         await calculator.apply(events, db)
 
         await self._create_notifications(planter_id, planter.user_id, logs, db)
@@ -104,8 +120,6 @@ class LogueGenerator:
 
     def _build_markdown(self, data: dict) -> str:
         sections = [
-            f"# {data.get('pattern_name', 'パターン名')}",
-            "",
             "## 状況（Context）",
             data.get("context", ""),
             "",
@@ -153,11 +167,18 @@ class LogueGenerator:
         return logs, users_map
 
     async def _update_logue_content(
-        self, planter_id: uuid.UUID, content: str, db: AsyncSession
+        self,
+        planter_id: uuid.UUID,
+        content: str,
+        logue_title: str,
+        db: AsyncSession,
     ) -> None:
         repo = PlanterRepository(db)
         await repo.update_logue_content(
-            planter_id, content, datetime.now(timezone.utc)
+            planter_id,
+            content=content,
+            logue_title=logue_title,
+            generated_at=datetime.now(timezone.utc),
         )
 
     async def _create_notifications(

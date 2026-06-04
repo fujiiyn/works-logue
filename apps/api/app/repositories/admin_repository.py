@@ -217,7 +217,10 @@ class AdminRepository:
             )
 
         if q is not None and q.strip():
-            base = base.where(Planter.title.ilike(_q_pattern(q)))
+            pattern = _q_pattern(q)
+            base = base.where(
+                Planter.title.ilike(pattern) | Planter.logue_title.ilike(pattern)
+            )
 
         total_q = select(func.count()).select_from(base.subquery())
         total = int((await self.db.execute(total_q)).scalar_one())
@@ -252,6 +255,7 @@ class AdminRepository:
                 {
                     "id": p.id,
                     "title": p.title,
+                    "logue_title": p.logue_title,
                     "status": p.status,
                     "seed_type_name": st_names[p.seed_type_id],
                     "author": {

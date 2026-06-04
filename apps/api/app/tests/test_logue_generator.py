@@ -42,8 +42,8 @@ def _make_user_mock(user_id=None, display_name="Test User"):
 
 class TestLogueGeneratorGenerate:
     async def test_generate_returns_markdown(self):
-        """generate() should call Vertex AI and return Markdown article."""
-        from app.services.logue_generator import LogueGenerator
+        """generate() should call Vertex AI and return content + pattern_name."""
+        from app.services.logue_generator import GeneratedLogue, LogueGenerator
 
         vertex_response = {
             "pattern_name": "0→1営業責任者の泥臭さ要件",
@@ -68,15 +68,18 @@ class TestLogueGeneratorGenerate:
 
             result = await generator.generate(planter, logs, users_map)
 
-        assert result is not None
-        assert "0→1営業責任者の泥臭さ要件" in result
-        assert "## 状況（Context）" in result
-        assert "## 問題（Problem）" in result
-        assert "## 解決策（Solution）" in result
-        assert "## 反論・例外（Counterarguments）" in result
-        assert "## 出典" in result
-        assert "@田中" in result
-        assert "@佐藤" in result
+        assert isinstance(result, GeneratedLogue)
+        assert result.pattern_name == "0→1営業責任者の泥臭さ要件"
+        # Pattern name is now a first-class column, not an h1 inside the body.
+        assert "# 0→1営業責任者の泥臭さ要件" not in result.content
+        assert result.content.lstrip().startswith("## ")
+        assert "## 状況（Context）" in result.content
+        assert "## 問題（Problem）" in result.content
+        assert "## 解決策（Solution）" in result.content
+        assert "## 反論・例外（Counterarguments）" in result.content
+        assert "## 出典" in result.content
+        assert "@田中" in result.content
+        assert "@佐藤" in result.content
 
     async def test_generate_footnote_format(self):
         """generate() should use footnote format for references."""
@@ -104,8 +107,34 @@ class TestLogueGeneratorGenerate:
                 {},
             )
 
-        assert "[1] @田中" in result
-        assert "[2] @佐藤" in result
+        assert result is not None
+        assert "[1] @田中" in result.content
+        assert "[2] @佐藤" in result.content
+
+    async def test_generate_falls_back_when_pattern_name_missing(self):
+        """generate() should fall back to a default name if AI omits pattern_name."""
+        from app.services.logue_generator import DEFAULT_PATTERN_NAME, LogueGenerator
+
+        vertex_response = {
+            "pattern_name": "",
+            "context": "x",
+            "problem": "y",
+            "solution": "z",
+            "counterarguments": "w",
+            "references": [],
+        }
+        generator = LogueGenerator()
+        with patch.object(generator, "client") as mock_client:
+            mock_client.generate_json = AsyncMock(return_value=vertex_response)
+
+            result = await generator.generate(
+                _make_planter_mock(),
+                [_make_log_mock()],
+                {},
+            )
+
+        assert result is not None
+        assert result.pattern_name == DEFAULT_PATTERN_NAME
 
     async def test_generate_returns_none_on_vertex_error(self):
         """generate() should return None when Vertex AI fails."""
@@ -127,7 +156,7 @@ class TestLogueGeneratorGenerate:
 class TestLogueGeneratorBloom:
     async def test_bloom_full_flow(self):
         """bloom() should generate article, update planter, calculate insight scores, and create notification."""
-        from app.services.logue_generator import LogueGenerator
+        from app.services.logue_generator import GeneratedLogue, LogueGenerator
 
         planter_id = uuid.uuid4()
         user_id = uuid.uuid4()
@@ -139,7 +168,11 @@ class TestLogueGeneratorBloom:
         db = AsyncMock()
 
         generator = LogueGenerator()
-        generator.generate = AsyncMock(return_value="# Test Article\n\nContent here")
+        generated = GeneratedLogue(
+            content="## 状況（Context）\nContent here",
+            pattern_name="開花パターン",
+        )
+        generator.generate = AsyncMock(return_value=generated)
         generator._get_planter = AsyncMock(return_value=planter)
         generator._get_logs_with_users = AsyncMock(return_value=(logs, users_map))
         generator._update_logue_content = AsyncMock()
@@ -153,7 +186,9 @@ class TestLogueGeneratorBloom:
             await generator.bloom(planter_id, db)
 
         generator.generate.assert_called_once()
-        generator._update_logue_content.assert_called_once()
+        generator._update_logue_content.assert_called_once_with(
+            planter_id, generated.content, generated.pattern_name, db
+        )
         mock_calculator.calculate.assert_called_once()
         mock_calculator.apply.assert_called_once()
         generator._create_notifications.assert_called_once()

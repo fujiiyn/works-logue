@@ -98,6 +98,7 @@ async def search_planters(
             contributor_count=p.contributor_count,
             progress=p.progress,
             view_count=view_counts.get(p.id, 0),
+            logue_title=p.logue_title,
             created_at=p.created_at,
         )
         for p in planters

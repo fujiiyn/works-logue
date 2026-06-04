@@ -124,12 +124,21 @@ class PlanterRepository:
         await self.db.flush()
 
     async def update_logue_content(
-        self, planter_id: uuid.UUID, content: str, generated_at: datetime
+        self,
+        planter_id: uuid.UUID,
+        *,
+        content: str,
+        logue_title: str,
+        generated_at: datetime,
     ) -> None:
         await self.db.execute(
             update(Planter)
             .where(Planter.id == planter_id)
-            .values(logue_content=content, logue_generated_at=generated_at)
+            .values(
+                logue_content=content,
+                logue_title=logue_title,
+                logue_generated_at=generated_at,
+            )
         )
         await self.db.flush()
 
@@ -259,6 +268,7 @@ class PlanterRepository:
             stmt = stmt.where(
                 or_(
                     Planter.title.ilike(pattern),
+                    Planter.logue_title.ilike(pattern),
                     Planter.body.ilike(pattern),
                 )
             )

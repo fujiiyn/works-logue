@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Dialog } from "@/components/common/dialog";
 import { adminApi, type AdminPlanterItem } from "@/lib/api-client";
+import { getDisplayTitle } from "@/lib/planter-display";
 
 interface Props {
   planter: AdminPlanterItem | null;
@@ -21,9 +22,12 @@ export function DeletePlanterDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // BR-A12 D7: trim BOTH sides, then strict (case-sensitive) equality.
+  // BR-A12 D7: trim BOTH sides, then strict (case-sensitive) equality against
+  // the displayed title (logue_title takes precedence over the Seed title once
+  // the planter has bloomed — backend enforces the same rule).
+  const displayTitle = planter ? getDisplayTitle(planter) : "";
   const matched =
-    !!planter && confirmInput.trim() === planter.title.trim();
+    !!planter && confirmInput.trim() === displayTitle.trim();
 
   async function handleConfirm() {
     if (!planter || !matched) return;
@@ -75,7 +79,7 @@ export function DeletePlanterDialog({
       }
     >
       <p className="text-body-s text-primary-dark">
-        対象: 「{planter.title}」
+        対象: 「{displayTitle}」
       </p>
       <p className="mt-2 text-caption font-semibold text-[#a6322c]">
         この操作は取り消せません

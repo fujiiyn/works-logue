@@ -66,6 +66,7 @@ class AdminAuthorSummary(BaseModel):
 class AdminPlanterItem(BaseModel):
     id: uuid.UUID
     title: str
+    logue_title: str | None = None
     status: str
     seed_type_name: str
     author: AdminAuthorSummary

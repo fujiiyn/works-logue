@@ -142,6 +142,7 @@ export interface AdminPlanterAuthor {
 export interface AdminPlanterItem {
   id: string;
   title: string;
+  logue_title: string | null;
   status: string;
   seed_type_name: string;
   author: AdminPlanterAuthor;

@@ -13,6 +13,7 @@ import { Pagination } from "@/components/admin/pagination";
 import { ArchivePlanterDialog } from "@/components/admin/archive-planter-dialog";
 import { RestorePlanterDialog } from "@/components/admin/restore-planter-dialog";
 import { DeletePlanterDialog } from "@/components/admin/delete-planter-dialog";
+import { getDisplayTitle } from "@/lib/planter-display";
 
 type StatusFilter =
   | "all"
@@ -219,7 +220,7 @@ export default function AdminPlantersPage() {
                   className="border-t border-border"
                 >
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-primary-dark">{p.title}</p>
+                    <p className="font-semibold text-primary-dark">{getDisplayTitle(p)}</p>
                     <p className="text-caption text-text-secondary">
                       {p.seed_type_name}
                     </p>

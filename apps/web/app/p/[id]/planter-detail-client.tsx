@@ -17,6 +17,7 @@ import { ScoreCard } from "@/components/planter/ScoreCard";
 import { PlanterFollowButton } from "@/components/planter/PlanterFollowButton";
 import { LogueArticle } from "@/components/logue/LogueArticle";
 import { ContributorsSidebar } from "@/components/logue/ContributorsSidebar";
+import { getDisplayTitle } from "@/lib/planter-display";
 
 interface RealtimePlanterRow {
   id: string;
@@ -26,6 +27,7 @@ interface RealtimePlanterRow {
   progress: number;
   structure_fulfillment: number;
   maturity_score: number | null;
+  logue_title: string | null;
   logue_content: string | null;
   logue_generated_at: string | null;
 }
@@ -52,6 +54,7 @@ interface PlanterDetail {
   maturity_score: number | null;
   structure_parts: StructureParts | null;
   bloom_threshold: number;
+  logue_title: string | null;
   logue_content: string | null;
   logue_generated_at: string | null;
   bloom_pending: boolean;
@@ -295,6 +298,7 @@ export function PlanterDetailClient({
             structure_fulfillment: row.structure_fulfillment,
             maturity_score: row.maturity_score,
             structure_parts: structureParts ?? prev.structure_parts,
+            logue_title: row.logue_title ?? prev.logue_title,
             logue_content: row.logue_content ?? prev.logue_content,
             logue_generated_at:
               row.logue_generated_at ?? prev.logue_generated_at,
@@ -511,7 +515,7 @@ export function PlanterDetailClient({
           className="mb-4 text-[18px] font-semibold leading-[1.55] text-primary-dark"
           data-testid="planter-detail-title"
         >
-          {planter.title}
+          {getDisplayTitle(planter)}
         </h1>
 
         {/* Logue state: Article view */}
@@ -564,6 +568,9 @@ export function PlanterDetailClient({
               </button>
               {seedExpanded && (
                 <div className="px-4 pb-4">
+                  <h3 className="mb-2 text-[14px] font-semibold leading-[1.55] text-primary-dark">
+                    {planter.title}
+                  </h3>
                   <p className="whitespace-pre-wrap text-[13px] leading-[1.7] text-text-secondary">
                     {planter.body}
                   </p>

@@ -2,11 +2,13 @@
 import { Eye } from "lucide-react";
 import { ProgressBar } from "./ProgressBar";
 import { formatRelativeTime } from "@/lib/format-time";
+import { getDisplayTitle } from "@/lib/planter-display";
 
 interface PlanterCardProps {
   planter: {
     id: string;
     title: string;
+    logue_title?: string | null;
     status: string;
     seed_type: { slug: string; name: string };
     user: { id: string; display_name: string; avatar_url: string | null };
@@ -28,6 +30,7 @@ export function PlanterCard({ planter }: PlanterCardProps) {
   const isLogue = planter.status === "logue";
   const visibleTags = planter.tags.slice(0, 3);
   const extraCount = planter.tags.length - 3;
+  const displayTitle = getDisplayTitle(planter);
 
   return (
     <article
@@ -38,7 +41,7 @@ export function PlanterCard({ planter }: PlanterCardProps) {
       <Link
         href={`/p/${planter.id}`}
         className="absolute inset-0 z-0"
-        aria-label={planter.title}
+        aria-label={displayTitle}
       />
 
       {/* Foreground content with inner links above the overlay */}
@@ -80,7 +83,7 @@ export function PlanterCard({ planter }: PlanterCardProps) {
 
         {/* Title */}
         <h3 className="mb-2 text-[15px] font-medium leading-[1.55] text-primary-dark">
-          {planter.title}
+          {displayTitle}
         </h3>
 
         {/* Tags */}
