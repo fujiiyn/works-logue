@@ -44,11 +44,11 @@ jobs:
             --memory=512Mi \
             --min-instances=0 \
             --max-instances=3 \
-            --set-env-vars="\
-          DATABASE_URL=${{ secrets.DATABASE_URL }},\
-          SUPABASE_URL=${{ secrets.SUPABASE_URL }},\
-          SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }},\
-          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }},\
+            --set-env-vars="^|^\
+          DATABASE_URL=${{ secrets.DATABASE_URL }}|\
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}|\
+          SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}|\
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}|\
           CORS_ORIGINS=https://works-logue-web-369619150476.asia-northeast1.run.app,https://workslogue.com"
 
   deploy-web:
