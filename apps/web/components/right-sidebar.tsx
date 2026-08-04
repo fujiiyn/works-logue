@@ -90,6 +90,13 @@ function SiteRulesFooter() {
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <Link
+          href="/about"
+          className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
+        >
+          Works Logue とは
+        </Link>
+        <span aria-hidden="true">·</span>
+        <Link
           href="/rules/privacy-policy"
           className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
         >

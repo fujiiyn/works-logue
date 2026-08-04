@@ -14,6 +14,11 @@ export function PublicChrome({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
+  // LP（/about）は独立したページ。ヘッダー・サイドバーを一切出さない。
+  if (pathname === "/about") {
+    return <>{children}</>;
+  }
+
   return (
     <>
       <Header />

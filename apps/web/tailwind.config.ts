@@ -28,6 +28,15 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-inter)", "var(--font-noto-sans-jp)", "sans-serif"],
+        // 明朝: LP（/about）の見出し用。和文はOS標準の明朝にフォールバックする
+        mincho: [
+          "var(--font-zen-old-mincho)",
+          "Hiragino Mincho ProN",
+          "Yu Mincho",
+          "YuMincho",
+          "Noto Serif JP",
+          "serif",
+        ],
       },
       borderRadius: {
         xs: "2px",
