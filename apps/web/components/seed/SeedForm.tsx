@@ -20,6 +20,11 @@ interface CreatePlanterResponse {
 const TITLE_MAX = 200;
 const BODY_MAX = 10000;
 
+/** seed_types.slug（query, pain, ...）を英語表示名（Query, Pain, ...）に変換する */
+function toEnglishLabel(slug: string): string {
+  return slug.charAt(0).toUpperCase() + slug.slice(1);
+}
+
 export function SeedForm() {
   const router = useRouter();
 
@@ -114,7 +119,7 @@ export function SeedForm() {
                 data-testid={`seed-type-${st.slug}`}
               >
                 <span className="block text-body-m font-medium text-primary-dark">
-                  {st.name}
+                  {st.name}（{toEnglishLabel(st.slug)}）
                 </span>
                 <span className="block text-[11px] text-text-muted">
                   {st.description}
@@ -163,7 +168,7 @@ export function SeedForm() {
           id="seed-body"
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder={`状況、問題の詳細、これまでに試したことなどを具体的に記述してください。\n社名や個人名は記載しないことをお勧めします（投稿前にAIが抽象化のサポートをします）。`}
+          placeholder={`状況、問題の詳細、これまでに試したことなどを具体的に記述してください。`}
           maxLength={BODY_MAX}
           className="h-[130px] w-full resize-none rounded-md border border-border bg-bg-card px-3.5 py-2.5 text-body-m text-primary-dark placeholder:text-text-sage focus:border-primary focus:outline-none"
           data-testid="seed-form-body-input"

@@ -49,7 +49,7 @@ jobs:
           SUPABASE_URL=${{ secrets.SUPABASE_URL }},\
           SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }},\
           SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }},\
-          CORS_ORIGINS=https://works-logue-web-369619150476.asia-northeast1.run.app"
+          CORS_ORIGINS=https://works-logue-web-369619150476.asia-northeast1.run.app,https://workslogue.com"
 
   deploy-web:
     name: Deploy Web
