@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Home, Users, TrendingUp, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import { SiteRulesFooter } from "@/components/common/site-rules-footer";
 
 const NAV_ITEMS = [
   { label: "ホーム", icon: Home, href: "/", tab: null, authRequired: false },
@@ -78,10 +79,18 @@ export function Sidebar() {
     <>
       {/* Desktop sidebar */}
       <aside
-        className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-52 shrink-0 border-r border-border bg-bg-card md:block"
+        className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-52 shrink-0 flex-col border-r border-border bg-bg-card md:flex"
         data-testid="sidebar"
       >
         {navContent}
+        {/* xl 以上では右カラムに同じフッターが出るので、そちらに任せる */}
+        <div className="mt-auto xl:hidden">
+          <SiteRulesFooter
+            orientation="stack"
+            testId="site-rules-footer-nav"
+            className="border-t border-border px-4 pb-6 pt-4"
+          />
+        </div>
       </aside>
 
       {/* Mobile drawer */}
@@ -93,7 +102,7 @@ export function Sidebar() {
             data-testid="sidebar-overlay"
           />
           <aside
-            className="fixed inset-y-0 left-0 z-50 w-60 bg-bg-card shadow-lg md:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex w-60 flex-col overflow-y-auto bg-bg-card shadow-lg md:hidden"
             data-testid="sidebar-drawer"
           >
             <div className="flex items-center justify-end px-4 py-3">
@@ -106,6 +115,14 @@ export function Sidebar() {
               </button>
             </div>
             {navContent}
+            <div className="mt-auto">
+              <SiteRulesFooter
+                orientation="stack"
+                testId="site-rules-footer-drawer"
+                className="border-t border-border px-4 pb-6 pt-4"
+                onNavigate={() => setDrawerOpen(false)}
+              />
+            </div>
           </aside>
         </>
       )}

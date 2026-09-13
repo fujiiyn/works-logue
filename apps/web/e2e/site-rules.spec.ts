@@ -8,7 +8,8 @@ test.describe("Site rules pages", () => {
     const footer = page.getByTestId("site-rules-footer");
     await expect(footer).toBeVisible();
     await footer.getByRole("link", { name: "プライバシーポリシー" }).click();
-    await expect(page).toHaveURL("/rules/privacy-policy");
+    // dev サーバーでは遷移先の初回コンパイルを待つため長めに取る
+    await expect(page).toHaveURL("/rules/privacy-policy", { timeout: 20000 });
     await expect(
       page.getByRole("heading", { name: "プライバシーポリシー", level: 1 }),
     ).toBeVisible();

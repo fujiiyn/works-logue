@@ -1,25 +1,50 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Sprout } from "lucide-react";
-import { useRightSidebar } from "@/contexts/right-sidebar-context";
+import {
+  useRightSidebar,
+  type RightSidebarSlot,
+} from "@/contexts/right-sidebar-context";
+import { SiteRulesFooter } from "@/components/common/site-rules-footer";
 import { getPublicStats, type PublicStats } from "@/lib/api-client";
 
 export function RightSidebar() {
-  const { content } = useRightSidebar();
+  const { content, target } = useRightSidebar();
   return (
     <aside
-      className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-[300px] shrink-0 py-6 pr-6 xl:block"
+      className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-[300px] shrink-0 overflow-y-auto py-6 pr-6 xl:block"
       data-testid="right-sidebar"
     >
-      {content ?? (
-        <>
-          <AboutCard />
-          <SiteRulesFooter />
-        </>
-      )}
+      {/*
+        デフォルト表示は従来どおり SSR させる（幅判定で包むと、ハイドレーション
+        まで右カラムが空になる）。ページ注入分だけを target で絞り、
+        RightSidebarInline との二重マウントを防ぐ。
+      */}
+      {content ? target === "aside" && content : <AboutCard />}
+      {/* ページ固有の内容に差し替わってもフッターは常に残す */}
+      <SiteRulesFooter />
     </aside>
+  );
+}
+
+/**
+ * xl 未満で右カラムが display:none になる分の受け皿。ページが setContent で
+ * 注入したコンテンツを本文の指定位置にインライン展開する。
+ * デフォルトの AboutCard は本文に混ぜない（サービス紹介であり、
+ * 本文を押しのけてまで出すものではないため）。規約リンクは左ナビ／ドロワー側に出る。
+ */
+export function RightSidebarInline({ slot }: { slot: RightSidebarSlot }) {
+  const { content, target } = useRightSidebar();
+  if (target !== slot) return null;
+  return (
+    <div
+      className={slot === "top" ? "mb-6" : "mt-8"}
+      data-testid={`right-sidebar-inline-${slot}`}
+    >
+      {content}
+    </div>
   );
 }
 
@@ -76,48 +101,6 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="flex flex-col">
       <span className="text-heading-m text-primary">{value}</span>
       <span className="text-caption text-text-muted">{label}</span>
-    </div>
-  );
-}
-
-const FOOTER_YEAR = new Date().getFullYear();
-
-function SiteRulesFooter() {
-  return (
-    <div
-      className="mt-4 px-1 text-caption leading-relaxed text-text-secondary"
-      data-testid="site-rules-footer"
-    >
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <Link
-          href="/about"
-          className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
-        >
-          Works Logue とは
-        </Link>
-        <span aria-hidden="true">·</span>
-        <Link
-          href="/rules/privacy-policy"
-          className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
-        >
-          プライバシーポリシー
-        </Link>
-        <span aria-hidden="true">·</span>
-        <Link
-          href="/rules/terms-of-service"
-          className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
-        >
-          利用規約
-        </Link>
-        <span aria-hidden="true">·</span>
-        <Link
-          href="/rules/contents-policy"
-          className="underline decoration-text-secondary/40 underline-offset-2 hover:text-primary hover:decoration-primary"
-        >
-          コンテンツポリシー
-        </Link>
-      </div>
-      <div className="mt-1 text-text-muted">Works Logue © {FOOTER_YEAR}</div>
     </div>
   );
 }

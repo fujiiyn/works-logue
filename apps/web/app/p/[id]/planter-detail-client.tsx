@@ -363,6 +363,8 @@ export function PlanterDetailClient({
           isFollowing={planter.is_following}
           loading={contributorsLoading}
         />,
+        // 貢献者・フォロー・コピーは読了後の補足なので本文末尾へ
+        "bottom",
       );
     } else if (bloomPending) {
       // Mid-bloom: score progression no longer applies and Contributors
@@ -377,6 +379,8 @@ export function PlanterDetailClient({
           progress={planter.progress}
           scorePending={scorePending}
         />,
+        // 開花の進捗は記事より先に見せたいので本文冒頭へ
+        "top",
       );
     }
     return () => setContent(null);

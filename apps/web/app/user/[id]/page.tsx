@@ -63,7 +63,8 @@ export default function UserProfilePage() {
   // Inject sidebar content for this page; reset on unmount
   useEffect(() => {
     if (!userId) return;
-    setContent(<UserProfileSidebar userId={userId} />);
+    // バッジ・似たユーザーは補足情報なので本文末尾へ
+    setContent(<UserProfileSidebar userId={userId} />, "bottom");
     return () => setContent(null);
   }, [userId, setContent]);
 

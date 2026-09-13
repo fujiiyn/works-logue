@@ -128,6 +128,8 @@ export default function ProfileEditPage() {
         }}
         onCancel={() => router.push(`/user/${user.id}`)}
       />,
+      // 保存・キャンセルは本文側にもあるため、xl 未満では出さない（重複防止）
+      "none",
     );
 
     return () => setContent(null);

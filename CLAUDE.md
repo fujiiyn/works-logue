@@ -125,6 +125,13 @@ works-logue/               ← monorepo
 **グローバルの `RightSidebar`（`components/right-sidebar.tsx`）はレイアウト共通であり、各ページが `useRightSidebar().setContent()` で内容を差し替える仕組み。**
 
 - ページ独自の右カラムを `<div className="hidden w-[276px]">` 等で直接追加してはならない。必ず `useRightSidebar` の `setContent` を使う
+- **`setContent` の第2引数でモバイル時の配置を必ず指定する**（型で必須。省略するとコンパイルエラー）。右カラムは `xl`(1280px) 未満で `display:none` になるため、配置を決めないと内容がスマホ・タブレットで丸ごと消える
+  - `"top"`: 本文の先頭にインライン展開（例: Seed の開花スコア）
+  - `"bottom"`: 本文の末尾にインライン展開（例: 貢献者リスト、プロフィールのバッジ）
+  - `"none"`: モバイルでは出さない（本文側に同等の UI が既にある場合のみ。例: プロフィール編集の保存ボタン）
+- 描画先は `RightSidebarProvider` が1か所で決める（`target`）。右カラムかインラインのどちらか一方だけがマウントされ、fetch や effect は二重に走らない
+- 幅判定を各コンポーネントで個別に持たせないこと（一瞬でも両方 true になると二重マウントする）
+- 規約・ポリシー等のフッターリンクは `SiteRulesFooter`。`xl` 以上は右カラム、`xl` 未満は左ナビ／ハンバーガードロワーの下部に出る
 - Figma デザインの右カラムに独自コンテンツがある場合（例: プロフィールページのバッジ+似たユーザー、編集ページのプレビュー+保存ボタン）、そのコンテンツを `setContent` で注入する
 - `useEffect` の cleanup で `setContent(null)` を呼び、ページ離脱時にデフォルト（About Works Logue）に戻す
 - Figma デザインの右カラムが About Works Logue のままの場合は `setContent` を呼ばない（デフォルトが表示される）

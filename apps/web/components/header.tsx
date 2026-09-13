@@ -18,9 +18,9 @@ export function Header() {
         data-testid="header"
       >
         {/* Left: mobile hamburger + logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 md:gap-3">
           <button
-            className="md:hidden"
+            className="shrink-0 md:hidden"
             onClick={() => {
               const event = new CustomEvent("toggle-sidebar");
               window.dispatchEvent(event);
@@ -31,22 +31,26 @@ export function Header() {
             <Menu size={20} strokeWidth={1.5} />
           </button>
 
-          <Link href="/" className="flex items-center gap-2" data-testid="header-logo">
+          <Link
+            href="/"
+            className="flex min-w-0 items-center gap-2"
+            data-testid="header-logo"
+          >
             <Image
               src="/img/works-logue-logo-icon.svg"
               alt="Works Logue"
               width={32}
               height={28}              
-              className="h-7 w-auto object-contain"
+              className="h-7 w-auto shrink-0 object-contain"
             />
-            <span className="hidden text-heading-l font-bold text-primary-dark md:block">
+            <span className="truncate text-[13px] font-bold text-primary-dark min-[360px]:text-heading-m md:text-heading-l">
               Works Logue
             </span>
           </Link>
         </div>
 
         {/* Right: actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           {!isLoading && !user && (
             <Link
               href="/login"
@@ -102,14 +106,19 @@ export function Header() {
             </div>
           )}
 
-          <Link
-            href={user ? "/seed/new" : "/login?redirect=/seed/new"}
-            className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-body-m text-white transition-colors hover:bg-primary-dark"
-            data-testid="header-seed-button"
-          >
-            <Plus size={16} strokeWidth={1.5} />
-            <span>Seed</span>
-          </Link>
+          {/* 未ログイン時は「ログイン」だけを出す（Seed と並べると狭い画面でロゴが潰れる） */}
+          {!isLoading && user && (
+            <Link
+              href="/seed/new"
+              aria-label="Seedを投稿"
+              className="flex items-center gap-1 rounded-full bg-primary p-2 text-body-m text-white transition-colors hover:bg-primary-dark md:rounded-md md:px-3 md:py-1.5"
+              data-testid="header-seed-button"
+            >
+              <Plus size={16} strokeWidth={1.5} />
+              {/* スマホは幅が厳しいのでアイコンのみ */}
+              <span className="hidden md:inline">Seed</span>
+            </Link>
+          )}
         </div>
       </header>
 
