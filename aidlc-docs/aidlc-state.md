@@ -80,12 +80,12 @@
         - Phase 17 (Step 41): apps/web/e2e/admin.spec.ts (smoke 5 シナリオ)
         - Phase 18 (Step 42): aidlc-docs/construction/u7-admin/code/code-summary.md
       - 検証: API テスト 350 件 全 Pass / Web TypeScript エラー 0
-  - [ ] U8 Logue 品質改善 — 開始 2026-10-03（ブランチ `feat/logue-quality-improvements`）
+  - [ ] U8 Logue 品質改善 — 開始 2026-10-03、R1・R2・R4 は 2026-10-05 に本番反映（R3 保留のため未完了）（ブランチ `feat/logue-quality-improvements`）
     - 計画: `construction/plans/u8-logue-quality-plan.md`（要件と計画を 1 ファイルに集約。Functional Design は省略）
-    - [x] R1 開花基準 0.85 → 0.9（`settings_repository.py` 初期値、migration 00017。本番適用は未実施）
+    - [x] R1 開花基準 0.85 → 0.9（`settings_repository.py` 初期値、migration 00017。2026-10-05 に本番へ SQL Editor で適用済み）
     - [x] R2 Logue ページをタイトルから表示（`LogThread` の `scrollToLatestOnMount`、E2E `planter-initial-scroll.spec.ts`）
     - [ ] R3 スマホの投稿ボックス — 保留（後日 HTML モックで仕様を決める）
-    - [x] R4 パターン名プロンプト v5 で確定。「限られた時間での業務効率化」の置き換え SQL を `supabase/manual/` に作成（実行はユーザー、未実施）
+    - [x] R4 パターン名プロンプト v5 で確定。「限られた時間での業務効率化」→「雑務はAIに、時間は本質に」を 2026-10-05 に本番で置き換え済み（`supabase/manual/`）
     - 別件: Vertex AI の応答停止と JSON 読み取り失敗を GitHub Issue #1 に記録
     - レビュー（review-pr）はユーザー判断で省略
 - [x] Build and Test — Completed 2026-05-04

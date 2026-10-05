@@ -727,3 +727,11 @@
 **Context**: CONSTRUCTION - U8 Logue 品質改善 - Phase 2 E2E 完了、Phase 5
 
 ---
+
+## U8 Logue 品質改善 — マージ・デプロイ・本番適用
+**Timestamp**: 2026-10-05T01:00:00Z
+**User Input**: "ok, そしたらマージにうつろう。\n作業の最後にgcloudでログインしているやつを会社ように切り替えるのもお忘れなく。" / "それさ、チャットに出してくれる？そのあとマージも行ってくれる？" / "ok" / "これさ、GithubCLIを追加したあとさ、会社ようにできる？" / "マイグレーション実施してみよう。\n2は完了したんだよねすでに。" / "できたー" / "ok"
+**AI Response**: 作業ブランチをコミットし main に --no-ff マージ、fujiiyn アカウントで push（ea7ee05）。CD 成功で本番デプロイ。ユーザーが Supabase SQL Editor でマイグレーション 00017（開花基準 0.9）と、パターン名の置き換え SQL を実行。GitHub CLI を FujiiYoshinobu、gcloud を default に戻した。
+**Context**: CONSTRUCTION - U8 Logue 品質改善 - 本番反映完了（R3 は保留）
+
+---
