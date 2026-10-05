@@ -593,6 +593,7 @@ export function PlanterDetailClient({
               onReply={handleReply}
               onRealtimeInsert={handleRealtimeLogInsert}
               onAtBottomChange={handleAtBottomChange}
+              scrollToLatestOnMount={false}
             />
           </>
         ) : isLogue && bloomPending ? (

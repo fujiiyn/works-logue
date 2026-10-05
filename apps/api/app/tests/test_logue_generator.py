@@ -40,6 +40,51 @@ def _make_user_mock(user_id=None, display_name="Test User"):
     return user
 
 
+class TestLogueSystemInstruction:
+    def test_pattern_name_rules_require_solution_essence(self):
+        """pattern_name must name the core of the solution, not restate the theme."""
+        from app.services.logue_generator import LOGUE_SYSTEM_INSTRUCTION
+
+        assert "## パターン名（pattern_name）の付け方" in LOGUE_SYSTEM_INSTRUCTION
+        assert "テーマの言い換えにしない" in LOGUE_SYSTEM_INSTRUCTION
+        assert "解決の本質" in LOGUE_SYSTEM_INSTRUCTION
+        assert "他のパターンと並べたときに違いがわかる" in LOGUE_SYSTEM_INSTRUCTION
+        # Japanese pattern names use the plain form (流れを変える), not the
+        # imperative (流れを変えよ). Show concrete verb rewrites only: spelling
+        # the rule as 「〜する」 nudged the model toward abstract サ変 verbs
+        # (再構築する, 設計する). Examples avoid words from existing Logues.
+        assert "命令形" in LOGUE_SYSTEM_INSTRUCTION
+        assert "「〜する」" not in LOGUE_SYSTEM_INSTRUCTION
+        assert "「先に決めろ」→「先に決める」" in LOGUE_SYSTEM_INSTRUCTION
+        assert "「無理をするな」→「無理をしない」" in LOGUE_SYSTEM_INSTRUCTION
+        assert "兆候を探" not in LOGUE_SYSTEM_INSTRUCTION
+        # A catchy one-liner that states the solution as a concept; the
+        # contrast form (AよりB) and a comma are allowed.
+        assert "キャッチーな一言" in LOGUE_SYSTEM_INSTRUCTION
+        assert "「AよりB」の対比" in LOGUE_SYSTEM_INSTRUCTION
+        # Examples use topics unrelated to existing Logues so the model can't
+        # just copy them.
+        assert "悪い例（テーマ名）：「会議の生産性向上」" in LOGUE_SYSTEM_INSTRUCTION
+        assert "「議論より、まず決める」" in LOGUE_SYSTEM_INSTRUCTION
+        assert "「決めない会議は開かない」" in LOGUE_SYSTEM_INSTRUCTION
+        assert "「報告は結論の一行から」" in LOGUE_SYSTEM_INSTRUCTION
+        assert "限られた時間での業務効率化" not in LOGUE_SYSTEM_INSTRUCTION
+        assert "完璧より" not in LOGUE_SYSTEM_INSTRUCTION
+
+    async def test_generate_passes_system_instruction(self):
+        """generate() should send LOGUE_SYSTEM_INSTRUCTION to Vertex AI."""
+        from app.services.logue_generator import LOGUE_SYSTEM_INSTRUCTION, LogueGenerator
+
+        generator = LogueGenerator()
+
+        with patch.object(generator, "client") as mock_client:
+            mock_client.generate_json = AsyncMock(return_value={"pattern_name": "名前"})
+            await generator.generate(_make_planter_mock(), [], {})
+
+        kwargs = mock_client.generate_json.call_args.kwargs
+        assert kwargs["system_instruction"] == LOGUE_SYSTEM_INSTRUCTION
+
+
 class TestLogueGeneratorGenerate:
     async def test_generate_returns_markdown(self):
         """generate() should call Vertex AI and return content + pattern_name."""

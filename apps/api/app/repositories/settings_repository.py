@@ -6,7 +6,7 @@ from app.models.app_setting import AppSetting
 SCORE_DEFAULTS = {
     "min_contributors": 3,
     "min_logs": 5,
-    "bloom_threshold": 0.85,
+    "bloom_threshold": 0.9,
     "bud_threshold": 0.8,
 }
 
