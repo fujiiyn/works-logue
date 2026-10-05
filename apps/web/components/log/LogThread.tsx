@@ -80,6 +80,10 @@ interface LogThreadProps {
   // Fires when the bottom sentinel enters/leaves the viewport. The parent
   // uses this to gate the "new messages" jump-to-latest button.
   onAtBottomChange?: (atBottom: boolean) => void;
+  // Jump to the latest log once the first batch mounts (chat-UI behavior for
+  // the Seed view). The Logue view passes false so the article is read from
+  // its title instead of opening scrolled to the bottom of the log list.
+  scrollToLatestOnMount?: boolean;
 }
 
 // Final-pass dedupe across the whole tree. Belt-and-suspenders: each insert
@@ -106,7 +110,13 @@ function dedupeTree(logs: LogWithReplies[]): LogWithReplies[] {
 
 export const LogThread = forwardRef<LogThreadHandle, LogThreadProps>(
   function LogThread(
-    { planterId, onReply, onRealtimeInsert, onAtBottomChange },
+    {
+      planterId,
+      onReply,
+      onRealtimeInsert,
+      onAtBottomChange,
+      scrollToLatestOnMount = true,
+    },
     ref,
   ) {
   const [logs, setLogs] = useState<LogWithReplies[]>([]);
@@ -202,6 +212,7 @@ export const LogThread = forwardRef<LogThreadHandle, LogThreadProps>(
   // the viewport bottom and scrollIntoView's idea of "in view" can stop
   // short. requestAnimationFrame retry covers late-arriving layout shifts.
   useLayoutEffect(() => {
+    if (!scrollToLatestOnMount) return;
     if (didInitialScrollRef.current) return;
     if (!initialLoaded || logs.length === 0) return;
     if (typeof window === "undefined") return;
@@ -215,7 +226,7 @@ export const LogThread = forwardRef<LogThreadHandle, LogThreadProps>(
     jump();
     const raf = requestAnimationFrame(jump);
     return () => cancelAnimationFrame(raf);
-  }, [initialLoaded, logs.length]);
+  }, [initialLoaded, logs.length, scrollToLatestOnMount]);
 
   // Prepend correction: when fetchLogs prepended older logs, the document
   // scrollHeight grew above the user's viewport. Restore the previous visual

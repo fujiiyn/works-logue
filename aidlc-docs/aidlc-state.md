@@ -80,6 +80,14 @@
         - Phase 17 (Step 41): apps/web/e2e/admin.spec.ts (smoke 5 シナリオ)
         - Phase 18 (Step 42): aidlc-docs/construction/u7-admin/code/code-summary.md
       - 検証: API テスト 350 件 全 Pass / Web TypeScript エラー 0
+  - [ ] U8 Logue 品質改善 — 開始 2026-10-03（ブランチ `feat/logue-quality-improvements`）
+    - 計画: `construction/plans/u8-logue-quality-plan.md`（要件と計画を 1 ファイルに集約。Functional Design は省略）
+    - [x] R1 開花基準 0.85 → 0.9（`settings_repository.py` 初期値、migration 00017。本番適用は未実施）
+    - [x] R2 Logue ページをタイトルから表示（`LogThread` の `scrollToLatestOnMount`、E2E `planter-initial-scroll.spec.ts`）
+    - [ ] R3 スマホの投稿ボックス — 保留（後日 HTML モックで仕様を決める）
+    - [x] R4 パターン名プロンプト v5 で確定。「限られた時間での業務効率化」の置き換え SQL を `supabase/manual/` に作成（実行はユーザー、未実施）
+    - 別件: Vertex AI の応答停止と JSON 読み取り失敗を GitHub Issue #1 に記録
+    - レビュー（review-pr）はユーザー判断で省略
 - [x] Build and Test — Completed 2026-05-04
   - 生成ファイル: `aidlc-docs/construction/build-and-test/{build-instructions,unit-test-instructions,integration-test-instructions,e2e-test-instructions,build-and-test-summary}.md`
   - 検証結果: API 373/373 Pass（test 関数実測総数 / 33 ファイル）、Web build clean、E2E 13/13、CI/CD 緑、本番 Cloud Run へ U1〜U6 反映済み（U7 はローカル main が origin/main に対し 3 コミット ahead の未 push 状態。`git push origin main` 時点で CD が起動）
